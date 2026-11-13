@@ -1,0 +1,553 @@
+﻿<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"tertiary-container":"#df2928","on-primary-fixed":"#002019","on-background":"#0b1c30","on-primary-fixed-variant":"#005142","surface-container-highest":"#d3e4fe","background":"#f8f9ff","surface-bright":"#f8f9ff","on-error-container":"#93000a","on-secondary-fixed":"#111c2d","on-secondary-container":"#586377","on-secondary":"#ffffff","surface-container-low":"#eff4ff","on-tertiary-container":"#fffbfa","inverse-on-surface":"#eaf1ff","surface":"#f8f9ff","on-surface-variant":"#3e4945","primary-fixed":"#93f5da","primary-container":"#0e836d","primary-fixed-dim":"#77d8be","secondary-container":"#d5e0f8","tertiary-fixed-dim":"#ffb4ab","on-secondary-fixed-variant":"#3c475a","on-tertiary-fixed":"#410002","on-primary-container":"#f1fff8","on-tertiary-fixed-variant":"#93000b","inverse-surface":"#213145","tertiary-fixed":"#ffdad6","primary":"#006856","tertiary":"#ba0012","surface-container":"#e5eeff","secondary-fixed-dim":"#bcc7de","on-tertiary":"#ffffff","on-primary":"#ffffff","on-error":"#ffffff","on-surface":"#0b1c30","surface-variant":"#d3e4fe","outline-variant":"#bdc9c4","secondary-fixed":"#d8e3fb","outline":"#6e7a75","surface-container-lowest":"#ffffff","inverse-primary":"#77d8be","surface-dim":"#cbdbf5","surface-tint":"#006b58","error-container":"#ffdad6","error":"#ba1a1a","surface-container-high":"#dce9ff","secondary":"#545f73"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-lg":"1.5rem","margin-mobile":"1rem","space-md":"1rem","space-sm":"0.5rem","gutter-mobile":"1rem","gutter":"1.5rem","space-xs":"0.25rem","margin":"2rem","space-xl":"2.5rem"},"fontFamily":{"headline-md":["Inter"],"label-md":["Inter"],"display-lg-mobile":["Inter"],"headline-sm":["Inter"],"display-lg":["Inter"],"headline-lg-mobile":["Inter"],"label-sm":["Inter"],"label-lg":["Inter"],"body-md":["Inter"],"headline-lg":["Inter"],"body-lg":["Inter"],"body-sm":["Inter"]},"fontSize":{"headline-md":["22px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-md":["14px",{"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"500"}],"display-lg-mobile":["32px",{"lineHeight":"40px","letterSpacing":"-0.01em","fontWeight":"700"}],"headline-sm":["18px",{"lineHeight":"26px","letterSpacing":"0em","fontWeight":"600"}],"display-lg":["40px",{"lineHeight":"48px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-lg-mobile":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-sm":["12px",{"lineHeight":"16px","letterSpacing":"0.02em","fontWeight":"600"}],"label-lg":["16px",{"lineHeight":"24px","letterSpacing":"0.01em","fontWeight":"600"}],"body-md":["16px",{"lineHeight":"24px","fontWeight":"400"}],"headline-lg":["30px",{"lineHeight":"38px","letterSpacing":"-0.015em","fontWeight":"600"}],"body-lg":["18px",{"lineHeight":"28px","fontWeight":"400"}],"body-sm":["14px",{"lineHeight":"20px","fontWeight":"400"}]}}}}</script></head><body class="bg-background font-body-md text-body-md text-on-surface min-h-screen"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest border-r border-outline-variant z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col"><div class="h-20 px-space-md flex items-center gap-space-sm border-b border-outline-variant"><img alt="AccessOne AI Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/ALJJyrC-Cn0bNcjy-9KDDXYbKgKi-4kQTy4jPMh4XoF8mhvINwU6v3nhAaAXBLvziRxiIjjEDVE5ZK2lqvCehS9iO65c5BszOOBqD6StQy0mBTOuiJmcZor8qyMEUlqB4e7haDhgG_R8dwjT27BMptlUUGUqofDWCxdAqe9Uw98Hn9DXAP-qeE0PDYsTPyx1VLsg_HC3UsyU53AiSmZ2IxzwFumFkpFIzlkOdJVYFJSg2-pn"/><span class="font-headline-sm text-headline-sm text-on-surface">AccessOne AI</span></div><nav class="flex flex-col p-space-md gap-space-xs" data-active-classes="bg-primary-container text-on-primary-container font-bold rounded-lg"><a class="flex items-center min-h-[48px] px-space-md rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="dashboard" href="#"><span>Dashboard</span></a><a class="flex items-center min-h-[48px] px-space-md rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="vision-assist" href="#"><span>Vision Assist</span></a><a class="flex items-center min-h-[48px] px-space-md rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="hearing-assist" href="#"><span>Hearing Assist</span></a><a class="flex items-center min-h-[48px] px-space-md rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="bridge-comm" href="#"><span>Bridge Comm</span></a><a class="flex items-center min-h-[48px] px-space-md rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="safety-assist" href="#"><span>Safety Assist</span></a><a class="flex items-center min-h-[48px] px-space-md rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="settings" href="#"><span>Settings</span></a></nav></div><div class="p-space-md border-t border-outline-variant bg-surface-container-low"><div class="flex items-center justify-between mb-space-xs"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase font-bold">Emergency Relay</span><span class="material-symbols-outlined text-tertiary text-sm">phone_in_talk</span></div><div class="font-body-sm text-body-sm text-on-surface font-semibold">Lifeline: 988 | Relay: 711</div><div class="font-label-sm text-label-sm text-on-secondary-container mt-space-xs">24/7 Clinical Accessibility Line</div></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-20 bg-surface-container-lowest border-b border-outline-variant z-40 flex items-center justify-between px-space-lg shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex items-center gap-space-sm"><div aria-label="Accessibility Quick Bar" class="flex items-center bg-surface-container-low rounded-lg p-space-xs gap-space-xs" role="region"><button aria-label="Decrease font size" class="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-lg font-label-md text-label-md text-on-surface hover:bg-surface-container-highest transition-colors" type="button"><span class="material-symbols-outlined text-lg">text_decrease</span></button><button aria-label="Increase font size" class="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-lg font-label-md text-label-md text-on-surface hover:bg-surface-container-highest transition-colors" type="button"><span class="material-symbols-outlined text-lg">text_increase</span></button><button aria-label="Toggle high contrast" class="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-lg text-on-surface hover:bg-surface-container-highest transition-colors" type="button"><span class="material-symbols-outlined">contrast</span></button><button aria-label="Audio Readout Assist" class="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-lg text-on-surface hover:bg-surface-container-highest transition-colors" type="button"><span class="material-symbols-outlined">volume_up</span></button></div></div><div class="flex items-center gap-space-md"><a class="min-h-[48px] px-space-md inline-flex items-center justify-center gap-space-xs bg-tertiary text-on-tertiary font-label-lg text-label-lg rounded-lg shadow-sm hover:bg-tertiary-container focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-tertiary" data-path="emergency-assistance" href="#"><span class="material-symbols-outlined font-bold">emergency</span><span>EMERGENCY SOS</span></a><div class="flex items-center gap-space-sm pl-space-xs border-l border-outline-variant"><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-2 ring-primary" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBaAECFZ22JyT6It5eo_6up9-H8AIZ-FkthnAGXi-PQgg4It-IxWGbEP_vOnz0DMk7-7k-gOcTZuJNGkQ4KTswsBXObS3PlnJztzhkYJUg5_F2x_maeBmZOSXXlDh9KCDWrPn1T8qWJUSMJ2klKVmUD6Uaj07omqp8q3Yujd7NJcPQ2yxVyc7YEG0bKK38YiB4ln4yFdAGfJaila7uG-5QP5Eya_d_zuwFJtC21POU"/></div></div></header><main class="relative pt-20 bg-background min-h-screen"><div class="flex flex-col w-full">
+<div class="p-space-lg flex flex-col gap-space-lg max-w-[1560px] mx-auto w-full">
+<!-- Top Command & Status Bar -->
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md bg-surface-container-lowest p-space-lg rounded-xl shadow-sm">
+<div class="flex flex-col gap-space-xs">
+<div class="flex flex-wrap items-center gap-space-sm">
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Safety Assist &amp; Emergency Hub</h1>
+<span class="inline-flex items-center gap-space-xs px-space-md py-1 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-semibold tracking-wide">
+<span class="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></span>
+            Sensors Online · GPS Precision 1.4m · Fall Detection Active
+          </span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Automated critical telemetry, accessibility relay protocols, and rapid emergency dispatch.</p>
+</div>
+<div class="flex flex-wrap items-center gap-space-sm">
+<button class="min-h-[48px] px-space-md flex items-center justify-center gap-space-xs bg-surface-container hover:bg-surface-container-high text-on-surface rounded-lg font-label-md text-label-md transition-colors" id="sirenTestBtn" type="button">
+<span class="material-symbols-outlined text-secondary">volume_up</span>
+<span>Alarm Siren Test</span>
+</button>
+<button class="min-h-[48px] px-space-md flex items-center justify-center gap-space-xs bg-surface-container hover:bg-surface-container-high text-on-surface rounded-lg font-label-md text-label-md transition-colors" id="strobeToggleBtn" type="button">
+<span class="material-symbols-outlined text-secondary">flash_on</span>
+<span>Haptic Strobe: Off</span>
+</button>
+<button class="min-h-[48px] px-space-md flex items-center justify-center gap-space-xs bg-surface-container hover:bg-surface-container-high text-on-surface rounded-lg font-label-md text-label-md transition-colors" id="silentModeBtn" type="button">
+<span class="material-symbols-outlined text-secondary">notifications_off</span>
+<span>Silent SOS: Armed</span>
+</button>
+</div>
+</div>
+<!-- Main Grid: Trigger Hero + Telemetry Map -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-lg items-start">
+<!-- Primary Emergency Trigger Panel (5 Cols) -->
+<div class="xl:col-span-5 bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-lg relative overflow-hidden">
+<!-- Visual Accent Header -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-tertiary text-2xl" style="font-variation-settings: 'FILL' 1;">e911_emergency</span>
+<span class="font-label-lg text-label-lg text-tertiary uppercase tracking-wider">Critical Action Zone</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm">High Priority</span>
+</div>
+<!-- High-Stakes SOS Button Container -->
+<div class="bg-surface-container-low p-space-lg rounded-xl flex flex-col items-center text-center gap-space-md relative">
+<p class="font-label-md text-label-md text-on-surface-variant font-semibold">Immediate Dispatch &amp; Circle Broadcast</p>
+<button aria-label="Press and hold 3 seconds for Emergency SOS" class="relative group w-full py-8 px-space-md rounded-xl bg-tertiary hover:bg-tertiary-container text-on-tertiary shadow-md transition-all active:scale-[0.98] flex flex-col items-center justify-center gap-space-sm select-none" id="mainSosTrigger" type="button">
+<span class="material-symbols-outlined text-5xl" style="font-variation-settings: 'FILL' 1;">emergency_home</span>
+<span class="font-headline-md text-headline-md tracking-normal font-bold">EMERGENCY SOS</span>
+<span class="font-label-sm text-label-sm opacity-90 uppercase tracking-widest bg-tertiary-container px-space-sm py-0.5 rounded-full">Press &amp; Hold 3s to Trigger</span>
+<div class="absolute bottom-0 left-0 h-2 bg-on-tertiary/40 rounded-b-xl transition-all duration-75 w-0" id="holdProgress"></div>
+</button>
+<!-- Dynamic Cancel Countdown Banner (Hidden by default) -->
+<div class="hidden w-full p-space-md bg-tertiary text-on-tertiary rounded-lg flex items-center justify-between animate-pulse" id="countdownBanner">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined">timer</span>
+<span class="font-label-lg text-label-lg font-bold">Dispatching in <span id="countdownTimer">5</span>s</span>
+</div>
+<button class="min-h-[48px] px-space-md bg-surface-container-lowest text-tertiary font-label-md text-label-md rounded-lg font-bold shadow-sm" id="cancelSosBtn" type="button">ABORT</button>
+</div>
+<!-- Active Dispatch Telemetry Checklist -->
+<div class="w-full flex flex-col gap-space-xs text-left pt-space-xs">
+<div class="flex items-center gap-space-sm p-space-xs rounded bg-surface-container-lowest">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<span class="font-label-sm text-label-sm text-on-surface">Auto-sharing Live GPS Coordinates (±1.4m)</span>
+</div>
+<div class="flex items-center gap-space-sm p-space-xs rounded bg-surface-container-lowest">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<span class="font-label-sm text-label-sm text-on-surface">Broadcasting Clinical Medical ID to Dispatchers</span>
+</div>
+<div class="flex items-center gap-space-sm p-space-xs rounded bg-surface-container-lowest">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<span class="font-label-sm text-label-sm text-on-surface">TRS 711 TTY / Text-to-911 Emergency Relay Armed</span>
+</div>
+</div>
+</div>
+<!-- Quick Category Selectors -->
+<div class="flex flex-col gap-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-bold uppercase tracking-wider">Fast Categorical Triggers</span>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-xs">
+<button class="min-h-[48px] p-space-md rounded-lg bg-surface-container-low hover:bg-surface-container-high transition-colors flex items-center gap-space-xs text-left" type="button">
+<span class="material-symbols-outlined text-tertiary">cardiology</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Medical Distress</span>
+</button>
+<button class="min-h-[48px] p-space-md rounded-lg bg-surface-container-low hover:bg-surface-container-high transition-colors flex items-center gap-space-xs text-left" type="button">
+<span class="material-symbols-outlined text-tertiary">personal_injury</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Fall / Hard Impact</span>
+</button>
+<button class="min-h-[48px] p-space-md rounded-lg bg-surface-container-low hover:bg-surface-container-high transition-colors flex items-center gap-space-xs text-left" type="button">
+<span class="material-symbols-outlined text-primary">explore_off</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Lost / Disoriented</span>
+</button>
+<button class="min-h-[48px] p-space-md rounded-lg bg-surface-container-low hover:bg-surface-container-high transition-colors flex items-center gap-space-xs text-left" type="button">
+<span class="material-symbols-outlined text-secondary">sms</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Silent Covert SMS</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Live Location & Telemetry Card (7 Cols) -->
+<div class="xl:col-span-7 bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-lg">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-2xl">location_on</span>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Live Telemetry &amp; Precise Positioning</h2>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Continuous Triangulation via Dual-Band GNSS &amp; Wi-Fi Positioning</p>
+</div>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="w-2.5 h-2.5 rounded-full bg-primary animate-ping"></span>
+<span class="font-label-sm text-label-sm font-bold text-primary uppercase">Transmitting</span>
+</div>
+</div>
+<!-- Styled Live Map Container -->
+<div class="relative w-full h-80 rounded-xl overflow-hidden bg-surface-container-low flex flex-col justify-between p-space-md shadow-inner" data-location="St. Jude Health Center, 742 Evergreen Terrace" style="">
+<!-- Top Overlay: Status and Accuracy -->
+<div class="flex items-center justify-between gap-space-sm z-10">
+<div class="bg-surface-container-lowest/95 backdrop-blur px-space-md py-1.5 rounded-lg shadow-sm flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-sm">my_location</span>
+<span class="font-label-sm text-label-sm font-semibold text-on-surface">Accuracy: ±1.4m (GLONASS L1/L5)</span>
+</div>
+<div class="bg-surface-container-lowest/95 backdrop-blur px-space-md py-1.5 rounded-lg shadow-sm flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-sm">battery_charging_full</span>
+<span class="font-label-sm text-label-sm text-on-surface">Tracker: 94%</span>
+</div>
+</div>
+<!-- Pulsing Map Marker Pin Graphic (Centrally Anchored) -->
+<div class="self-center flex flex-col items-center justify-center z-10 pointer-events-none">
+<div class="relative flex items-center justify-center">
+<span class="absolute w-20 h-20 rounded-full bg-primary/20 animate-ping"></span>
+<span class="absolute w-12 h-12 rounded-full bg-primary/40"></span>
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-lg ring-4 ring-surface-container-lowest">
+<span class="material-symbols-outlined text-lg">person_pin_circle</span>
+</div>
+</div>
+<span class="mt-2 bg-inverse-surface text-inverse-on-surface px-space-sm py-0.5 rounded text-[11px] font-semibold shadow">Current Location</span>
+</div>
+<!-- Bottom Coordinates Overlay -->
+<div class="bg-surface-container-lowest/95 backdrop-blur p-space-md rounded-lg shadow-sm z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<div>
+<p class="font-label-md text-label-md text-on-surface font-bold">St. Jude Health Center · Suite 304</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">742 Evergreen Terrace, San Francisco, CA · 37.7749° N, 122.4194° W</p>
+</div>
+<div class="flex items-center gap-space-xs">
+<button aria-label="Refresh GPS coordinates" class="min-h-[48px] px-space-md rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center gap-space-xs transition-colors" id="refreshGpsBtn" type="button">
+<span class="material-symbols-outlined text-sm">refresh</span>
+<span>Refresh</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Telemetry Actions & Geofence Status -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-sm pt-space-xs">
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col justify-between gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-bold uppercase">Circle Live Sharing</span>
+<span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+</div>
+<p class="font-headline-sm text-headline-sm text-on-surface">Active</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">3 Trusted Members streaming</p>
+</div>
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col justify-between gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-bold uppercase">Geofence Perimeter</span>
+<span class="material-symbols-outlined text-primary text-sm">shield</span>
+</div>
+<p class="font-headline-sm text-headline-sm text-on-surface">500 Meter Radius</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Safe Zone: Home &amp; Clinic</p>
+</div>
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col justify-between gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-bold uppercase">Public Access Link</span>
+<span class="material-symbols-outlined text-primary text-sm">lock_open</span>
+</div>
+<button class="min-h-[48px] w-full px-space-sm rounded-lg bg-primary-container text-on-primary-container font-label-md text-label-md font-semibold hover:opacity-90 flex items-center justify-center gap-space-xs transition-opacity" id="copyTrackingLink" type="button">
+<span class="material-symbols-outlined text-sm">share_location</span>
+<span>Copy Live Link</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Secondary Row: Medical Dispatch Payload & Emergency Contacts -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-lg items-start">
+<!-- Medical ID & First Responder Payload (6 Cols) -->
+<div class="xl:col-span-6 bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-lg">
+<div class="flex items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-2xl">medical_information</span>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Emergency Medical Dispatch Payload</h2>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Cryptographically Signed · Transmitted Instantly to First Responders</p>
+</div>
+</div>
+<button class="min-h-[48px] px-space-md rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md font-semibold flex items-center gap-space-xs transition-colors" type="button">
+<span class="material-symbols-outlined text-sm">edit_note</span>
+<span>Update ID</span>
+</button>
+</div>
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-space-md">
+<!-- Patient Primary Identifiers -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-md pb-space-sm border-b border-outline-variant/30">
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Full Legal Name</span>
+<p class="font-label-lg text-label-lg text-on-surface font-bold">Sarah Jenkins</p>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Date of Birth / Age</span>
+<p class="font-label-lg text-label-lg text-on-surface font-bold">10/14/1988 (35 y/o)</p>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Blood Type</span>
+<p class="font-label-lg text-label-lg text-tertiary font-bold">O+ (Rh Positive)</p>
+</div>
+</div>
+<!-- Sensory Impairments & Communication Directives -->
+<div class="p-space-md rounded-lg bg-surface-container-highest flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-xl">hearing_disabled</span>
+<span class="font-label-md text-label-md text-on-surface font-bold">Critical Sensory &amp; Communication Protocol</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface font-medium leading-relaxed">
+              Patient is <strong>Profoundly Deaf</strong>. Does not respond to verbal commands or emergency sirens. Primary language is <strong>American Sign Language (ASL)</strong> and written English text. Also presents with <strong>Low Vision in left eye</strong>. Always provide text, visual cards, or ASL video relay.
+            </p>
+</div>
+<!-- Allergies & Medications -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+<div class="p-space-md rounded-lg bg-surface-container-lowest flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs text-tertiary">
+<span class="material-symbols-outlined text-sm">warning</span>
+<span class="font-label-sm text-label-sm font-bold uppercase">Allergies (Severe)</span>
+</div>
+<p class="font-label-md text-label-md text-on-surface font-semibold">Penicillin, Sulfa Drugs</p>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Anaphylaxis risk · Carry EpiPen</span>
+</div>
+<div class="p-space-md rounded-lg bg-surface-container-lowest flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs text-primary">
+<span class="material-symbols-outlined text-sm">medication</span>
+<span class="font-label-sm text-label-sm font-bold uppercase">Active Medications</span>
+</div>
+<p class="font-label-md text-label-md text-on-surface font-semibold">Metformin 500mg, Amoxicillin</p>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Daily regiment for glycemic control</span>
+</div>
+</div>
+<!-- Emergency Medical Directives -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-space-xs text-on-surface-variant">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-sm">verified_user</span>
+<span class="font-label-sm text-label-sm">DNR Directive: No (Full Code)</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-sm">lock</span>
+<span class="font-label-sm text-label-sm">HIPAA &amp; E-Health Safe Encrypted</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Emergency Contacts & Care Ring (6 Cols) -->
+<div class="xl:col-span-6 bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-lg">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-2xl">supervised_user_circle</span>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Trusted Emergency Circle</h2>
+<p class="font-label-sm text-label-sm text-on-surface-variant">3 Active Responders · Multi-channel Escalation</p>
+</div>
+</div>
+<button class="min-h-[48px] px-space-md rounded-lg bg-primary text-on-primary font-label-md text-label-md font-semibold hover:bg-primary-container flex items-center gap-space-xs transition-colors" type="button">
+<span class="material-symbols-outlined text-sm">person_add</span>
+<span>+ Add Contact</span>
+</button>
+</div>
+<!-- Contact List Stack -->
+<div class="flex flex-col gap-space-sm">
+<!-- Contact 1 -->
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-12 h-12 rounded-full bg-primary-container text-on-primary-container font-headline-sm text-headline-sm flex items-center justify-center font-bold flex-shrink-0">
+                EV
+              </div>
+<div class="min-w-0 flex flex-col">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-label-lg text-label-lg text-on-surface font-bold truncate">Elena Vance</span>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-semibold">Priority 1 · Primary Caregiver</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Daughter · (415) 555-0192 · Auto-Call, SMS &amp; GPS Stream</p>
+</div>
+</div>
+<div class="flex items-center gap-space-xs self-end md:self-center flex-shrink-0">
+<button aria-label="Send test ping to Elena Vance" class="min-h-[48px] px-space-md rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center gap-space-xs transition-colors" type="button">
+<span class="material-symbols-outlined text-sm">notification_important</span>
+<span>Test Ping</span>
+</button>
+<button aria-label="More options for Elena Vance" class="min-h-[48px] min-w-[48px] rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-sm">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Contact 2 -->
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container font-headline-sm text-headline-sm flex items-center justify-center font-bold flex-shrink-0">
+                DP
+              </div>
+<div class="min-w-0 flex flex-col">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-label-lg text-label-lg text-on-surface font-bold truncate">Dr. Rajesh Patel</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-semibold">Priority 2 · Clinical Neurologist</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">UCSF Health · (415) 555-0843 · Medical Record Transmission</p>
+</div>
+</div>
+<div class="flex items-center gap-space-xs self-end md:self-center flex-shrink-0">
+<button aria-label="Send test ping to Dr. Patel" class="min-h-[48px] px-space-md rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center gap-space-xs transition-colors" type="button">
+<span class="material-symbols-outlined text-sm">notification_important</span>
+<span>Test Ping</span>
+</button>
+<button aria-label="More options for Dr. Patel" class="min-h-[48px] min-w-[48px] rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-sm">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Contact 3 -->
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-12 h-12 rounded-full bg-surface-container-highest text-on-surface font-headline-sm text-headline-sm flex items-center justify-center font-bold flex-shrink-0">
+                MV
+              </div>
+<div class="min-w-0 flex flex-col">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-label-lg text-label-lg text-on-surface font-bold truncate">Marcus Vance</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-variant text-on-surface-variant font-label-sm text-label-sm font-semibold">Priority 3 · Transit &amp; Backup</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Brother · (510) 555-0422 · SMS Alerts &amp; Escort</p>
+</div>
+</div>
+<div class="flex items-center gap-space-xs self-end md:self-center flex-shrink-0">
+<button aria-label="Send test ping to Marcus Vance" class="min-h-[48px] px-space-md rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center gap-space-xs transition-colors" type="button">
+<span class="material-symbols-outlined text-sm">notification_important</span>
+<span>Test Ping</span>
+</button>
+<button aria-label="More options for Marcus Vance" class="min-h-[48px] min-w-[48px] rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-sm">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Automated Safety Triggers & Sensory Hardware Protocols (Bento Grid) -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-lg">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-2xl">tune</span>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Automated Sensor Protocols &amp; Environmental Guardrails</h2>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Fine-tune on-device AI sensors and deaf-accessible strobe beacon responses</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-lg">
+<!-- Impact & Fall Detection -->
+<div class="p-space-lg rounded-xl bg-surface-container-low flex flex-col justify-between gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary">motion_sensor_active</span>
+<span class="font-label-lg text-label-lg font-bold text-on-surface">Fall &amp; Impact Sensor</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-semibold">Enabled</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">High-G accelerometer &amp; gyroscope continuous posture monitoring.</p>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between font-label-sm text-label-sm text-on-surface">
+<span>Sensitivity Threshold</span>
+<span class="font-bold text-primary">High (Wheelchair &amp; Walking)</span>
+</div>
+<input aria-label="Fall sensitivity threshold" class="w-full h-2 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-primary" max="5" min="1" type="range" value="4"/>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Triggers immediate 15-second soft verification before SOS.</span>
+</div>
+</div>
+<!-- Inactivity Safety Timer -->
+<div class="p-space-lg rounded-xl bg-surface-container-low flex flex-col justify-between gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary">hourglass_empty</span>
+<span class="font-label-lg text-label-lg font-bold text-on-surface">Inactivity Safety Ping</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-semibold">Every 4h</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Haptic + high-contrast visual prompts to verify patient wellbeing when motionless.</p>
+</div>
+<div class="flex items-center justify-between gap-space-sm pt-space-xs">
+<span class="font-label-md text-label-md text-on-surface">Cadence interval</span>
+<select aria-label="Select inactivity interval" class="min-h-[48px] px-space-md bg-surface-container-lowest text-on-surface rounded-lg font-label-md text-label-md focus:outline-none focus:ring-2 focus:ring-primary">
+<option>Every 2 Hours</option>
+<option selected="">Every 4 Hours</option>
+<option>Every 8 Hours</option>
+<option>Disabled</option>
+</select>
+</div>
+</div>
+<!-- Visual Strobe Beacon for Deaf Localization -->
+<div class="p-space-lg rounded-xl bg-surface-container-low flex flex-col justify-between gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary">lightbulb</span>
+<span class="font-label-lg text-label-lg font-bold text-on-surface">Visual Localization Beacon</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-semibold">Auto on Alarm</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Flashes device LED strobe and displays 100% white screen flicker for nocturnal first responders.</p>
+</div>
+<div class="flex items-center justify-between gap-space-sm pt-space-xs">
+<span class="font-label-md text-label-md text-on-surface">Strobe on SOS trigger</span>
+<button class="min-h-[48px] px-space-md bg-primary-container text-on-primary-container rounded-lg font-label-md text-label-md font-semibold hover:opacity-95" id="strobeSettingBtn" type="button">
+              Active: Strobe + Haptics
+            </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Interactive JavaScript for accessible SOS simulation & buttons -->
+<script>
+    (function() {
+      const sosBtn = document.getElementById('mainSosTrigger');
+      const holdProgress = document.getElementById('holdProgress');
+      const countdownBanner = document.getElementById('countdownBanner');
+      const countdownTimer = document.getElementById('countdownTimer');
+      const cancelBtn = document.getElementById('cancelSosBtn');
+      const sirenBtn = document.getElementById('sirenTestBtn');
+      const strobeBtn = document.getElementById('strobeToggleBtn');
+      const silentBtn = document.getElementById('silentModeBtn');
+      const copyBtn = document.getElementById('copyTrackingLink');
+      const refreshGpsBtn = document.getElementById('refreshGpsBtn');
+
+      let holdTimeout = null;
+      let holdInterval = null;
+      let countdownInterval = null;
+      let progress = 0;
+      let isStrobeActive = false;
+      let isSilentActive = true;
+
+      // SOS Press & Hold (3 seconds)
+      const startHold = () => {
+        progress = 0;
+        holdProgress.style.width = '0%';
+        holdInterval = setInterval(() => {
+          progress += 5;
+          holdProgress.style.width = progress + '%';
+          if (progress >= 100) {
+            clearInterval(holdInterval);
+            triggerEmergencySequence();
+          }
+        }, 150);
+      };
+
+      const cancelHold = () => {
+        clearInterval(holdInterval);
+        progress = 0;
+        holdProgress.style.width = '0%';
+      };
+
+      sosBtn.addEventListener('mousedown', startHold);
+      sosBtn.addEventListener('touchstart', startHold, { passive: true });
+      sosBtn.addEventListener('mouseup', cancelHold);
+      sosBtn.addEventListener('mouseleave', cancelHold);
+      sosBtn.addEventListener('touchend', cancelHold);
+
+      function triggerEmergencySequence() {
+        sosBtn.classList.add('opacity-50', 'pointer-events-none');
+        countdownBanner.classList.remove('hidden');
+        let timeLeft = 5;
+        countdownTimer.textContent = timeLeft;
+
+        countdownInterval = setInterval(() => {
+          timeLeft -= 1;
+          countdownTimer.textContent = timeLeft;
+          if (timeLeft <= 0) {
+            clearInterval(countdownInterval);
+            countdownBanner.innerHTML = '<span class="font-label-lg font-bold">EMERGENCY DISPATCH CONFIRMED · FIRST RESPONDERS EN ROUTE</span>';
+          }
+        }, 1000);
+      }
+
+      cancelBtn.addEventListener('click', () => {
+        clearInterval(countdownInterval);
+        countdownBanner.classList.add('hidden');
+        sosBtn.classList.remove('opacity-50', 'pointer-events-none');
+        holdProgress.style.width = '0%';
+      });
+
+      // Siren test button
+      sirenBtn.addEventListener('click', () => {
+        const isTesting = sirenBtn.classList.contains('bg-tertiary');
+        if (!isTesting) {
+          sirenBtn.classList.remove('bg-surface-container', 'text-on-surface');
+          sirenBtn.classList.add('bg-tertiary', 'text-on-tertiary');
+          sirenBtn.querySelector('span:last-child').textContent = 'Siren Emitting (Press to Stop)';
+        } else {
+          sirenBtn.classList.add('bg-surface-container', 'text-on-surface');
+          sirenBtn.classList.remove('bg-tertiary', 'text-on-tertiary');
+          sirenBtn.querySelector('span:last-child').textContent = 'Alarm Siren Test';
+        }
+      });
+
+      // Strobe toggle
+      strobeBtn.addEventListener('click', () => {
+        isStrobeActive = !isStrobeActive;
+        strobeBtn.querySelector('span:last-child').textContent = 'Haptic Strobe: ' + (isStrobeActive ? 'ON' : 'Off');
+        if (isStrobeActive) {
+          strobeBtn.classList.add('bg-primary-container', 'text-on-primary-container');
+          strobeBtn.classList.remove('bg-surface-container', 'text-on-surface');
+        } else {
+          strobeBtn.classList.remove('bg-primary-container', 'text-on-primary-container');
+          strobeBtn.classList.add('bg-surface-container', 'text-on-surface');
+        }
+      });
+
+      // Silent SOS toggle
+      silentBtn.addEventListener('click', () => {
+        isSilentActive = !isSilentActive;
+        silentBtn.querySelector('span:last-child').textContent = 'Silent SOS: ' + (isSilentActive ? 'Armed' : 'Audible Alert');
+      });
+
+      // Copy link
+      copyBtn.addEventListener('click', () => {
+        const originalText = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<span class="material-symbols-outlined text-sm">done</span><span>Copied to Clipboard!</span>';
+        setTimeout(() => {
+          copyBtn.innerHTML = originalText;
+        }, 2200);
+      });
+
+      // Refresh GPS
+      refreshGpsBtn.addEventListener('click', () => {
+        refreshGpsBtn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">sync</span><span>Syncing...</span>';
+        setTimeout(() => {
+          refreshGpsBtn.innerHTML = '<span class="material-symbols-outlined text-sm">refresh</span><span>Refreshed (±1.2m)</span>';
+          setTimeout(() => {
+            refreshGpsBtn.innerHTML = '<span class="material-symbols-outlined text-sm">refresh</span><span>Refresh</span>';
+          }, 2000);
+        }, 900);
+      });
+    })();
+  </script>
+</div></main></div></body></html>

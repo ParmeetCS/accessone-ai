@@ -1,0 +1,595 @@
+﻿<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"tertiary-container":"#df2928","on-primary-fixed":"#002019","on-background":"#0b1c30","on-primary-fixed-variant":"#005142","surface-container-highest":"#d3e4fe","background":"#f8f9ff","surface-bright":"#f8f9ff","on-error-container":"#93000a","on-secondary-fixed":"#111c2d","on-secondary-container":"#586377","on-secondary":"#ffffff","surface-container-low":"#eff4ff","on-tertiary-container":"#fffbfa","inverse-on-surface":"#eaf1ff","surface":"#f8f9ff","on-surface-variant":"#3e4945","primary-fixed":"#93f5da","primary-container":"#0e836d","primary-fixed-dim":"#77d8be","secondary-container":"#d5e0f8","tertiary-fixed-dim":"#ffb4ab","on-secondary-fixed-variant":"#3c475a","on-tertiary-fixed":"#410002","on-primary-container":"#f1fff8","on-tertiary-fixed-variant":"#93000b","inverse-surface":"#213145","tertiary-fixed":"#ffdad6","primary":"#006856","tertiary":"#ba0012","surface-container":"#e5eeff","secondary-fixed-dim":"#bcc7de","on-tertiary":"#ffffff","on-primary":"#ffffff","on-error":"#ffffff","on-surface":"#0b1c30","surface-variant":"#d3e4fe","outline-variant":"#bdc9c4","secondary-fixed":"#d8e3fb","outline":"#6e7a75","surface-container-lowest":"#ffffff","inverse-primary":"#77d8be","surface-dim":"#cbdbf5","surface-tint":"#006b58","error-container":"#ffdad6","error":"#ba1a1a","surface-container-high":"#dce9ff","secondary":"#545f73"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-lg":"1.5rem","margin-mobile":"1rem","space-md":"1rem","space-sm":"0.5rem","gutter-mobile":"1rem","gutter":"1.5rem","space-xs":"0.25rem","margin":"2rem","space-xl":"2.5rem"},"fontFamily":{"headline-md":["Inter"],"label-md":["Inter"],"display-lg-mobile":["Inter"],"headline-sm":["Inter"],"display-lg":["Inter"],"headline-lg-mobile":["Inter"],"label-sm":["Inter"],"label-lg":["Inter"],"body-md":["Inter"],"headline-lg":["Inter"],"body-lg":["Inter"],"body-sm":["Inter"]},"fontSize":{"headline-md":["22px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-md":["14px",{"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"500"}],"display-lg-mobile":["32px",{"lineHeight":"40px","letterSpacing":"-0.01em","fontWeight":"700"}],"headline-sm":["18px",{"lineHeight":"26px","letterSpacing":"0em","fontWeight":"600"}],"display-lg":["40px",{"lineHeight":"48px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-lg-mobile":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-sm":["12px",{"lineHeight":"16px","letterSpacing":"0.02em","fontWeight":"600"}],"label-lg":["16px",{"lineHeight":"24px","letterSpacing":"0.01em","fontWeight":"600"}],"body-md":["16px",{"lineHeight":"24px","fontWeight":"400"}],"headline-lg":["30px",{"lineHeight":"38px","letterSpacing":"-0.015em","fontWeight":"600"}],"body-lg":["18px",{"lineHeight":"28px","fontWeight":"400"}],"body-sm":["14px",{"lineHeight":"20px","fontWeight":"400"}]}}}}</script></head><body class="bg-background font-body-md text-body-md text-on-surface min-h-screen"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest border-r border-outline-variant z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col"><div class="h-20 px-space-md flex items-center gap-space-sm border-b border-outline-variant"><img alt="AccessOne AI Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/ALJJyrC-Cn0bNcjy-9KDDXYbKgKi-4kQTy4jPMh4XoF8mhvINwU6v3nhAaAXBLvziRxiIjjEDVE5ZK2lqvCehS9iO65c5BszOOBqD6StQy0mBTOuiJmcZor8qyMEUlqB4e7haDhgG_R8dwjT27BMptlUUGUqofDWCxdAqe9Uw98Hn9DXAP-qeE0PDYsTPyx1VLsg_HC3UsyU53AiSmZ2IxzwFumFkpFIzlkOdJVYFJSg2-pn"/><span class="font-headline-sm text-headline-sm text-on-surface">AccessOne AI</span></div><nav class="flex flex-col p-space-md gap-space-xs" data-active-classes="bg-primary-container text-on-primary-container font-bold rounded-lg"><a class="flex items-center min-h-[48px] px-space-md rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="dashboard" href="#"><span class="material-symbols-outlined mr-3 text-2xl">space_dashboard</span><span>Dashboard</span></a><a class="flex items-center min-h-[48px] px-space-md rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="vision-assist" href="#"><span class="material-symbols-outlined mr-3 text-2xl">visibility</span><span>Vision Assist</span></a><a class="flex items-center min-h-[48px] px-space-md rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="hearing-assist" href="#"><span class="material-symbols-outlined mr-3 text-2xl">hearing</span><span>Hearing Assist</span></a><a class="flex items-center min-h-[48px] px-space-md rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="bridge-comm" href="#"><span class="material-symbols-outlined mr-3 text-2xl">forum</span><span>Bridge Comm</span></a><a class="flex items-center min-h-[48px] px-space-md rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="safety-assist" href="#"><span class="material-symbols-outlined mr-3 text-2xl">shield</span><span>Safety Assist</span></a><a class="flex items-center min-h-[48px] px-space-md rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="settings" href="#"><span class="material-symbols-outlined mr-3 text-2xl">settings</span><span>Settings</span></a></nav></div><div class="p-space-md border-t border-outline-variant bg-surface-container-low"><div class="flex items-center justify-between mb-space-xs"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase font-bold">Emergency Relay</span><span class="material-symbols-outlined text-tertiary text-sm">phone_in_talk</span></div><div class="font-body-sm text-body-sm text-on-surface font-semibold">Lifeline: 988 | Relay: 711</div><div class="font-label-sm text-label-sm text-on-secondary-container mt-space-xs">24/7 Clinical Accessibility Line</div></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-20 bg-surface-container-lowest border-b border-outline-variant z-40 flex items-center justify-between px-space-lg shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex items-center gap-space-sm"><div aria-label="Accessibility Quick Bar" class="flex items-center bg-surface-container-low rounded-lg p-space-xs gap-space-xs" role="region"><button aria-label="Decrease font size" class="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-lg font-label-md text-label-md text-on-surface hover:bg-surface-container-highest transition-colors" type="button"><span class="material-symbols-outlined text-lg">text_decrease</span></button><button aria-label="Increase font size" class="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-lg font-label-md text-label-md text-on-surface hover:bg-surface-container-highest transition-colors" type="button"><span class="material-symbols-outlined text-lg">text_increase</span></button><button aria-label="Toggle high contrast" class="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-lg text-on-surface hover:bg-surface-container-highest transition-colors" type="button"><span class="material-symbols-outlined">contrast</span></button><button aria-label="Audio Readout Assist" class="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-lg text-on-surface hover:bg-surface-container-highest transition-colors" type="button"><span class="material-symbols-outlined">volume_up</span></button></div></div><div class="flex items-center gap-space-md"><a class="min-h-[48px] px-space-md inline-flex items-center justify-center gap-space-xs bg-tertiary text-on-tertiary font-label-lg text-label-lg rounded-lg shadow-sm hover:bg-tertiary-container focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-tertiary" data-path="emergency-assistance" href="#"><span class="material-symbols-outlined font-bold">emergency</span><span>EMERGENCY SOS</span></a><div class="flex items-center gap-space-sm pl-space-xs border-l border-outline-variant"><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-2 ring-primary" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBaAECFZ22JyT6It5eo_6up9-H8AIZ-FkthnAGXi-PQgg4It-IxWGbEP_vOnz0DMk7-7k-gOcTZuJNGkQ4KTswsBXObS3PlnJztzhkYJUg5_F2x_maeBmZOSXXlDh9KCDWrPn1T8qWJUSMJ2klKVmUD6Uaj07omqp8q3Yujd7NJcPQ2yxVyc7YEG0bKK38YiB4ln4yFdAGfJaila7uG-5QP5Eya_d_zuwFJtC21POU"/></div></div></header><main class="relative pt-20 bg-background min-h-screen"><div class="flex flex-col w-full">
+<!-- Top Accessibility & Context Utility Bar -->
+<header class="p-space-md lg:p-space-lg bg-surface-container-lowest shadow-sm flex flex-col xl:flex-row xl:items-center xl:justify-between gap-space-md">
+<div class="flex items-center gap-space-md min-w-0">
+<a aria-label="Return to Dashboard" class="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-lg bg-surface-container-low text-on-surface hover:bg-surface-container-high transition-colors focus:ring-2 focus:ring-primary focus:outline-none" data-path="dashboard" href="#">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+</a>
+<div class="min-w-0">
+<div class="flex items-center gap-space-sm flex-wrap">
+<h1 class="font-headline-md text-headline-md text-on-surface tracking-tight">Bridge Communication</h1>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+            Dual-Channel Live Sync Active
+          </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Two-Way Accessible Speech-to-Text &amp; Voice Synthesis Protocol (WCAG AAA)</p>
+</div>
+</div>
+<!-- Ergonomics & Hardware Controls -->
+<div class="flex items-center flex-wrap gap-space-sm">
+<!-- Font Scale Control -->
+<div aria-label="Font scale options" class="inline-flex items-center bg-surface-container-low rounded-lg p-1" role="group">
+<button class="min-h-[40px] px-3 rounded-lg font-label-md text-label-md bg-surface-container-lowest shadow-sm text-primary transition-all font-semibold" id="font-norm-btn">1x</button>
+<button class="min-h-[40px] px-3 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-all" id="font-lg-btn">1.25x</button>
+<button class="min-h-[40px] px-3 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-all" id="font-xl-btn">1.5x</button>
+</div>
+<!-- Flip View for Across-the-Counter Placement -->
+<button class="min-h-[48px] px-space-md inline-flex items-center gap-2 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md transition-colors" id="flip-view-btn" title="Toggle Counter Split/Flip View">
+<span class="material-symbols-outlined text-xl">screen_rotation</span>
+<span class="hidden md:inline">Counter Flip View</span>
+</button>
+<!-- Voice Selector Pill -->
+<div class="inline-flex items-center gap-2 bg-surface-container-low px-3 py-2 rounded-lg text-on-surface min-h-[48px]">
+<span class="material-symbols-outlined text-primary text-xl">record_voice_over</span>
+<div class="flex flex-col text-left">
+<span class="font-label-sm text-label-sm leading-none text-on-surface-variant">TTS Engine</span>
+<span class="font-label-md text-label-md font-semibold">Sarah (Natural 1.0x)</span>
+</div>
+<span class="material-symbols-outlined text-base text-outline ml-1">expand_more</span>
+</div>
+</div>
+</header>
+<!-- Main Multi-Pane Collaboration Canvas -->
+<div class="p-space-md lg:p-space-lg grid grid-cols-1 xl:grid-cols-12 gap-space-lg">
+<!-- LEFT 8 COLS: Dialogue Stream & Participant Input Zones -->
+<div class="xl:col-span-8 flex flex-col gap-space-lg min-w-0">
+<!-- Dialogue Stream Window -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md lg:p-space-lg min-h-[440px] max-h-[560px] overflow-y-auto flex flex-col gap-space-lg relative" id="dialogue-scroll-pane">
+<!-- Live Transcribing Telemetry Header -->
+<div class="flex items-center justify-between pb-space-sm bg-surface-container-lowest sticky top-0 z-10">
+<div class="flex items-center gap-space-xs font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+<span class="material-symbols-outlined text-primary text-sm">graphic_eq</span>
+<span>Microphone Feed: Directional Array Active</span>
+</div>
+<div class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+            99.4% Clinical Precision Transcribing
+          </div>
+</div>
+<!-- 1. Hearing Speaker Message Bubble (Speech to Text) -->
+<article aria-label="Message from Hearing Partner" class="flex flex-col gap-2 max-w-[90%] self-start">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-fixed">
+<span class="material-symbols-outlined text-lg">medical_services</span>
+</div>
+<span class="font-label-md text-label-md font-semibold text-on-surface">Dr. Patel (Clinical Pharmacist)</span>
+<span class="font-label-sm text-label-sm text-outline">10:42 AM</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container font-label-sm text-label-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-xs text-primary">mic</span>
+              Voice Capture
+            </span>
+</div>
+<div class="p-space-md bg-surface-container-low rounded-xl rounded-tl-sm text-on-surface text-body-lg font-body-lg shadow-sm">
+            Please take one tablet twice daily with food. Do you have any questions about potential drowsiness or allergies?
+          </div>
+<div class="flex items-center gap-space-sm pl-2">
+<button class="min-h-[48px] px-3 inline-flex items-center gap-1.5 text-primary hover:text-on-primary-fixed-variant font-label-sm text-label-sm font-semibold rounded-lg focus:ring-2 focus:ring-primary focus:outline-none" onclick="speakMessage('Please take one tablet twice daily with food. Do you have any questions about potential drowsiness or allergies?')">
+<span class="material-symbols-outlined text-lg">replay</span>
+<span>Replay Synthesized Audio</span>
+</button>
+<span class="text-outline-variant">•</span>
+<button class="min-h-[48px] px-3 inline-flex items-center gap-1 text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm rounded-lg" onclick="triggerRepeatRequest()">
+<span class="material-symbols-outlined text-lg">sync_problem</span>
+<span>Request Repeat</span>
+</button>
+</div>
+</article>
+<!-- 2. Deaf/Hard of Hearing User Message Bubble (Typed / Synthesized) -->
+<article aria-label="Message from You" class="flex flex-col gap-2 max-w-[90%] self-end items-end">
+<div class="flex items-center gap-2 flex-row-reverse">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary font-bold text-sm">
+              S
+            </div>
+<span class="font-label-md text-label-md font-semibold text-on-surface">Sarah (You)</span>
+<span class="font-label-sm text-label-sm text-outline">10:43 AM</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-xs">volume_up</span>
+              Synthesized Aloud
+            </span>
+</div>
+<div class="p-space-md bg-primary-container text-on-primary-container rounded-xl rounded-tr-sm text-body-lg font-body-lg shadow-sm">
+            Will this medication interact with my daily allergy antihistamines? Also, can I pick up the refill on Tuesday afternoon?
+          </div>
+<div class="flex items-center gap-space-sm pr-2">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+              Spoken to Room (100% Vol)
+            </span>
+<button class="min-h-[48px] px-3 inline-flex items-center gap-1 text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm rounded-lg focus:ring-2 focus:ring-primary focus:outline-none" onclick="speakMessage('Will this medication interact with my daily allergy antihistamines? Also, can I pick up the refill on Tuesday afternoon?')">
+<span class="material-symbols-outlined text-lg">volume_up</span>
+<span>Speak Again</span>
+</button>
+</div>
+</article>
+<!-- 3. Dynamic Realtime In-Progress Transcription Feed -->
+<div class="flex flex-col gap-2 max-w-[85%] self-start opacity-90 transition-opacity" id="live-speech-transcription-preview">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-tertiary-container animate-ping"></span>
+<span class="font-label-sm text-label-sm font-semibold text-tertiary">Hearing Partner Speaking...</span>
+</div>
+<div class="p-space-md bg-surface-container rounded-xl rounded-tl-sm text-on-surface text-body-lg font-body-lg italic">
+            "No interactions with common antihistamines, but I advise spacing them out by two hours..."
+          </div>
+</div>
+</div>
+<!-- Quick-Tap Everyday Phrase Bank -->
+<section aria-label="One-Touch Rapid Responses" class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm">
+<div class="flex items-center justify-between mb-space-sm">
+<h2 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-semibold">One-Touch Instant Voice Pills</h2>
+<span class="font-label-sm text-label-sm text-outline">Tap to immediately vocalize aloud</span>
+</div>
+<div class="flex flex-wrap gap-2">
+<button class="min-h-[48px] px-space-md rounded-full bg-surface-container-low hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors font-label-md text-label-md text-on-surface flex items-center gap-2 focus:ring-2 focus:ring-primary focus:outline-none" onclick="instantVocalize('Yes, I understand clearly. Thank you.')">
+<span class="material-symbols-outlined text-base text-primary">check</span>
+<span>Yes, I understand</span>
+</button>
+<button class="min-h-[48px] px-space-md rounded-full bg-surface-container-low hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors font-label-md text-label-md text-on-surface flex items-center gap-2 focus:ring-2 focus:ring-primary focus:outline-none" onclick="instantVocalize('Could you please speak a bit slower? Thank you.')">
+<span class="material-symbols-outlined text-base text-primary">speed</span>
+<span>Please speak slower</span>
+</button>
+<button class="min-h-[48px] px-space-md rounded-full bg-surface-container-low hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors font-label-md text-label-md text-on-surface flex items-center gap-2 focus:ring-2 focus:ring-primary focus:outline-none" onclick="instantVocalize('Could you please type or write that down for me?')">
+<span class="material-symbols-outlined text-base text-primary">edit_note</span>
+<span>Can you write it down?</span>
+</button>
+<button class="min-h-[48px] px-space-md rounded-full bg-surface-container-low hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors font-label-md text-label-md text-on-surface flex items-center gap-2 focus:ring-2 focus:ring-primary focus:outline-none" onclick="instantVocalize('How many days should I continue this regimen?')">
+<span class="material-symbols-outlined text-base text-primary">calendar_month</span>
+<span>How many days?</span>
+</button>
+<button class="min-h-[48px] px-space-md rounded-full bg-surface-container-low hover:bg-tertiary-fixed hover:text-on-tertiary-fixed transition-colors font-label-md text-label-md text-on-surface flex items-center gap-2 focus:ring-2 focus:ring-tertiary focus:outline-none" onclick="instantVocalize('I am currently experiencing some mild discomfort or pain.')">
+<span class="material-symbols-outlined text-base text-tertiary">healing</span>
+<span>I am experiencing pain</span>
+</button>
+</div>
+</section>
+<!-- Dual Input Console: Split Zones for Deaf User & Hearing Partner -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-space-md">
+<!-- Deaf/HOH Input Console (Type to Vocalize) - 8 Cols -->
+<div class="md:col-span-8 bg-surface-container-lowest p-space-md lg:p-space-lg rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-xs">
+<label class="font-label-md text-label-md font-semibold text-on-surface flex items-center gap-2" for="deaf-input-text">
+<span class="material-symbols-outlined text-primary text-xl">keyboard</span>
+<span>Your Typed Voice (Spoken Aloud)</span>
+</label>
+<span class="font-label-sm text-label-sm text-outline" id="char-counter">0 / 280</span>
+</div>
+<div class="relative mt-2">
+<textarea class="w-full p-3 rounded-lg bg-surface-container-low text-on-surface text-body-md font-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary focus:outline-none resize-none transition-all placeholder:text-outline" id="deaf-input-text" placeholder="Type your response here to vocalize immediately to the hearing partner... (Press Enter to Speak)" rows="3"></textarea>
+</div>
+<div class="mt-space-md flex items-center justify-between gap-space-sm flex-wrap">
+<div class="flex items-center gap-1 text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-lg text-primary">record_voice_over</span>
+<span>Synthesizer: Low Latency 32ms</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="min-h-[48px] px-space-md rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-md text-label-md" id="clear-input-btn">
+                Clear
+              </button>
+<button class="min-h-[48px] px-space-lg rounded-lg bg-primary-container text-on-primary-container hover:bg-primary transition-all font-label-lg text-label-lg font-bold flex items-center gap-2 shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-primary" id="speak-aloud-btn">
+<span class="material-symbols-outlined text-2xl">volume_up</span>
+<span>Speak Aloud</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Hearing Partner Input / Mic Station - 4 Cols -->
+<div class="md:col-span-4 bg-surface-container-lowest p-space-md lg:p-space-lg rounded-xl shadow-sm flex flex-col justify-between items-center text-center">
+<div class="w-full flex items-center justify-between">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Hearing Partner</span>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm">Listening</span>
+</div>
+<!-- Interactive Mic Target -->
+<div class="py-space-md flex flex-col items-center">
+<button aria-label="Push to Talk or Toggle Microphone" class="w-20 h-20 rounded-full bg-primary text-on-primary shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center focus:ring-4 focus:ring-primary-fixed focus:outline-none" id="mic-toggle-btn">
+<span class="material-symbols-outlined text-4xl">mic</span>
+</button>
+<!-- Live Audio Visualizer Bars -->
+<div aria-hidden="true" class="flex items-center gap-1 h-6 mt-space-md">
+<span class="w-1 bg-primary rounded-full h-3 animate-pulse"></span>
+<span class="w-1 bg-primary rounded-full h-5 animate-pulse" style="animation-delay: 150ms;"></span>
+<span class="w-1 bg-primary rounded-full h-6 animate-pulse" style="animation-delay: 300ms;"></span>
+<span class="w-1 bg-primary rounded-full h-4 animate-pulse" style="animation-delay: 75ms;"></span>
+<span class="w-1 bg-primary rounded-full h-2 animate-pulse" style="animation-delay: 220ms;"></span>
+</div>
+</div>
+<div class="w-full">
+<p class="font-label-sm text-label-sm text-on-surface-variant font-medium">Click mic or hold space to capture partner response</p>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT 4 COLS: Mode Selection, ASL / Visual Aids, & Saved Clinical Phrases -->
+<aside class="xl:col-span-4 flex flex-col gap-space-lg">
+<!-- Conversation Context Modes -->
+<div class="bg-surface-container-lowest p-space-md lg:p-space-lg rounded-xl shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-space-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">tune</span>
+<span>Conversation Mode</span>
+</h2>
+<div aria-label="Conversation contexts" class="grid grid-cols-1 gap-space-xs" role="radiogroup">
+<label class="p-3 rounded-lg bg-primary-fixed-dim/30 hover:bg-primary-fixed-dim/50 cursor-pointer flex items-start gap-3 transition-colors">
+<input checked="" class="mt-1 w-5 h-5 text-primary accent-primary" name="mode-select" type="radio"/>
+<div class="min-w-0">
+<div class="font-label-lg text-label-lg font-bold text-on-surface">Medical &amp; Consultation</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Enhanced clinical term dictionary, HIPAA-secure logging, medical confirmation tags.</div>
+</div>
+</label>
+<label class="p-3 rounded-lg hover:bg-surface-container-low cursor-pointer flex items-start gap-3 transition-colors">
+<input class="mt-1 w-5 h-5 text-primary accent-primary" name="mode-select" type="radio"/>
+<div class="min-w-0">
+<div class="font-label-lg text-label-lg font-semibold text-on-surface">Everyday &amp; Retail</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">General social talk, counter checkouts, low background noise suppression.</div>
+</div>
+</label>
+<label class="p-3 rounded-lg hover:bg-surface-container-low cursor-pointer flex items-start gap-3 transition-colors">
+<input class="mt-1 w-5 h-5 text-primary accent-primary" name="mode-select" type="radio"/>
+<div class="min-w-0">
+<div class="font-label-lg text-label-lg font-semibold text-on-surface">Rapid Transit / Relay</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Fast bullet points, high-contrast flashcards for noisy transport hubs.</div>
+</div>
+</label>
+</div>
+</div>
+<!-- Real-Time ASL Visual Card / Flashcard Mode -->
+<div class="bg-surface-container-lowest p-space-md lg:p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">sign_language</span>
+<span>Visual Assist &amp; ASL</span>
+</h2>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-semibold">AI Video Sync</span>
+</div>
+<!-- ASL Avatar Representation Area -->
+<div class="relative w-full h-48 bg-surface-container-low rounded-lg overflow-hidden flex flex-col justify-end">
+<img class="absolute inset-0 w-full h-full object-cover" data-alt="High contrast, clean clinical studio lighting showing a 3D animated medical sign language avatar performing American Sign Language fingerspelling in a bright healthcare room setting with calm teal accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzGn1gCaRbTFI7emM4cocjMGJdDbKv8gwoHYd7Sb9UVmGC-nwNCTc15NxEfzhQ3HxvGsC6mqYlGdcI7_BkVjHrUlZKvuFye5LM44k1dw-TYlNiwRMaL6wsxYPKuGXgUr_D6bOA4VHs8Y7hBbhQQjX_bgpBC2kJK02S_1n_umQFL3z0vSx7Y1UmaKWMemoCnH9gm7JOaRVjSmZK9JiR_TVPSsKVLGBLY0glTUo6zsk"/>
+<div class="relative z-10 p-3 bg-inverse-surface/80 backdrop-blur-sm text-inverse-on-surface flex items-center justify-between">
+<span class="font-label-sm text-label-sm font-semibold truncate">Current Sign: "MEDICATION" (Twice Daily)</span>
+<span class="material-symbols-outlined text-sm text-inverse-primary">check_circle</span>
+</div>
+</div>
+<button class="min-h-[48px] w-full rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-md text-label-md font-semibold flex items-center justify-center gap-2 transition-colors focus:ring-2 focus:ring-primary focus:outline-none" id="full-card-mode-btn">
+<span class="material-symbols-outlined text-xl">fullscreen</span>
+<span>Expand to Full-Screen Flashcard</span>
+</button>
+</div>
+<!-- Categorized Saved Phrase Library -->
+<div class="bg-surface-container-lowest p-space-md lg:p-space-lg rounded-xl shadow-sm flex flex-col gap-space-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">bookmarks</span>
+<span>Saved Response Library</span>
+</h2>
+<!-- Category Dropdowns / Accordions -->
+<div class="flex flex-col gap-space-xs mt-2">
+<details class="group rounded-lg bg-surface-container-low p-3" open="">
+<summary class="font-label-lg text-label-lg font-semibold text-on-surface cursor-pointer flex items-center justify-between list-none">
+<span class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">prescriptions</span>
+                Pharmacy &amp; Dosage
+              </span>
+<span class="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
+</summary>
+<div class="mt-space-sm flex flex-col gap-2 pt-2">
+<button class="text-left p-2 rounded hover:bg-surface-container font-body-sm text-body-sm text-on-surface transition-colors flex items-center justify-between" onclick="insertPhrase('Do I need to take this with breakfast or dinner?')">
+<span>"Do I need to take this with food?"</span>
+<span class="material-symbols-outlined text-base text-primary">send</span>
+</button>
+<button class="text-left p-2 rounded hover:bg-surface-container font-body-sm text-body-sm text-on-surface transition-colors flex items-center justify-between" onclick="insertPhrase('Is there a generic alternative for this prescription?')">
+<span>"Is there a generic version available?"</span>
+<span class="material-symbols-outlined text-base text-primary">send</span>
+</button>
+<button class="text-left p-2 rounded hover:bg-surface-container font-body-sm text-body-sm text-on-surface transition-colors flex items-center justify-between" onclick="insertPhrase('Can I get an updated written summary of side effects?')">
+<span>"Please provide a printed side effects list."</span>
+<span class="material-symbols-outlined text-base text-primary">send</span>
+</button>
+</div>
+</details>
+<details class="group rounded-lg bg-surface-container-low p-3">
+<summary class="font-label-lg text-label-lg font-semibold text-on-surface cursor-pointer flex items-center justify-between list-none">
+<span class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">contact_emergency</span>
+                Clinical Emergency
+              </span>
+<span class="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
+</summary>
+<div class="mt-space-sm flex flex-col gap-2 pt-2">
+<button class="text-left p-2 rounded hover:bg-error-container text-on-surface font-body-sm text-body-sm transition-colors flex items-center justify-between" onclick="insertPhrase('Please call my designated emergency medical advocate immediately.')">
+<span>"Call my emergency advocate immediately."</span>
+<span class="material-symbols-outlined text-base text-error">send</span>
+</button>
+<button class="text-left p-2 rounded hover:bg-surface-container text-on-surface font-body-sm text-body-sm transition-colors flex items-center justify-between" onclick="insertPhrase('I need a certified American Sign Language interpreter on site.')">
+<span>"I require an in-person certified ASL interpreter."</span>
+<span class="material-symbols-outlined text-base text-primary">send</span>
+</button>
+</div>
+</details>
+</div>
+</div>
+<!-- Session Actions & HIPAA Export -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-space-sm">
+<button class="min-h-[48px] w-full rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md font-semibold flex items-center justify-center gap-2 transition-colors focus:ring-2 focus:ring-primary focus:outline-none" id="download-transcript-btn">
+<span class="material-symbols-outlined text-xl">description</span>
+<span>Export Secure HIPAA Transcript (PDF)</span>
+</button>
+<div class="flex items-center gap-2">
+<button class="min-h-[48px] flex-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-sm text-label-sm font-semibold flex items-center justify-center gap-1 transition-colors" id="clear-chat-btn">
+<span class="material-symbols-outlined text-base">delete_sweep</span>
+<span>Clear Session</span>
+</button>
+<button class="min-h-[48px] flex-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-sm text-label-sm font-semibold flex items-center justify-center gap-1 transition-colors" id="mute-tts-btn">
+<span class="material-symbols-outlined text-base" id="mute-icon">volume_off</span>
+<span id="mute-label">Mute Voice</span>
+</button>
+</div>
+</div>
+</aside>
+</div>
+<!-- Full-Screen Flashcard Overlay (Initial Hidden) -->
+<div class="fixed inset-0 bg-inverse-surface/90 backdrop-blur-md z-50 hidden flex-col items-center justify-center p-space-xl" id="flashcard-modal">
+<button aria-label="Close Flashcard View" class="absolute top-6 right-6 min-h-[48px] min-w-[48px] rounded-full bg-surface text-on-surface flex items-center justify-center hover:bg-surface-container transition-colors" id="close-flashcard-btn">
+<span class="material-symbols-outlined text-3xl">close</span>
+</button>
+<div class="max-w-4xl w-full bg-surface rounded-2xl p-space-xl text-center shadow-2xl flex flex-col items-center gap-space-lg">
+<span class="font-label-lg text-label-lg uppercase tracking-widest text-primary font-bold">Counter View Card</span>
+<p class="font-display-lg text-display-lg text-on-surface leading-tight font-extrabold" id="flashcard-text-display">
+        "Will this medication interact with my daily allergy antihistamines?"
+      </p>
+<div class="flex items-center gap-space-md mt-space-md">
+<button class="min-h-[48px] px-space-xl rounded-xl bg-primary-container text-on-primary-container font-label-lg text-label-lg font-bold flex items-center gap-2 shadow-md" onclick="speakMessage(document.getElementById('flashcard-text-display').textContent)">
+<span class="material-symbols-outlined text-2xl">volume_up</span>
+<span>Speak Again Out Loud</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // Accessibility & Live Interaction Handlers
+  const textarea = document.getElementById('deaf-input-text');
+  const charCounter = document.getElementById('char-counter');
+  const speakBtn = document.getElementById('speak-aloud-btn');
+  const clearBtn = document.getElementById('clear-input-btn');
+  const scrollPane = document.getElementById('dialogue-scroll-pane');
+  const flashcardModal = document.getElementById('flashcard-modal');
+  const fullCardBtn = document.getElementById('full-card-mode-btn');
+  const closeFlashcardBtn = document.getElementById('close-flashcard-btn');
+  const flashcardDisplay = document.getElementById('flashcard-text-display');
+
+  // Char Counter
+  if (textarea && charCounter) {
+    textarea.addEventListener('input', () => {
+      charCounter.textContent = `${textarea.value.length} / 280`;
+    });
+  }
+
+  // Clear Input
+  if (clearBtn && textarea) {
+    clearBtn.addEventListener('click', () => {
+      textarea.value = '';
+      charCounter.textContent = '0 / 280';
+      textarea.focus();
+    });
+  }
+
+  // Insert Saved Phrase to Input
+  window.insertPhrase = function(text) {
+    if (textarea) {
+      textarea.value = text;
+      charCounter.textContent = `${text.length} / 280`;
+      textarea.focus();
+    }
+  };
+
+  // Instant Vocalize Function
+  window.instantVocalize = function(phrase) {
+    appendUserBubble(phrase);
+    speakMessage(phrase);
+  };
+
+  // Speak Handler
+  function handleSendVoice() {
+    const text = textarea ? textarea.value.trim() : '';
+    if (!text) return;
+    appendUserBubble(text);
+    speakMessage(text);
+    textarea.value = '';
+    charCounter.textContent = '0 / 280';
+  }
+
+  if (speakBtn) {
+    speakBtn.addEventListener('click', handleSendVoice);
+  }
+
+  if (textarea) {
+    textarea.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSendVoice();
+      }
+    });
+  }
+
+  // Append User Bubble to Stream
+  function appendUserBubble(messageText) {
+    if (!scrollPane) return;
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    const bubble = document.createElement('article');
+    bubble.className = "flex flex-col gap-2 max-w-[90%] self-end items-end animate-fadeIn";
+    bubble.setAttribute('aria-label', 'Message from You');
+    bubble.innerHTML = `
+      <div class="flex items-center gap-2 flex-row-reverse">
+        <div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary font-bold text-sm">
+          S
+        </div>
+        <span class="font-label-md text-label-md font-semibold text-on-surface">Sarah (You)</span>
+        <span class="font-label-sm text-label-sm text-outline">${timeStr}</span>
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm">
+          <span class="material-symbols-outlined text-xs">volume_up</span>
+          Synthesized Aloud
+        </span>
+      </div>
+      <div class="p-space-md bg-primary-container text-on-primary-container rounded-xl rounded-tr-sm text-body-lg font-body-lg shadow-sm">
+        ${escapeHTML(messageText)}
+      </div>
+      <div class="flex items-center gap-space-sm pr-2">
+        <span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary">
+          <span class="material-symbols-outlined text-sm">check_circle</span>
+          Spoken to Room
+        </span>
+        <button class="min-h-[48px] px-3 inline-flex items-center gap-1 text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm rounded-lg" onclick="speakMessage('${escapeHTML(messageText).replace(/'/g, "\\'")}')">
+          <span class="material-symbols-outlined text-lg">volume_up</span>
+          <span>Speak Again</span>
+        </button>
+      </div>
+    `;
+
+    // Insert before the live-speech preview
+    const preview = document.getElementById('live-speech-transcription-preview');
+    if (preview) {
+      scrollPane.insertBefore(bubble, preview);
+    } else {
+      scrollPane.appendChild(bubble);
+    }
+    scrollPane.scrollTop = scrollPane.scrollHeight;
+  }
+
+  // Synthetic TTS Output
+  window.speakMessage = function(text) {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  // Repeat Request Simulation
+  window.triggerRepeatRequest = function() {
+    instantVocalize("I did not catch that completely. Could you please repeat what you just said?");
+  };
+
+  // Helper Escape
+  function escapeHTML(str) {
+    return str.replace(/[&<>'"]/g, 
+      tag => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+      }[tag] || tag)
+    );
+  }
+
+  // Flashcard Mode Full-Screen Toggle
+  if (fullCardBtn && flashcardModal) {
+    fullCardBtn.addEventListener('click', () => {
+      const lastMsg = textarea && textarea.value.trim() ? textarea.value.trim() : "Will this medication interact with my daily allergy antihistamines?";
+      if (flashcardDisplay) flashcardDisplay.textContent = `"${lastMsg}"`;
+      flashcardModal.classList.remove('hidden');
+      flashcardModal.classList.add('flex');
+    });
+  }
+
+  if (closeFlashcardBtn && flashcardModal) {
+    closeFlashcardBtn.addEventListener('click', () => {
+      flashcardModal.classList.add('hidden');
+      flashcardModal.classList.remove('flex');
+    });
+  }
+
+  // Flip View Toggle for Across Counter Tablet setup
+  const flipBtn = document.getElementById('flip-view-btn');
+  if (flipBtn && scrollPane) {
+    flipBtn.addEventListener('click', () => {
+      scrollPane.classList.toggle('rotate-180');
+      flipBtn.classList.toggle('bg-primary-fixed');
+      flipBtn.classList.toggle('text-on-primary-fixed');
+    });
+  }
+
+  // Font Size Switches
+  const normBtn = document.getElementById('font-norm-btn');
+  const lgBtn = document.getElementById('font-lg-btn');
+  const xlBtn = document.getElementById('font-xl-btn');
+
+  function resetFontBtns() {
+    [normBtn, lgBtn, xlBtn].forEach(b => {
+      if (!b) return;
+      b.classList.remove('bg-surface-container-lowest', 'shadow-sm', 'text-primary', 'font-semibold');
+      b.classList.add('text-on-surface-variant');
+    });
+  }
+
+  if (normBtn && scrollPane) {
+    normBtn.addEventListener('click', () => {
+      resetFontBtns();
+      normBtn.classList.add('bg-surface-container-lowest', 'shadow-sm', 'text-primary', 'font-semibold');
+      scrollPane.style.fontSize = '1rem';
+    });
+  }
+
+  if (lgBtn && scrollPane) {
+    lgBtn.addEventListener('click', () => {
+      resetFontBtns();
+      lgBtn.classList.add('bg-surface-container-lowest', 'shadow-sm', 'text-primary', 'font-semibold');
+      scrollPane.style.fontSize = '1.25rem';
+    });
+  }
+
+  if (xlBtn && scrollPane) {
+    xlBtn.addEventListener('click', () => {
+      resetFontBtns();
+      xlBtn.classList.add('bg-surface-container-lowest', 'shadow-sm', 'text-primary', 'font-semibold');
+      scrollPane.style.fontSize = '1.5rem';
+    });
+  }
+
+  // Mute Audio Toggle
+  const muteBtn = document.getElementById('mute-tts-btn');
+  const muteIcon = document.getElementById('mute-icon');
+  const muteLabel = document.getElementById('mute-label');
+  let isMuted = false;
+
+  if (muteBtn && muteIcon && muteLabel) {
+    muteBtn.addEventListener('click', () => {
+      isMuted = !isMuted;
+      if (isMuted) {
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        muteIcon.textContent = 'volume_up';
+        muteLabel.textContent = 'Unmute Voice';
+        muteBtn.classList.add('bg-tertiary-fixed', 'text-on-tertiary-fixed');
+      } else {
+        muteIcon.textContent = 'volume_off';
+        muteLabel.textContent = 'Mute Voice';
+        muteBtn.classList.remove('bg-tertiary-fixed', 'text-on-tertiary-fixed');
+      }
+    });
+  }
+
+  // Mic Pulse Interaction
+  const micBtn = document.getElementById('mic-toggle-btn');
+  if (micBtn) {
+    micBtn.addEventListener('click', () => {
+      micBtn.classList.toggle('bg-tertiary');
+      micBtn.classList.toggle('bg-primary');
+    });
+  }
+</script></main></div></body></html>

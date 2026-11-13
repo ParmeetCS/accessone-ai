@@ -1,0 +1,809 @@
+﻿<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"tertiary-container":"#df2928","on-primary-fixed":"#002019","on-background":"#0b1c30","on-primary-fixed-variant":"#005142","surface-container-highest":"#d3e4fe","background":"#f8f9ff","surface-bright":"#f8f9ff","on-error-container":"#93000a","on-secondary-fixed":"#111c2d","on-secondary-container":"#586377","on-secondary":"#ffffff","surface-container-low":"#eff4ff","on-tertiary-container":"#fffbfa","inverse-on-surface":"#eaf1ff","surface":"#f8f9ff","on-surface-variant":"#3e4945","primary-fixed":"#93f5da","primary-container":"#0e836d","primary-fixed-dim":"#77d8be","secondary-container":"#d5e0f8","tertiary-fixed-dim":"#ffb4ab","on-secondary-fixed-variant":"#3c475a","on-tertiary-fixed":"#410002","on-primary-container":"#f1fff8","on-tertiary-fixed-variant":"#93000b","inverse-surface":"#213145","tertiary-fixed":"#ffdad6","primary":"#006856","tertiary":"#ba0012","surface-container":"#e5eeff","secondary-fixed-dim":"#bcc7de","on-tertiary":"#ffffff","on-primary":"#ffffff","on-error":"#ffffff","on-surface":"#0b1c30","surface-variant":"#d3e4fe","outline-variant":"#bdc9c4","secondary-fixed":"#d8e3fb","outline":"#6e7a75","surface-container-lowest":"#ffffff","inverse-primary":"#77d8be","surface-dim":"#cbdbf5","surface-tint":"#006b58","error-container":"#ffdad6","error":"#ba1a1a","surface-container-high":"#dce9ff","secondary":"#545f73"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-lg":"1.5rem","margin-mobile":"1rem","space-md":"1rem","space-sm":"0.5rem","gutter-mobile":"1rem","gutter":"1.5rem","space-xs":"0.25rem","margin":"2rem","space-xl":"2.5rem"},"fontFamily":{"headline-md":["Inter"],"label-md":["Inter"],"display-lg-mobile":["Inter"],"headline-sm":["Inter"],"display-lg":["Inter"],"headline-lg-mobile":["Inter"],"label-sm":["Inter"],"label-lg":["Inter"],"body-md":["Inter"],"headline-lg":["Inter"],"body-lg":["Inter"],"body-sm":["Inter"]},"fontSize":{"headline-md":["22px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-md":["14px",{"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"500"}],"display-lg-mobile":["32px",{"lineHeight":"40px","letterSpacing":"-0.01em","fontWeight":"700"}],"headline-sm":["18px",{"lineHeight":"26px","letterSpacing":"0em","fontWeight":"600"}],"display-lg":["40px",{"lineHeight":"48px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-lg-mobile":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-sm":["12px",{"lineHeight":"16px","letterSpacing":"0.02em","fontWeight":"600"}],"label-lg":["16px",{"lineHeight":"24px","letterSpacing":"0.01em","fontWeight":"600"}],"body-md":["16px",{"lineHeight":"24px","fontWeight":"400"}],"headline-lg":["30px",{"lineHeight":"38px","letterSpacing":"-0.015em","fontWeight":"600"}],"body-lg":["18px",{"lineHeight":"28px","fontWeight":"400"}],"body-sm":["14px",{"lineHeight":"20px","fontWeight":"400"}]}}}}</script></head><body class="bg-background font-body-md text-body-md text-on-surface min-h-screen"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest border-r border-outline-variant z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col"><div class="h-20 px-space-md flex items-center gap-space-sm border-b border-outline-variant"><img alt="AccessOne AI Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/ALJJyrC-Cn0bNcjy-9KDDXYbKgKi-4kQTy4jPMh4XoF8mhvINwU6v3nhAaAXBLvziRxiIjjEDVE5ZK2lqvCehS9iO65c5BszOOBqD6StQy0mBTOuiJmcZor8qyMEUlqB4e7haDhgG_R8dwjT27BMptlUUGUqofDWCxdAqe9Uw98Hn9DXAP-qeE0PDYsTPyx1VLsg_HC3UsyU53AiSmZ2IxzwFumFkpFIzlkOdJVYFJSg2-pn"/><span class="font-headline-sm text-headline-sm text-on-surface">AccessOne AI</span></div><nav class="flex flex-col p-space-md gap-space-xs" data-active-classes="bg-primary-container text-on-primary-container font-bold rounded-lg"><a class="flex items-center min-h-[48px] px-space-md rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="dashboard" href="#"><span>Dashboard</span></a><a class="flex items-center min-h-[48px] px-space-md rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="vision-assist" href="#"><span>Vision Assist</span></a><a class="flex items-center min-h-[48px] px-space-md rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="hearing-assist" href="#"><span>Hearing Assist</span></a><a class="flex items-center min-h-[48px] px-space-md rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="bridge-comm" href="#"><span>Bridge Comm</span></a><a class="flex items-center min-h-[48px] px-space-md rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="safety-assist" href="#"><span>Safety Assist</span></a><a class="flex items-center min-h-[48px] px-space-md rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="settings" href="#"><span>Settings</span></a></nav></div><div class="p-space-md border-t border-outline-variant bg-surface-container-low"><div class="flex items-center justify-between mb-space-xs"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase font-bold">Emergency Relay</span><span class="material-symbols-outlined text-tertiary text-sm">phone_in_talk</span></div><div class="font-body-sm text-body-sm text-on-surface font-semibold">Lifeline: 988 | Relay: 711</div><div class="font-label-sm text-label-sm text-on-secondary-container mt-space-xs">24/7 Clinical Accessibility Line</div></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-20 bg-surface-container-lowest border-b border-outline-variant z-40 flex items-center justify-between px-space-lg shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex items-center gap-space-sm"><div aria-label="Accessibility Quick Bar" class="flex items-center bg-surface-container-low rounded-lg p-space-xs gap-space-xs" role="region"><button aria-label="Decrease font size" class="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-lg font-label-md text-label-md text-on-surface hover:bg-surface-container-highest transition-colors" type="button"><span class="material-symbols-outlined text-lg">text_decrease</span></button><button aria-label="Increase font size" class="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-lg font-label-md text-label-md text-on-surface hover:bg-surface-container-highest transition-colors" type="button"><span class="material-symbols-outlined text-lg">text_increase</span></button><button aria-label="Toggle high contrast" class="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-lg text-on-surface hover:bg-surface-container-highest transition-colors" type="button"><span class="material-symbols-outlined">contrast</span></button><button aria-label="Audio Readout Assist" class="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-lg text-on-surface hover:bg-surface-container-highest transition-colors" type="button"><span class="material-symbols-outlined">volume_up</span></button></div></div><div class="flex items-center gap-space-md"><a class="min-h-[48px] px-space-md inline-flex items-center justify-center gap-space-xs bg-tertiary text-on-tertiary font-label-lg text-label-lg rounded-lg shadow-sm hover:bg-tertiary-container focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-tertiary" data-path="emergency-assistance" href="#"><span class="material-symbols-outlined font-bold">emergency</span><span>EMERGENCY SOS</span></a><div class="flex items-center gap-space-sm pl-space-xs border-l border-outline-variant"><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-2 ring-primary" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBaAECFZ22JyT6It5eo_6up9-H8AIZ-FkthnAGXi-PQgg4It-IxWGbEP_vOnz0DMk7-7k-gOcTZuJNGkQ4KTswsBXObS3PlnJztzhkYJUg5_F2x_maeBmZOSXXlDh9KCDWrPn1T8qWJUSMJ2klKVmUD6Uaj07omqp8q3Yujd7NJcPQ2yxVyc7YEG0bKK38YiB4ln4yFdAGfJaila7uG-5QP5Eya_d_zuwFJtC21POU"/></div></div></header><main class="relative pt-20 bg-background min-h-screen"><div class="flex flex-col w-full">
+<!-- Interactive Style Controller for Live Preview -->
+<style>
+    .toggle-checkbox:checked {
+      right: 2px;
+      transform: translateX(100%);
+    }
+    .toggle-checkbox:checked + .toggle-label {
+      background-color: #0e836d;
+    }
+    .custom-slider::-webkit-slider-thumb {
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 9999px;
+      background: #006856;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 104, 86, 0.35);
+    }
+  </style>
+<!-- Page Header Container -->
+<div class="px-gutter pt-space-lg pb-space-md">
+<div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-space-md">
+<div class="flex flex-col space-y-space-xs">
+<div class="flex items-center gap-space-xs text-primary font-label-sm text-label-sm uppercase tracking-wider">
+<span class="material-symbols-outlined text-base">tune</span>
+<span>System Configuration • Clinical Profile</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Accessibility Settings &amp; Personalization</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-4xl">
+          Configure display preferences, acoustic transcription profiles, speech synthesis engines, and emergency sensor sensitivity for multimodal patient operations.
+        </p>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center gap-space-sm self-start xl:self-center">
+<button class="min-h-[48px] px-space-md bg-surface-container-lowest text-on-surface font-label-lg text-label-lg rounded-lg shadow-sm hover:bg-surface-container-high transition-colors flex items-center justify-center gap-space-xs focus:outline-none focus:ring-2 focus:ring-primary" id="resetDefaultsBtn" type="button">
+<span class="material-symbols-outlined text-xl">restore</span>
+<span>Reset to Clinical Defaults</span>
+</button>
+<button class="min-h-[48px] px-space-lg bg-primary-container text-on-primary-container font-label-lg text-label-lg rounded-lg shadow-sm hover:bg-primary transition-all flex items-center justify-center gap-space-xs focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" id="saveChangesBtn" type="button">
+<span class="material-symbols-outlined text-xl font-bold">check_circle</span>
+<span>Save Changes</span>
+</button>
+</div>
+</div>
+</div>
+<div class="px-gutter pb-space-xl flex flex-col gap-space-lg">
+<!-- 1. Sensory Mode Profile Selector (Bento Hero Unit) -->
+<section class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-2xl">accessibility_new</span>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Sensory Mode Profile</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Switch operating modes to dynamically adapt audio, haptic, and visual telemetry.</p>
+</div>
+</div>
+<div class="inline-flex items-center gap-space-xs bg-surface-container-low px-space-md py-space-xs rounded-full self-start md:self-auto">
+<span class="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-primary font-semibold">Syncs across all connected sensors &amp; PWA devices</span>
+</div>
+</div>
+<!-- Profiles Grid -->
+<div aria-label="Sensory Profile Selection" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-md" role="radiogroup">
+<!-- Profile 1 -->
+<button aria-checked="false" class="profile-card text-left p-space-md rounded-xl bg-surface-container-low hover:bg-surface-container transition-all flex flex-col justify-between min-h-[160px] focus:outline-none focus:ring-2 focus:ring-primary" role="radio" type="button">
+<div class="flex items-start justify-between">
+<span class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-2xl">visibility</span>
+</span>
+<span class="material-symbols-outlined text-secondary opacity-40 check-icon">radio_button_unchecked</span>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm text-on-surface">Vision Assist Focus</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-xs">Maximized tactile feedback, high contrast UI, continuous camera screen narration.</p>
+</div>
+</button>
+<!-- Profile 2 -->
+<button aria-checked="false" class="profile-card text-left p-space-md rounded-xl bg-surface-container-low hover:bg-surface-container transition-all flex flex-col justify-between min-h-[160px] focus:outline-none focus:ring-2 focus:ring-primary" role="radio" type="button">
+<div class="flex items-start justify-between">
+<span class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-2xl">hearing</span>
+</span>
+<span class="material-symbols-outlined text-secondary opacity-40 check-icon">radio_button_unchecked</span>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm text-on-surface">Hearing &amp; Deaf Assist</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-xs">Live phoneme captions, ambient frequency isolation, visual flash alert strobe.</p>
+</div>
+</button>
+<!-- Profile 3 (Active) -->
+<button aria-checked="true" class="profile-card active text-left p-space-md rounded-xl bg-surface-container-high transition-all flex flex-col justify-between min-h-[160px] focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" role="radio" type="button">
+<div class="flex items-start justify-between">
+<span class="w-12 h-12 rounded-lg bg-primary-container text-on-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-2xl">sensors</span>
+</span>
+<span class="material-symbols-outlined text-primary font-bold check-icon">check_circle</span>
+</div>
+<div>
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-headline-sm text-on-surface">Combined Dual-Sensory</span>
+<span class="px-space-xs py-0.5 rounded-full bg-primary-container text-on-primary-container font-label-sm text-label-sm">Active</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-xs">Balanced multimodal sync: simultaneous low-latency captions and ambient TTS.</p>
+</div>
+</button>
+<!-- Profile 4 -->
+<button aria-checked="false" class="profile-card text-left p-space-md rounded-xl bg-surface-container-low hover:bg-surface-container transition-all flex flex-col justify-between min-h-[160px] focus:outline-none focus:ring-2 focus:ring-primary" role="radio" type="button">
+<div class="flex items-start justify-between">
+<span class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-2xl">psychology</span>
+</span>
+<span class="material-symbols-outlined text-secondary opacity-40 check-icon">radio_button_unchecked</span>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm text-on-surface">Cognitive &amp; High Legibility</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-xs">Reduced operational clutter, plain text summaries, guided step execution.</p>
+</div>
+</button>
+</div>
+</section>
+<!-- 2. Display & Typography Preferences -->
+<section class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-lg">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-2xl">format_size</span>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Display &amp; Typography Preferences</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Calibrate typography scale, line density, contrast modes, and motion dynamics.</p>
+</div>
+</div>
+<span class="font-label-sm text-label-sm bg-surface-container-low text-primary px-space-md py-space-xs rounded-full font-semibold">WCAG 2.1 AAA Compliant</span>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+<!-- Controls Column (7 Cols) -->
+<div class="lg:col-span-7 flex flex-col gap-space-lg">
+<!-- Font Size Scale Slider -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col gap-space-sm">
+<div class="flex justify-between items-center">
+<label class="font-label-lg text-label-lg text-on-surface" for="fontSizeRange">Font Scale Scaling</label>
+<span class="px-space-md py-space-xs bg-surface-container-highest text-on-surface font-label-md text-label-md rounded-full font-semibold" id="fontSizeBadge">Standard (16px)</span>
+</div>
+<input aria-label="Font Size scale selection" class="custom-slider w-full h-2 bg-surface-container-highest rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary" id="fontSizeRange" max="5" min="1" step="1" type="range" value="2"/>
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant pt-space-xs">
+<span>Small (14)</span>
+<span>Standard (16)</span>
+<span>Large (18)</span>
+<span>Extra (22)</span>
+<span>Hyper (26)</span>
+</div>
+</div>
+<!-- Font Family Selector -->
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-lg text-label-lg text-on-surface">Font Family</label>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-space-sm">
+<button class="font-selector-btn active min-h-[48px] px-space-sm py-space-xs rounded-lg bg-primary-container text-on-primary-container font-label-md text-label-md flex flex-col items-center justify-center transition-all focus:ring-2 focus:ring-primary" type="button">
+<span class="font-bold">Inter</span>
+<span class="text-xs opacity-80">Clinical Sans</span>
+</button>
+<button class="font-selector-btn min-h-[48px] px-space-sm py-space-xs rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md flex flex-col items-center justify-center transition-all focus:ring-2 focus:ring-primary" type="button">
+<span class="font-bold">Atkinson</span>
+<span class="text-xs opacity-70">Hyperlegible</span>
+</button>
+<button class="font-selector-btn min-h-[48px] px-space-sm py-space-xs rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md flex flex-col items-center justify-center transition-all focus:ring-2 focus:ring-primary" type="button">
+<span class="font-bold">OpenDyslexic</span>
+<span class="text-xs opacity-70">Weighted</span>
+</button>
+<button class="font-selector-btn min-h-[48px] px-space-sm py-space-xs rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md flex flex-col items-center justify-center transition-all focus:ring-2 focus:ring-primary" type="button">
+<span class="font-bold">Monospace</span>
+<span class="text-xs opacity-70">Code/Fixed</span>
+</button>
+</div>
+</div>
+<!-- Contrast Modes -->
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-lg text-label-lg text-on-surface">Contrast Mode</label>
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-space-sm">
+<button class="contrast-btn active min-h-[48px] p-space-sm rounded-lg bg-surface-container-highest text-on-surface font-label-md text-label-md flex items-center justify-center gap-space-xs shadow-sm focus:ring-2 focus:ring-primary" type="button">
+<span class="w-4 h-4 rounded-full bg-surface-container-lowest"></span>
+<span>Default Light</span>
+</button>
+<button class="contrast-btn min-h-[48px] p-space-sm rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md flex items-center justify-center gap-space-xs focus:ring-2 focus:ring-primary" type="button">
+<span class="w-4 h-4 rounded-full bg-black"></span>
+<span>Black on White</span>
+</button>
+<button class="contrast-btn min-h-[48px] p-space-sm rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md flex items-center justify-center gap-space-xs focus:ring-2 focus:ring-primary" type="button">
+<span class="w-4 h-4 rounded-full bg-yellow-400"></span>
+<span>Yellow on Black</span>
+</button>
+<button class="contrast-btn min-h-[48px] p-space-sm rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md flex items-center justify-center gap-space-xs focus:ring-2 focus:ring-primary" type="button">
+<span class="w-4 h-4 rounded-full bg-inverse-surface"></span>
+<span>Dark Mode</span>
+</button>
+</div>
+</div>
+<!-- Line Spacing & Motion Toggles -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md pt-space-xs">
+<!-- Line Spacing -->
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-md text-label-md text-on-surface">Line Spacing</label>
+<div class="inline-flex bg-surface-container-low p-1 rounded-lg">
+<button class="spacing-btn flex-1 min-h-[40px] rounded-lg text-on-surface font-label-sm text-label-sm transition-all" type="button">Normal</button>
+<button class="spacing-btn active flex-1 min-h-[40px] rounded-lg bg-primary-container text-on-primary-container font-label-sm text-label-sm font-semibold transition-all" type="button">Relaxed</button>
+<button class="spacing-btn flex-1 min-h-[40px] rounded-lg text-on-surface font-label-sm text-label-sm transition-all" type="button">Expanded</button>
+</div>
+</div>
+<!-- Reduce Motion Toggle -->
+<div class="flex items-center justify-between p-space-md bg-surface-container-low rounded-xl">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">Reduce Motion</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Vestibular safety default</span>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-surface-container-lowest appearance-none cursor-pointer top-0.5 left-0.5 transition-transform duration-200 ease-in" id="reduceMotionToggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-7 rounded-full bg-primary-container cursor-pointer transition-colors" for="reduceMotionToggle"></label>
+</div>
+</div>
+</div>
+</div>
+<!-- Preview Column (5 Cols) -->
+<div class="lg:col-span-5 flex flex-col">
+<div class="h-full bg-surface-container-low p-space-lg rounded-xl flex flex-col justify-between">
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase text-primary font-bold tracking-wider">Dynamic Live Text Preview</span>
+<span class="material-symbols-outlined text-primary text-xl">preview</span>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm transition-all" id="liveSampleBox">
+<p class="font-body-md text-body-md text-on-surface leading-relaxed" id="liveSampleText">
+                  The quick brown fox jumps over the lazy dog. Vital sign telemetry telemetry verification: Heart Rate 72 BPM, Blood Oxygen 99%. 100% WCAG AAA Compliant.
+                </p>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-highest/60 flex items-start gap-space-xs text-on-surface">
+<span class="material-symbols-outlined text-primary text-sm mt-0.5">verified</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Optimal optical character rendering calibrated for medical charting readability under varied ambient lighting.</p>
+</div>
+</div>
+<!-- Visual Graphic / Contrast Ratio Meter -->
+<div class="mt-space-md pt-space-md bg-surface-container-lowest p-space-md rounded-lg flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Calculated Contrast Ratio</span>
+<span class="font-headline-md text-headline-md text-primary font-bold">14.8 : 1</span>
+</div>
+<div class="flex items-center gap-space-xs text-primary font-label-md text-label-md font-semibold">
+<span class="material-symbols-outlined text-xl">check_circle</span>
+<span>Passes Enhanced AAA</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 3. Speech-to-Text & Transcription (Hearing Settings) -->
+<section class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-lg">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-2xl">transcribe</span>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Speech-to-Text &amp; Acoustic Transcription</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Acoustic recognition, real-time medical transcription latency, and environmental haptics.</p>
+</div>
+</div>
+<span class="font-label-sm text-label-sm bg-primary-container text-on-primary-container px-space-md py-space-xs rounded-full font-semibold">Hearing Assist Subsystem</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-lg">
+<!-- Latency Mode Selector -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col gap-space-md">
+<div class="flex justify-between items-start">
+<div>
+<span class="font-label-lg text-label-lg text-on-surface">Transcription Engine Mode</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-xs">Balance immediate conversational responsiveness with specialized ICD-10/SNOMED terminology.</p>
+</div>
+<span class="material-symbols-outlined text-primary">speed</span>
+</div>
+<div class="grid grid-cols-1 gap-space-sm">
+<label class="flex items-center justify-between p-space-sm rounded-lg bg-surface-container-lowest cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-space-sm">
+<input checked="" class="w-5 h-5 text-primary accent-primary focus:ring-primary" name="transcriptionMode" type="radio" value="lowLatency"/>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Ultra-Low Latency Conversational (50ms)</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Optimized for face-to-face dialogue and rapid speaker turn-taking</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-primary font-bold">50ms</span>
+</label>
+<label class="flex items-center justify-between p-space-sm rounded-lg bg-surface-container-lowest cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-space-sm">
+<input class="w-5 h-5 text-primary accent-primary focus:ring-primary" name="transcriptionMode" type="radio" value="medical"/>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-semibold">High Precision Clinical Dictionary</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Enhanced pharmacological spelling &amp; complex clinical terminology</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-bold">140ms</span>
+</label>
+</div>
+</div>
+<!-- Speaker Diarization / Identification -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col justify-between gap-space-md">
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-on-surface">Speaker Diarization &amp; Color Coding</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-xs">Separates doctor, nurse, and patient lines with distinct visual badge colors.</p>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-surface-container-lowest appearance-none cursor-pointer top-0.5 left-0.5 transition-transform duration-200 ease-in" id="diarizationToggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-7 rounded-full bg-primary-container cursor-pointer transition-colors" for="diarizationToggle"></label>
+</div>
+</div>
+<!-- Color-coded preview badges -->
+<div class="p-space-sm bg-surface-container-lowest rounded-lg flex flex-col gap-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Sample Transcript Badging</span>
+<div class="flex flex-wrap items-center gap-space-xs">
+<span class="px-space-sm py-1 rounded bg-teal-100 text-teal-800 font-label-sm text-label-sm font-semibold">Physician (Dr. M. Chen)</span>
+<span class="px-space-sm py-1 rounded bg-blue-100 text-blue-800 font-label-sm text-label-sm font-semibold">Nurse Practitioner</span>
+<span class="px-space-sm py-1 rounded bg-amber-100 text-amber-800 font-label-sm text-label-sm font-semibold">Patient (Self)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Additional Acoustic Settings -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-lg">
+<!-- Environmental Acoustic Alert Sensitivity -->
+<div class="p-space-md bg-surface-container-low rounded-xl flex items-center justify-between">
+<div class="flex flex-col max-w-sm">
+<span class="font-label-lg text-label-lg text-on-surface">Non-Speech Acoustic Alerts</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Doorbells, fire alarms, clinical monitor chimes trigger Haptic Strobe + Visual Screen Flash.</span>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-surface-container-lowest appearance-none cursor-pointer top-0.5 left-0.5 transition-transform duration-200 ease-in" id="acousticFlashToggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-7 rounded-full bg-primary-container cursor-pointer transition-colors" for="acousticFlashToggle"></label>
+</div>
+</div>
+<!-- Profanity & Sensitive Term Filter -->
+<div class="p-space-md bg-surface-container-low rounded-xl flex items-center justify-between">
+<div class="flex flex-col max-w-sm">
+<span class="font-label-lg text-label-lg text-on-surface">Profanity &amp; Sensitive Term Filter</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Disabled by clinical default to ensure complete and unfiltered medical accuracy.</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="font-label-sm text-label-sm text-tertiary font-bold uppercase">Disabled</span>
+<div class="relative inline-block w-12 align-middle select-none">
+<input class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-surface-container-lowest appearance-none cursor-pointer top-0.5 left-0.5 transition-transform duration-200 ease-in" id="profanityFilterToggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-7 rounded-full bg-secondary-container cursor-pointer transition-colors" for="profanityFilterToggle"></label>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 4. Text-to-Speech (TTS) & Voice Output (Vision & Bridge Settings) -->
+<section class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-lg">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-2xl">record_voice_over</span>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Text-to-Speech (TTS) &amp; Voice Output</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Configure synthetic speech personalities, speech rates, and automatic OCR readout triggers.</p>
+</div>
+</div>
+<span class="font-label-sm text-label-sm bg-surface-container-low text-primary px-space-md py-space-xs rounded-full font-semibold">Vision &amp; Bridge Assist</span>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-space-md">
+<!-- Voice Engine Selection -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col gap-space-sm">
+<label class="font-label-lg text-label-lg text-on-surface">Voice Engine Profile</label>
+<div class="flex flex-col gap-space-xs">
+<label class="flex items-center justify-between p-space-sm rounded-lg bg-surface-container-lowest cursor-pointer hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-space-sm">
+<input checked="" class="w-5 h-5 text-primary accent-primary" name="voiceEngine" type="radio" value="sarah"/>
+<div>
+<div class="font-label-md text-label-md text-on-surface font-semibold">Neural Sarah</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Warm &amp; Natural Empathy</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary">female</span>
+</label>
+<label class="flex items-center justify-between p-space-sm rounded-lg bg-surface-container-lowest cursor-pointer hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-space-sm">
+<input class="w-5 h-5 text-primary accent-primary" name="voiceEngine" type="radio" value="david"/>
+<div>
+<div class="font-label-md text-label-md text-on-surface font-semibold">Neural David</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Deep &amp; Articulate</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary">male</span>
+</label>
+<label class="flex items-center justify-between p-space-sm rounded-lg bg-surface-container-lowest cursor-pointer hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-space-sm">
+<input class="w-5 h-5 text-primary accent-primary" name="voiceEngine" type="radio" value="aria"/>
+<div>
+<div class="font-label-md text-label-md text-on-surface font-semibold">Aria Clinical</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">High-Cadence Precision</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary">smart_toy</span>
+</label>
+<label class="flex items-center justify-between p-space-sm rounded-lg bg-surface-container-lowest cursor-pointer hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-space-sm">
+<input class="w-5 h-5 text-primary accent-primary" name="voiceEngine" type="radio" value="offline"/>
+<div>
+<div class="font-label-md text-label-md text-on-surface font-semibold">Local Offline Synthetic</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Zero-latency onboard model</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary">cloud_off</span>
+</label>
+</div>
+</div>
+<!-- Speech Rate & Pitch Sliders -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col justify-between gap-space-md">
+<div class="flex flex-col gap-space-md">
+<div>
+<div class="flex justify-between items-center mb-space-xs">
+<label class="font-label-lg text-label-lg text-on-surface" for="speechRateRange">Speech Rate (Speed)</label>
+<span class="font-label-md text-label-md text-primary font-bold" id="speechRateBadge">1.25x</span>
+</div>
+<input aria-label="Speech Rate Speed" class="custom-slider w-full h-2 bg-surface-container-highest rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary" id="speechRateRange" max="2.5" min="0.75" step="0.25" type="range" value="1.25"/>
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant pt-1">
+<span>0.75x</span>
+<span>1.0x</span>
+<span>1.5x</span>
+<span>2.0x</span>
+<span>2.5x</span>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-space-xs">
+<label class="font-label-lg text-label-lg text-on-surface" for="speechPitchRange">Pitch Modulation</label>
+<span class="font-label-md text-label-md text-on-surface">Neutral (0.0)</span>
+</div>
+<input aria-label="Pitch Modulation" class="custom-slider w-full h-2 bg-surface-container-highest rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary" id="speechPitchRange" max="5" min="-5" type="range" value="0"/>
+</div>
+</div>
+<!-- Interactive Test Audio Button -->
+<button class="min-h-[48px] px-space-md bg-surface-container-lowest text-on-surface hover:bg-surface-container-high rounded-lg shadow-sm flex items-center justify-center gap-space-xs font-label-md text-label-md transition-all focus:ring-2 focus:ring-primary" id="testVoiceBtn" type="button">
+<span class="material-symbols-outlined text-primary">play_circle</span>
+<span id="testVoiceText">Test Voice Readout Sample</span>
+</button>
+</div>
+<!-- Automatic Readout Toggles -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col justify-between gap-space-md">
+<div class="flex flex-col gap-space-sm">
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-on-surface">Auto-Readout Medication &amp; Vision OCR</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-1">Automatically vocalize scanned dosage instructions, contraindications, and room signage when detected in viewfinder.</span>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-surface-container-lowest appearance-none cursor-pointer top-0.5 left-0.5 transition-transform duration-200 ease-in" id="autoReadoutToggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-7 rounded-full bg-primary-container cursor-pointer transition-colors" for="autoReadoutToggle"></label>
+</div>
+</div>
+<!-- Auto-readout sub-options -->
+<div class="p-space-sm bg-surface-container-lowest rounded-lg flex flex-col gap-space-xs mt-space-sm">
+<label class="flex items-center gap-space-sm">
+<input checked="" class="w-4 h-4 text-primary accent-primary rounded" type="checkbox"/>
+<span class="font-label-sm text-label-sm text-on-surface">Vocalize warnings and expiration dates immediately</span>
+</label>
+<label class="flex items-center gap-space-sm">
+<input checked="" class="w-4 h-4 text-primary accent-primary rounded" type="checkbox"/>
+<span class="font-label-sm text-label-sm text-on-surface">Repeat button on single earbud tap</span>
+</label>
+</div>
+</div>
+<div class="flex items-center gap-space-xs text-primary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-base">bluetooth_audio</span>
+<span>Optimized for low-latency hearing aids (MFi / ASHA)</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 5. Emergency & Sensor Guardrails (Safety Settings) -->
+<section class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-lg">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-tertiary text-2xl">health_and_safety</span>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Emergency &amp; Sensor Guardrails</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Automated clinical fall dispatch, false-alarm buffers, and covert duress shortcuts.</p>
+</div>
+</div>
+<span class="font-label-sm text-label-sm bg-tertiary/10 text-tertiary px-space-md py-space-xs rounded-full font-bold">Priority Safety Circuit</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<!-- Fall Detection Sensitivity -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col justify-between gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<span class="font-label-lg text-label-lg text-on-surface">Fall Detection Sensitivity</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Calibrate accelerometer and gyroscope detection thresholds.</p>
+</div>
+<div class="grid grid-cols-3 gap-space-xs">
+<button class="sensitivity-btn min-h-[48px] rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md flex flex-col items-center justify-center transition-all focus:ring-2 focus:ring-primary" type="button">
+<span class="font-bold">Low</span>
+<span class="text-xs opacity-70">Impact only</span>
+</button>
+<button class="sensitivity-btn active min-h-[48px] rounded-lg bg-primary-container text-on-primary-container font-label-md text-label-md flex flex-col items-center justify-center transition-all focus:ring-2 focus:ring-primary shadow-sm" type="button">
+<span class="font-bold">Medium</span>
+<span class="text-xs opacity-90">Balanced</span>
+</button>
+<button class="sensitivity-btn min-h-[48px] rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md flex flex-col items-center justify-center transition-all focus:ring-2 focus:ring-primary" type="button">
+<span class="font-bold">High</span>
+<span class="text-xs opacity-70">Vulnerable</span>
+</button>
+</div>
+</div>
+<!-- SOS Countdown Delay -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col justify-between gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<span class="font-label-lg text-label-lg text-on-surface">Emergency SOS Countdown</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Grace buffer before automated 911 / clinical relay dispatch to prevent accidental calls.</p>
+</div>
+<div class="flex items-center justify-between bg-surface-container-lowest p-space-sm rounded-lg">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-tertiary">timer</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Countdown Delay</span>
+</div>
+<select aria-label="Countdown Delay selection" class="min-h-[40px] px-space-sm rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer">
+<option value="0">0 Seconds (Instant)</option>
+<option selected="" value="3">3 Seconds (Clinical Standard)</option>
+<option value="5">5 Seconds</option>
+<option value="10">10 Seconds</option>
+</select>
+</div>
+</div>
+<!-- Silent Covert Trigger -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col justify-between gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<span class="font-label-lg text-label-lg text-on-surface">Covert Silent SOS Trigger</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Discreet activation without loud sirens or visual flashes during acute distress.</p>
+</div>
+<div class="p-space-sm bg-surface-container-lowest rounded-lg flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface font-semibold">3-Tap Power Key / Shortcut</span>
+<kbd class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container-high px-1.5 py-0.5 rounded mt-0.5">Ctrl + Shift + S</kbd>
+</div>
+<div class="relative inline-block w-12 align-middle select-none">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-surface-container-lowest appearance-none cursor-pointer top-0.5 left-0.5 transition-transform duration-200 ease-in" id="covertTriggerToggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-7 rounded-full bg-primary-container cursor-pointer transition-colors" for="covertTriggerToggle"></label>
+</div>
+</div>
+</div>
+</div>
+<!-- Trusted Circle Notification Channel -->
+<div class="p-space-md bg-surface-container-low rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-space-md">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-on-surface">Trusted Circle Notification Channels</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Simultaneously alerts designated caregivers upon emergency confirmation.</span>
+</div>
+<div class="flex flex-wrap items-center gap-space-sm">
+<label class="flex items-center gap-space-xs px-space-md py-space-xs rounded-lg bg-surface-container-lowest cursor-pointer min-h-[48px]">
+<input checked="" class="w-4 h-4 text-primary accent-primary rounded" type="checkbox"/>
+<span class="font-label-md text-label-md text-on-surface">SMS Alert</span>
+</label>
+<label class="flex items-center gap-space-xs px-space-md py-space-xs rounded-lg bg-surface-container-lowest cursor-pointer min-h-[48px]">
+<input checked="" class="w-4 h-4 text-primary accent-primary rounded" type="checkbox"/>
+<span class="font-label-md text-label-md text-on-surface">Push Notification</span>
+</label>
+<label class="flex items-center gap-space-xs px-space-md py-space-xs rounded-lg bg-surface-container-lowest cursor-pointer min-h-[48px]">
+<input checked="" class="w-4 h-4 text-primary accent-primary rounded" type="checkbox"/>
+<span class="font-label-md text-label-md text-on-surface">Automated Voice Relay</span>
+</label>
+</div>
+</div>
+</section>
+<!-- 6. Data Privacy, HIPAA & Offline Cache -->
+<section class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-lg">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-2xl">security</span>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Data Privacy, HIPAA &amp; Local On-Device Cache</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Ensure zero cloud leakage of protected health information (PHI) and manage local neural models.</p>
+</div>
+</div>
+<div class="flex items-center gap-space-xs bg-emerald-50 text-emerald-800 px-space-md py-space-xs rounded-full font-label-sm text-label-sm font-bold">
+<span class="material-symbols-outlined text-base">verified_user</span>
+<span>HIPAA &amp; HITECH Compliant</span>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-space-lg">
+<!-- On-Device Neural Processing Preference -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col justify-between gap-space-md">
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-on-surface">Strict On-Device Processing</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-xs">
+                Keep all camera OCR, facial orientation detection, and acoustic transcription localized entirely on device. No video frames or audio buffers are sent to external cloud APIs.
+              </p>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-surface-container-lowest appearance-none cursor-pointer top-0.5 left-0.5 transition-transform duration-200 ease-in" id="onDeviceOnlyToggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-7 rounded-full bg-primary-container cursor-pointer transition-colors" for="onDeviceOnlyToggle"></label>
+</div>
+</div>
+<div class="p-space-sm bg-surface-container-lowest rounded-lg flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Local Model Version: Onboard v4.2.1-Clinical</span>
+<span class="font-label-sm text-label-sm text-primary font-bold">100% Air-Gapped Ready</span>
+</div>
+</div>
+<!-- Offline Cache & Storage Management -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col justify-between gap-space-md">
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-on-surface">Offline Medical Vocabulary Cache</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-xs">
+                Local phoneme tables, offline Braille mappings, and clinical dictionaries stored securely in IndexedDB.
+              </p>
+</div>
+<span class="material-symbols-outlined text-secondary">database</span>
+</div>
+<div class="flex items-center justify-between bg-surface-container-lowest p-space-sm rounded-lg">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">1.24 GB Used</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Storage Allocation: Normal</span>
+</div>
+<button class="min-h-[48px] px-space-md bg-surface-container-low text-tertiary hover:bg-surface-container font-label-md text-label-md rounded-lg flex items-center gap-space-xs transition-colors focus:ring-2 focus:ring-tertiary" id="clearCacheBtn" type="button">
+<span class="material-symbols-outlined text-lg">delete_sweep</span>
+<span>Clear Cache</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Export User Configurations & Medical Badge QR -->
+<div class="p-space-md bg-surface-container-low rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container-lowest flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined text-2xl">qr_code_2</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-on-surface">Clinical Profile Portability</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Export configuration as an encrypted QR payload or portable JSON backup for medical wearable badges.</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="min-h-[48px] px-space-md bg-surface-container-lowest text-on-surface font-label-md text-label-md rounded-lg shadow-sm hover:bg-surface-container transition-colors flex items-center gap-space-xs focus:ring-2 focus:ring-primary" id="exportJsonBtn" type="button">
+<span class="material-symbols-outlined text-lg">download</span>
+<span>Export JSON</span>
+</button>
+<button class="min-h-[48px] px-space-md bg-primary-container text-on-primary-container font-label-md text-label-md rounded-lg shadow-sm hover:bg-primary transition-colors flex items-center gap-space-xs focus:ring-2 focus:ring-primary" id="viewQrBtn" type="button">
+<span class="material-symbols-outlined text-lg">badge</span>
+<span>Generate Patient Badge QR</span>
+</button>
+</div>
+</div>
+</section>
+</div>
+<!-- Inline Script for Interactive Micro-Interactions -->
+<script>
+    (function initSettingsInteractions() {
+      // 1. Highlight active navigation item in App Shell
+      const navLinks = document.querySelectorAll('aside nav a');
+      navLinks.forEach(link => {
+        if (link.getAttribute('data-path') === 'settings') {
+          link.classList.remove('text-on-surface-variant');
+          link.classList.add('bg-primary-container', 'text-on-primary-container', 'font-bold');
+        } else {
+          link.classList.remove('bg-primary-container', 'text-on-primary-container', 'font-bold');
+          link.classList.add('text-on-surface-variant');
+        }
+      });
+
+      // 2. Profile Cards Single-Selection
+      const profileCards = document.querySelectorAll('.profile-card');
+      profileCards.forEach(card => {
+        card.addEventListener('click', () => {
+          profileCards.forEach(c => {
+            c.classList.remove('active', 'bg-surface-container-high', 'shadow-sm');
+            c.classList.add('bg-surface-container-low');
+            c.setAttribute('aria-checked', 'false');
+            const check = c.querySelector('.check-icon');
+            if (check) {
+              check.textContent = 'radio_button_unchecked';
+              check.classList.remove('text-primary', 'font-bold');
+              check.classList.add('text-secondary', 'opacity-40');
+            }
+          });
+          card.classList.remove('bg-surface-container-low');
+          card.classList.add('active', 'bg-surface-container-high', 'shadow-sm');
+          card.setAttribute('aria-checked', 'true');
+          const check = card.querySelector('.check-icon');
+          if (check) {
+            check.textContent = 'check_circle';
+            check.classList.remove('text-secondary', 'opacity-40');
+            check.classList.add('text-primary', 'font-bold');
+          }
+        });
+      });
+
+      // 3. Dynamic Font Size Scaling preview
+      const fontSizeSlider = document.getElementById('fontSizeRange');
+      const fontSizeBadge = document.getElementById('fontSizeBadge');
+      const liveSampleText = document.getElementById('liveSampleText');
+      const fontSizes = {
+        '1': { label: 'Small (14px)', size: '14px', lineHeight: '20px' },
+        '2': { label: 'Standard (16px)', size: '16px', lineHeight: '24px' },
+        '3': { label: 'Large (18px)', size: '18px', lineHeight: '28px' },
+        '4': { label: 'Extra Large (22px)', size: '22px', lineHeight: '30px' },
+        '5': { label: 'Hyper-Legible (26px)', size: '26px', lineHeight: '36px' }
+      };
+
+      if (fontSizeSlider && fontSizeBadge && liveSampleText) {
+        fontSizeSlider.addEventListener('input', (e) => {
+          const conf = fontSizes[e.target.value] || fontSizes['2'];
+          fontSizeBadge.textContent = conf.label;
+          liveSampleText.style.fontSize = conf.size;
+          liveSampleText.style.lineHeight = conf.lineHeight;
+        });
+      }
+
+      // 4. Font Family Selector
+      const fontButtons = document.querySelectorAll('.font-selector-btn');
+      fontButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          fontButtons.forEach(b => {
+            b.classList.remove('active', 'bg-primary-container', 'text-on-primary-container');
+            b.classList.add('bg-surface-container-low', 'text-on-surface');
+          });
+          btn.classList.add('active', 'bg-primary-container', 'text-on-primary-container');
+          btn.classList.remove('bg-surface-container-low', 'text-on-surface');
+          
+          const fontName = btn.querySelector('.font-bold').textContent.trim();
+          if (fontName === 'Monospace') {
+            liveSampleText.style.fontFamily = 'monospace';
+          } else {
+            liveSampleText.style.fontFamily = 'Inter, sans-serif';
+          }
+        });
+      });
+
+      // 5. Speech Rate Slider display
+      const speechRateSlider = document.getElementById('speechRateRange');
+      const speechRateBadge = document.getElementById('speechRateBadge');
+      if (speechRateSlider && speechRateBadge) {
+        speechRateSlider.addEventListener('input', (e) => {
+          speechRateBadge.textContent = e.target.value + 'x';
+        });
+      }
+
+      // 6. Audio Test Voice Button simulation
+      const testVoiceBtn = document.getElementById('testVoiceBtn');
+      const testVoiceText = document.getElementById('testVoiceText');
+      if (testVoiceBtn && testVoiceText) {
+        let isPlaying = false;
+        testVoiceBtn.addEventListener('click', () => {
+          if (!isPlaying) {
+            isPlaying = true;
+            testVoiceText.textContent = 'Playing: "Blood oxygen verified at 99 percent..."';
+            testVoiceBtn.classList.add('bg-surface-container-highest', 'text-primary');
+            setTimeout(() => {
+              isPlaying = false;
+              testVoiceText.textContent = 'Test Voice Readout Sample';
+              testVoiceBtn.classList.remove('bg-surface-container-highest', 'text-primary');
+            }, 3000);
+          }
+        });
+      }
+
+      // 7. Sensitivity Buttons
+      const sensBtns = document.querySelectorAll('.sensitivity-btn');
+      sensBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          sensBtns.forEach(b => {
+            b.classList.remove('active', 'bg-primary-container', 'text-on-primary-container', 'shadow-sm');
+            b.classList.add('bg-surface-container-lowest', 'text-on-surface');
+          });
+          btn.classList.add('active', 'bg-primary-container', 'text-on-primary-container', 'shadow-sm');
+          btn.classList.remove('bg-surface-container-lowest', 'text-on-surface');
+        });
+      });
+
+      // 8. Save Changes confirmation feedback
+      const saveBtn = document.getElementById('saveChangesBtn');
+      if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+          const originalText = saveBtn.innerHTML;
+          saveBtn.innerHTML = '<span class="material-symbols-outlined text-xl">done_all</span><span>Saved Successfully!</span>';
+          saveBtn.classList.add('bg-primary');
+          setTimeout(() => {
+            saveBtn.innerHTML = originalText;
+            saveBtn.classList.remove('bg-primary');
+          }, 2400);
+        });
+      }
+
+      // 9. Reset Defaults feedback
+      const resetBtn = document.getElementById('resetDefaultsBtn');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          if (confirm('Reset all accessibility parameters to Clinical Recommended Baseline?')) {
+            if (fontSizeSlider) {
+              fontSizeSlider.value = 2;
+              fontSizeSlider.dispatchEvent(new Event('input'));
+            }
+            if (speechRateSlider) {
+              speechRateSlider.value = 1.25;
+              speechRateSlider.dispatchEvent(new Event('input'));
+            }
+          }
+        });
+      }
+    })();
+  </script>
+</div></main></div></body></html>

@@ -1,0 +1,453 @@
+﻿<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><title>AccessOne AI</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "on-primary": "#ffffff", "secondary-fixed": "#d8e3fb", "tertiary-fixed": "#ffdad6", "on-surface": "#0b1c30", "inverse-surface": "#213145", "on-tertiary-container": "#fffbfa", "on-secondary-fixed": "#111c2d", "surface-tint": "#006b58", "secondary-container": "#d5e0f8", "primary-fixed-dim": "#77d8be", "on-primary-fixed": "#002019", "on-primary-container": "#f1fff8", "secondary": "#545f73", "outline-variant": "#bdc9c4", "error-container": "#ffdad6", "surface-container-low": "#eff4ff", "inverse-primary": "#77d8be", "surface-container-highest": "#d3e4fe", "on-tertiary-fixed-variant": "#93000b", "on-secondary": "#ffffff", "on-surface-variant": "#3e4945", "surface": "#f8f9ff", "surface-dim": "#cbdbf5", "on-tertiary": "#ffffff", "primary-container": "#0e836d", "on-secondary-fixed-variant": "#3c475a", "tertiary-fixed-dim": "#ffb4ab", "on-tertiary-fixed": "#410002", "secondary-fixed-dim": "#bcc7de", "surface-variant": "#d3e4fe", "on-secondary-container": "#586377", "on-primary-fixed-variant": "#005142", "primary": "#006856", "surface-container-lowest": "#ffffff", "on-background": "#0b1c30", "on-error-container": "#93000a", "outline": "#6e7a75", "background": "#f8f9ff", "surface-container-high": "#dce9ff", "on-error": "#ffffff", "surface-container": "#e5eeff", "tertiary": "#ba0012", "primary-fixed": "#93f5da", "tertiary-container": "#df2928", "surface-bright": "#f8f9ff", "inverse-on-surface": "#eaf1ff", "error": "#ba1a1a" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "space-xl": "2.5rem", "gutter-mobile": "1rem", "space-md": "1rem", "space-lg": "1.5rem", "margin": "2rem", "space-xs": "0.25rem", "margin-mobile": "1rem", "space-sm": "0.5rem", "gutter": "1.5rem" }, fontFamily: { "headline-lg-mobile": ["Inter"], "body-sm": ["Inter"], "label-sm": ["Inter"], "headline-md": ["Inter"], "headline-lg": ["Inter"], "body-md": ["Inter"], "label-lg": ["Inter"], "body-lg": ["Inter"], "label-md": ["Inter"], "display-lg-mobile": ["Inter"], "headline-sm": ["Inter"], "display-lg": ["Inter"] }, fontSize: { "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }], "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-lg": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "label-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0.01em", "fontWeight": "600" }], "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }], "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }], "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }], "headline-sm": ["18px", { "lineHeight": "26px", "letterSpacing": "0em", "fontWeight": "600" }], "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }] } } } };</script><style>@layer base{html,body{width:100%;margin:0;padding:0;}.pb-safe{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 5rem);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-on-surface antialiased flex flex-col min-h-full"><header class="fixed top-0 w-full z-50 pt-safe bg-surface-container-lowest/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-gutter-mobile flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm min-w-0"><div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[22px]">accessibility_new</span></div><div class="flex flex-col truncate"><span class="font-headline-sm text-headline-sm text-on-surface truncate leading-tight">AccessOne</span><span class="font-label-sm text-label-sm text-on-surface-variant font-medium tracking-wider uppercase">Clinical AI</span></div></div><div class="flex items-center gap-space-xs shrink-0"><button aria-label="Adjust font size" class="w-11 h-11 flex items-center justify-center rounded-lg text-on-surface hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-[20px]">format_size</span></button><button aria-label="Toggle contrast mode" class="w-11 h-11 flex items-center justify-center rounded-lg text-on-surface hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-[20px]">contrast</span></button><a aria-label="Emergency SOS Assistance" class="min-h-[44px] px-space-sm rounded-lg bg-tertiary text-on-tertiary flex items-center gap-space-xs font-label-md text-label-md hover:bg-tertiary-container transition-colors shadow-sm" data-path="safety-assist" href="#"><span class="material-symbols-outlined text-[18px]">e911_emergency</span><span class="font-bold">SOS</span></a><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 ml-space-xs"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex flex-col relative w-full pt-16 pb-safe bg-surface px-gutter-mobile"><div class="flex flex-col w-full pb-8 space-y-4">
+<!-- Status & Environmental Live Telemetry Bar -->
+<div class="bg-surface-container-lowest rounded-xl p-3 shadow-sm flex flex-col gap-2.5">
+<div class="flex items-center justify-between gap-2">
+<div class="flex items-center gap-2 min-w-0">
+<span class="relative flex h-3 w-3 shrink-0">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+</span>
+<div class="truncate">
+<p class="font-label-sm text-label-sm font-semibold text-primary uppercase tracking-wider flex items-center gap-1.5 truncate">
+<span>Listening Active</span>
+<span class="text-outline text-[10px]">●</span>
+<span class="text-on-surface truncate">3 Speakers Detected</span>
+</p>
+</div>
+</div>
+<div class="flex items-center gap-1 shrink-0 bg-surface-container-low px-2 py-1 rounded-full">
+<span class="material-symbols-outlined text-[15px] text-primary">equalizer</span>
+<span class="font-label-sm text-label-sm font-semibold text-on-surface">38 dB</span>
+</div>
+</div>
+<!-- Quick Access Accessibility Ribbon -->
+<div class="flex items-center justify-between gap-2 pt-2 border-t border-surface-container">
+<!-- Theme Customizer Pills -->
+<div aria-label="Visual Theme Selector" class="flex items-center gap-1" role="group">
+<button class="px-2.5 py-1.5 rounded-lg bg-primary text-on-primary font-label-sm text-label-sm font-bold flex items-center gap-1 transition-all" id="theme-light-btn" onclick="selectTheme('light')">
+<span class="material-symbols-outlined text-[16px]">wb_sunny</span>
+<span>Light</span>
+</button>
+<button class="px-2 py-1.5 rounded-lg bg-surface-container-high text-on-surface font-label-sm text-label-sm font-medium flex items-center gap-1 hover:bg-surface-container-highest transition-all" id="theme-hivis-btn" onclick="selectTheme('hivis')">
+<span class="material-symbols-outlined text-[16px] text-yellow-600">contrast</span>
+<span>Hi-Vis</span>
+</button>
+<button class="px-2 py-1.5 rounded-lg bg-surface-container-high text-on-surface font-label-sm text-label-sm font-medium flex items-center gap-1 hover:bg-surface-container-highest transition-all" id="theme-dark-btn" onclick="selectTheme('dark')">
+<span class="material-symbols-outlined text-[16px]">dark_mode</span>
+<span>Dark</span>
+</button>
+</div>
+<!-- Typography Size Controls -->
+<div aria-label="Caption Text Size" class="flex items-center bg-surface-container-low p-0.5 rounded-lg" role="group">
+<button class="px-2.5 py-1 rounded text-on-surface font-label-sm text-label-sm font-medium transition-all" id="font-md-btn" onclick="setFontScale('md')">MD</button>
+<button class="px-2.5 py-1 rounded bg-surface-container-lowest shadow-sm text-primary font-label-sm text-label-sm font-bold transition-all" id="font-lg-btn" onclick="setFontScale('lg')">LG</button>
+<button class="px-2.5 py-1 rounded text-on-surface font-label-sm text-label-sm font-medium transition-all" id="font-xl-btn" onclick="setFontScale('xl')">XL</button>
+</div>
+</div>
+</div>
+<!-- Real-Time Acoustic Radar & Spectrum Visualizer -->
+<div class="grid grid-cols-12 gap-3 items-stretch">
+<!-- 360 Spatial Acoustic Radar Widget -->
+<div class="col-span-5 bg-surface-container-lowest rounded-xl p-3 shadow-sm flex flex-col items-center justify-between relative overflow-hidden">
+<div class="w-full flex items-center justify-between">
+<span class="font-label-sm text-label-sm font-semibold uppercase text-secondary">Acoustic Radar</span>
+<span class="material-symbols-outlined text-[16px] text-primary">spatial_audio_off</span>
+</div>
+<!-- Interactive Spatial Canvas / Compass Display -->
+<div class="relative w-28 h-28 my-1 flex items-center justify-center">
+<!-- Concentric Radial Waves -->
+<div class="absolute inset-0 rounded-full border border-dashed border-outline-variant opacity-60"></div>
+<div class="absolute inset-3 rounded-full border border-surface-container-high opacity-80"></div>
+<div class="absolute inset-7 rounded-full bg-surface-container-low flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px] text-primary" title="You are here">person_pin</span>
+</div>
+<!-- Cardinal Points -->
+<span class="absolute top-0 text-[9px] font-bold text-outline">N</span>
+<span class="absolute bottom-0 text-[9px] font-bold text-outline">S</span>
+<span class="absolute left-0.5 text-[9px] font-bold text-outline">W</span>
+<span class="absolute right-0.5 text-[9px] font-bold text-outline">E</span>
+<!-- Active Sound Blips -->
+<!-- Dr Evans Blip (Front Right) -->
+<div class="absolute top-4 right-5 flex flex-col items-center group cursor-pointer animate-pulse" title="Dr. Evans (Physician) · 45° Front Right">
+<span class="w-4 h-4 rounded-full bg-primary flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-[11px] text-on-primary">stethoscope</span>
+</span>
+<span class="text-[8px] font-bold text-primary mt-0.5 bg-surface-container-lowest px-1 rounded shadow-sm">Doc</span>
+</div>
+<!-- Door Knock Blip (Left Peripheral) -->
+<div class="absolute top-11 left-1.5 flex flex-col items-center animate-bounce" title="Acoustic Event: Door Knock">
+<span class="w-4 h-4 rounded-full bg-tertiary flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-[11px] text-on-tertiary">sensor_door</span>
+</span>
+<span class="text-[8px] font-bold text-tertiary mt-0.5 bg-surface-container-lowest px-1 rounded shadow-sm">Door</span>
+</div>
+<!-- Sarah / Patient (Self/Center bottom) -->
+<div class="absolute bottom-3 right-8 flex flex-col items-center" title="Sarah (Patient)">
+<span class="w-3.5 h-3.5 rounded-full bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[10px] text-on-secondary-container">record_voice_over</span>
+</span>
+</div>
+</div>
+<div class="w-full flex items-center justify-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary inline-block"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">360° Array Active</span>
+</div>
+</div>
+<!-- Acoustic Frequency Spectrum & Filter Bar -->
+<div class="col-span-7 bg-surface-container-lowest rounded-xl p-3 shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm font-semibold uppercase text-secondary">Neural Audio Filter</span>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">auto_fix_high</span>
+<span>ANC On</span>
+</span>
+</div>
+<!-- Live Dynamic Frequency Graph Visualization (Inline SVG) -->
+<div class="my-2 bg-surface-container-low rounded-lg p-2 flex flex-col justify-end h-20 overflow-hidden">
+<div class="flex items-end justify-between h-12 w-full gap-1 px-1">
+<span class="w-1.5 bg-primary rounded-t-sm h-[45%] transition-all duration-300"></span>
+<span class="w-1.5 bg-primary rounded-t-sm h-[70%] transition-all duration-300"></span>
+<span class="w-1.5 bg-primary-container rounded-t-sm h-[90%] transition-all duration-300"></span>
+<span class="w-1.5 bg-primary-container rounded-t-sm h-[60%] transition-all duration-300"></span>
+<span class="w-1.5 bg-primary rounded-t-sm h-[80%] transition-all duration-300"></span>
+<span class="w-1.5 bg-primary-fixed-dim rounded-t-sm h-[35%] transition-all duration-300"></span>
+<span class="w-1.5 bg-primary rounded-t-sm h-[55%] transition-all duration-300"></span>
+<span class="w-1.5 bg-primary-container rounded-t-sm h-[95%] transition-all duration-300"></span>
+<span class="w-1.5 bg-primary rounded-t-sm h-[65%] transition-all duration-300"></span>
+<span class="w-1.5 bg-primary rounded-t-sm h-[40%] transition-all duration-300"></span>
+<span class="w-1.5 bg-outline-variant rounded-t-sm h-[20%] transition-all duration-300"></span>
+<span class="w-1.5 bg-outline-variant rounded-t-sm h-[15%] transition-all duration-300"></span>
+</div>
+<div class="flex justify-between text-[9px] text-outline mt-1 font-mono">
+<span>125Hz</span>
+<span>Voice Range (1-3kHz)</span>
+<span>8kHz</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-primary">noise_control_off</span>
+<span>HVAC Damping: -22dB</span>
+</span>
+<span class="text-primary font-bold">99.4% Latency: 12ms</span>
+</div>
+</div>
+</div>
+<!-- Live Transcript Feed Section Header -->
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[20px]">subtitles</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold tracking-tight">Live Transcription Stream</h2>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-label-sm text-label-sm font-semibold text-secondary">Real-Time Sync</span>
+</div>
+</div>
+<!-- Real-time Conversation Cards Stream Container -->
+<div class="flex flex-col space-y-3 font-scale-lg" id="transcript-stream">
+<!-- Conversation Card: Dr. Evans (Physician) -->
+<div class="speaker-card bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col gap-2 transition-all">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-bold text-label-sm">
+            DE
+          </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="font-label-lg text-label-lg font-bold text-on-surface">Dr. Evans</span>
+<span class="px-2 py-0.5 rounded-full bg-primary text-on-primary font-label-sm text-label-sm font-semibold tracking-wide">Physician</span>
+</div>
+<span class="font-label-sm text-label-sm text-secondary font-medium">Front Right (3.5 ft) · Confidence 99.8%</span>
+</div>
+</div>
+<div class="flex items-center gap-1 text-secondary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+<span>10:42:15 AM</span>
+</div>
+</div>
+<!-- Dialogue Bubble -->
+<div class="caption-text bg-surface-container-low rounded-lg p-3 text-on-surface leading-relaxed mt-1 font-medium transition-all">
+        "Good morning Sarah, let's review your test results from yesterday."
+      </div>
+<div class="flex items-center justify-between text-secondary pt-1 font-label-sm text-label-sm">
+<span class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[14px]">volume_up</span>
+<span>High Vocal Clarity · 58 dB</span>
+</span>
+<button class="hover:text-primary transition-colors flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+<span>Copy</span>
+</button>
+</div>
+</div>
+<!-- Non-Speech Environmental Acoustic Alert Card -->
+<div class="bg-error-container text-on-error-container rounded-xl p-3.5 shadow-sm flex items-start gap-3 transition-all animate-pulse">
+<div class="w-9 h-9 rounded-lg bg-tertiary text-on-tertiary flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[20px]">sensor_door</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-1">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md font-bold tracking-tight uppercase text-tertiary">Environmental Sound Event</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest text-tertiary font-bold text-[10px]">High Priority</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-mono">10:42:21 AM</span>
+</div>
+<p class="font-label-lg text-label-lg font-bold mt-1 text-on-error-container flex items-center gap-1.5">
+<span>Door Knock · Peripheral Left Direction</span>
+</p>
+<p class="font-label-sm text-label-sm mt-0.5 text-on-surface-variant">
+          Detected via Ambient Array Mic 01 · 62 dB transient pulse
+        </p>
+</div>
+</div>
+<!-- Conversation Card: Sarah (Patient) -->
+<div class="speaker-card bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col gap-2 transition-all">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center font-bold text-label-sm">
+            SP
+          </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="font-label-lg text-label-lg font-bold text-on-surface">Sarah Peterson</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-semibold">Patient (You)</span>
+</div>
+<span class="font-label-sm text-label-sm text-secondary font-medium">Headset Lapel Mic · Confidence 99.9%</span>
+</div>
+</div>
+<div class="flex items-center gap-1 text-secondary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+<span>10:42:29 AM</span>
+</div>
+</div>
+<!-- Dialogue Bubble -->
+<div class="caption-text bg-surface-container-low rounded-lg p-3 text-on-surface leading-relaxed mt-1 font-medium transition-all">
+        "Thank you doctor, I'm following along using the live captions."
+      </div>
+<div class="flex items-center justify-between text-secondary pt-1 font-label-sm text-label-sm">
+<span class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[14px]">graphic_eq</span>
+<span>Speech Synthesis Output Active</span>
+</span>
+<button class="hover:text-primary transition-colors flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+<span>Copy</span>
+</button>
+</div>
+</div>
+<!-- Conversation Card: Dr. Evans (Physician) -->
+<div class="speaker-card bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col gap-2 transition-all">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-bold text-label-sm">
+            DE
+          </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="font-label-lg text-label-lg font-bold text-on-surface">Dr. Evans</span>
+<span class="px-2 py-0.5 rounded-full bg-primary text-on-primary font-label-sm text-label-sm font-semibold tracking-wide">Physician</span>
+</div>
+<span class="font-label-sm text-label-sm text-secondary font-medium">Front Right (3.5 ft) · Confidence 99.7%</span>
+</div>
+</div>
+<div class="flex items-center gap-1 text-secondary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+<span>10:42:38 AM</span>
+</div>
+</div>
+<!-- Dialogue Bubble -->
+<div class="caption-text bg-surface-container-low rounded-lg p-3 text-on-surface leading-relaxed mt-1 font-medium transition-all">
+        "Everything looks completely normal. I recommend continuing your current vitamin routine."
+      </div>
+<div class="flex items-center justify-between text-secondary pt-1 font-label-sm text-label-sm">
+<span class="flex items-center gap-1 text-primary font-medium">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+<span>Clinical Directive Flagged</span>
+</span>
+<button class="hover:text-primary transition-colors flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+<span>Copy</span>
+</button>
+</div>
+</div>
+<!-- Live Speech Recognition Typing Indicator -->
+<div class="flex items-center gap-3 bg-surface-container-low/70 rounded-xl p-3">
+<span class="material-symbols-outlined text-primary text-[20px] animate-pulse">hearing</span>
+<div class="flex items-center gap-2 text-on-surface-variant font-label-md text-label-md">
+<span>Dr. Evans is speaking</span>
+<span class="inline-flex gap-1 items-center">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-bounce"></span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style="animation-delay: 150ms;"></span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style="animation-delay: 300ms;"></span>
+</span>
+</div>
+</div>
+</div>
+<!-- Primary Interactive Control Station (Large Accessible Minimum 48px Touch Targets) -->
+<div class="pt-2">
+<div class="bg-surface-container-lowest rounded-xl p-3 shadow-md flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm font-semibold uppercase text-secondary">Session Controls</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Encrypted · HIPAA Verified</span>
+</div>
+<!-- Primary Action Buttons Row -->
+<div class="grid grid-cols-2 gap-2">
+<!-- Pause / Resume Listening Button -->
+<button class="min-h-[48px] px-3 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-lg text-label-lg font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.98]" id="toggle-listening-btn" onclick="toggleListening()">
+<span class="material-symbols-outlined text-[20px] text-primary" id="listening-icon">pause_circle</span>
+<span id="listening-label">Pause Listening</span>
+</button>
+<!-- Save Transcript Button -->
+<button class="min-h-[48px] px-3 rounded-lg bg-primary-container text-on-primary-container hover:bg-primary font-label-lg text-label-lg font-bold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.98]" onclick="saveTranscript()">
+<span class="material-symbols-outlined text-[20px]">bookmark_add</span>
+<span>Save Transcript</span>
+</button>
+</div>
+<!-- Secondary Action Buttons Row -->
+<div class="grid grid-cols-2 gap-2">
+<!-- Clear Captions Button -->
+<button class="min-h-[48px] px-3 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface-variant font-label-md text-label-md font-semibold flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]" onclick="clearCaptions()">
+<span class="material-symbols-outlined text-[18px]">cleaning_services</span>
+<span>Clear Stream</span>
+</button>
+<!-- Stop Clinical Session Button -->
+<button class="min-h-[48px] px-3 rounded-lg bg-error-container hover:bg-tertiary-fixed text-on-error-container font-label-md text-label-md font-bold flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]" onclick="stopSession()">
+<span class="material-symbols-outlined text-[18px] text-tertiary">stop_circle</span>
+<span>Stop Session</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Ambient Micro-Feedback Toast Notification (Hidden by default) -->
+<div class="hidden fixed bottom-20 left-4 right-4 bg-inverse-surface text-inverse-on-surface p-3 rounded-lg shadow-lg flex items-center justify-between z-40 transition-opacity" id="assist-toast">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim text-[18px]">info</span>
+<span class="font-label-md text-label-md" id="toast-message">Transcript successfully saved to patient chart.</span>
+</div>
+<button class="text-inverse-on-surface hover:text-white" onclick="dismissToast()">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+</div>
+<script>
+  let isListening = true;
+
+  function showToast(msg) {
+    const toast = document.getElementById('assist-toast');
+    const label = document.getElementById('toast-message');
+    if (toast && label) {
+      label.innerText = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3500);
+    }
+  }
+
+  function dismissToast() {
+    const toast = document.getElementById('assist-toast');
+    if (toast) toast.classList.add('hidden');
+  }
+
+  function toggleListening() {
+    isListening = !isListening;
+    const btnIcon = document.getElementById('listening-icon');
+    const btnLabel = document.getElementById('listening-label');
+    if (isListening) {
+      btnIcon.innerText = 'pause_circle';
+      btnLabel.innerText = 'Pause Listening';
+      showToast('Acoustic processing and live transcription resumed.');
+    } else {
+      btnIcon.innerText = 'play_circle';
+      btnLabel.innerText = 'Resume Listening';
+      showToast('Microphone stream paused. Acoustic logs suspended.');
+    }
+  }
+
+  function saveTranscript() {
+    showToast('Clinical transcript exported to Electronic Health Record.');
+  }
+
+  function clearCaptions() {
+    const stream = document.getElementById('transcript-stream');
+    if (stream) {
+      showToast('Live stream cleared. Log stored in background.');
+    }
+  }
+
+  function stopSession() {
+    showToast('Clinical session finalized. Generating clinical summary...');
+  }
+
+  function setFontScale(scale) {
+    const cards = document.querySelectorAll('.caption-text');
+    const mdBtn = document.getElementById('font-md-btn');
+    const lgBtn = document.getElementById('font-lg-btn');
+    const xlBtn = document.getElementById('font-xl-btn');
+
+    [mdBtn, lgBtn, xlBtn].forEach(b => {
+      b.className = 'px-2.5 py-1 rounded text-on-surface font-label-sm text-label-sm font-medium transition-all';
+    });
+
+    if (scale === 'md') {
+      mdBtn.className = 'px-2.5 py-1 rounded bg-surface-container-lowest shadow-sm text-primary font-label-sm text-label-sm font-bold transition-all';
+      cards.forEach(c => {
+        c.className = 'caption-text bg-surface-container-low rounded-lg p-3 text-on-surface leading-normal mt-1 font-body-sm text-body-sm transition-all';
+      });
+    } else if (scale === 'lg') {
+      lgBtn.className = 'px-2.5 py-1 rounded bg-surface-container-lowest shadow-sm text-primary font-label-sm text-label-sm font-bold transition-all';
+      cards.forEach(c => {
+        c.className = 'caption-text bg-surface-container-low rounded-lg p-3 text-on-surface leading-relaxed mt-1 font-body-md text-body-md font-medium transition-all';
+      });
+    } else if (scale === 'xl') {
+      xlBtn.className = 'px-2.5 py-1 rounded bg-surface-container-lowest shadow-sm text-primary font-label-sm text-label-sm font-bold transition-all';
+      cards.forEach(c => {
+        c.className = 'caption-text bg-surface-container-low rounded-lg p-3.5 text-on-surface leading-loose mt-1 font-headline-sm text-headline-sm font-semibold transition-all';
+      });
+    }
+  }
+
+  function selectTheme(mode) {
+    const lightBtn = document.getElementById('theme-light-btn');
+    const hivisBtn = document.getElementById('theme-hivis-btn');
+    const darkBtn = document.getElementById('theme-dark-btn');
+    const cards = document.querySelectorAll('.speaker-card');
+
+    [lightBtn, hivisBtn, darkBtn].forEach(b => {
+      b.className = 'px-2 py-1.5 rounded-lg bg-surface-container-high text-on-surface font-label-sm text-label-sm font-medium flex items-center gap-1 hover:bg-surface-container-highest transition-all';
+    });
+
+    if (mode === 'light') {
+      lightBtn.className = 'px-2.5 py-1.5 rounded-lg bg-primary text-on-primary font-label-sm text-label-sm font-bold flex items-center gap-1 transition-all';
+      cards.forEach(card => {
+        card.style.backgroundColor = '';
+        card.style.color = '';
+      });
+      showToast('Standard high-legibility clinical light palette applied.');
+    } else if (mode === 'hivis') {
+      hivisBtn.className = 'px-2.5 py-1.5 rounded-lg bg-primary text-on-primary font-label-sm text-label-sm font-bold flex items-center gap-1 transition-all';
+      cards.forEach(card => {
+        card.style.backgroundColor = '#000000';
+        card.style.color = '#FEF08A';
+      });
+      showToast('Maximum contrast yellow-on-black accessibility profile engaged.');
+    } else if (mode === 'dark') {
+      darkBtn.className = 'px-2.5 py-1.5 rounded-lg bg-primary text-on-primary font-label-sm text-label-sm font-bold flex items-center gap-1 transition-all';
+      cards.forEach(card => {
+        card.style.backgroundColor = '#1E293B';
+        card.style.color = '#F8FAFC';
+      });
+      showToast('Reduced glare dark contrast mode activated.');
+    }
+  }
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface-container-lowest/80 backdrop-blur-xl shadow-[0_-1px_8px_rgba(0,0,0,0.04)]" data-active-classes="text-primary font-bold"><div class="flex items-center justify-between h-16 px-space-xs"><a class="flex flex-1 flex-col items-center justify-center py-space-xs min-h-[48px] text-on-surface-variant hover:text-on-surface transition-colors" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[22px]">grid_view</span><span class="font-label-sm text-label-sm mt-0.5 tracking-tight">Dashboard</span></a><a class="flex flex-1 flex-col items-center justify-center py-space-xs min-h-[48px] text-on-surface-variant hover:text-on-surface transition-colors" data-path="vision-assist" href="#"><span class="material-symbols-outlined text-[22px]">visibility</span><span class="font-label-sm text-label-sm mt-0.5 tracking-tight">Vision</span></a><a aria-current="page" class="flex flex-1 flex-col items-center justify-center py-space-xs min-h-[48px] transition-colors text-primary font-bold" data-path="hearing-assist" href="#"><span class="material-symbols-outlined text-[22px]">hearing</span><span class="font-label-sm text-label-sm mt-0.5 tracking-tight">Hearing</span></a><a class="flex flex-1 flex-col items-center justify-center py-space-xs min-h-[48px] text-on-surface-variant hover:text-on-surface transition-colors" data-path="bridge-comm" href="#"><span class="material-symbols-outlined text-[22px]">forum</span><span class="font-label-sm text-label-sm mt-0.5 tracking-tight">Bridge</span></a><a class="flex flex-1 flex-col items-center justify-center py-space-xs min-h-[48px] text-on-surface-variant hover:text-on-surface transition-colors" data-path="safety-assist" href="#"><span class="material-symbols-outlined text-[22px]">shield_with_heart</span><span class="font-label-sm text-label-sm mt-0.5 tracking-tight">Safety</span></a><a class="flex flex-1 flex-col items-center justify-center py-space-xs min-h-[48px] text-on-surface-variant hover:text-on-surface transition-colors" data-path="settings" href="#"><span class="material-symbols-outlined text-[22px]">settings</span><span class="font-label-sm text-label-sm mt-0.5 tracking-tight">Settings</span></a></div></nav></body></html>

@@ -1,0 +1,418 @@
+﻿<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><title>AccessOne AI</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "on-primary": "#ffffff", "secondary-fixed": "#d8e3fb", "tertiary-fixed": "#ffdad6", "on-surface": "#0b1c30", "inverse-surface": "#213145", "on-tertiary-container": "#fffbfa", "on-secondary-fixed": "#111c2d", "surface-tint": "#006b58", "secondary-container": "#d5e0f8", "primary-fixed-dim": "#77d8be", "on-primary-fixed": "#002019", "on-primary-container": "#f1fff8", "secondary": "#545f73", "outline-variant": "#bdc9c4", "error-container": "#ffdad6", "surface-container-low": "#eff4ff", "inverse-primary": "#77d8be", "surface-container-highest": "#d3e4fe", "on-tertiary-fixed-variant": "#93000b", "on-secondary": "#ffffff", "on-surface-variant": "#3e4945", "surface": "#f8f9ff", "surface-dim": "#cbdbf5", "on-tertiary": "#ffffff", "primary-container": "#0e836d", "on-secondary-fixed-variant": "#3c475a", "tertiary-fixed-dim": "#ffb4ab", "on-tertiary-fixed": "#410002", "secondary-fixed-dim": "#bcc7de", "surface-variant": "#d3e4fe", "on-secondary-container": "#586377", "on-primary-fixed-variant": "#005142", "primary": "#006856", "surface-container-lowest": "#ffffff", "on-background": "#0b1c30", "on-error-container": "#93000a", "outline": "#6e7a75", "background": "#f8f9ff", "surface-container-high": "#dce9ff", "on-error": "#ffffff", "surface-container": "#e5eeff", "tertiary": "#ba0012", "primary-fixed": "#93f5da", "tertiary-container": "#df2928", "surface-bright": "#f8f9ff", "inverse-on-surface": "#eaf1ff", "error": "#ba1a1a" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "space-xl": "2.5rem", "gutter-mobile": "1rem", "space-md": "1rem", "space-lg": "1.5rem", "margin": "2rem", "space-xs": "0.25rem", "margin-mobile": "1rem", "space-sm": "0.5rem", "gutter": "1.5rem" }, fontFamily: { "headline-lg-mobile": ["Inter"], "body-sm": ["Inter"], "label-sm": ["Inter"], "headline-md": ["Inter"], "headline-lg": ["Inter"], "body-md": ["Inter"], "label-lg": ["Inter"], "body-lg": ["Inter"], "label-md": ["Inter"], "display-lg-mobile": ["Inter"], "headline-sm": ["Inter"], "display-lg": ["Inter"] }, fontSize: { "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }], "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-lg": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "label-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0.01em", "fontWeight": "600" }], "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }], "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }], "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }], "headline-sm": ["18px", { "lineHeight": "26px", "letterSpacing": "0em", "fontWeight": "600" }], "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }] } } } };</script><style>@layer base{html,body{width:100%;margin:0;padding:0;}.pb-safe{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 5rem);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-on-surface antialiased flex flex-col min-h-full"><header class="fixed top-0 w-full z-50 pt-safe bg-surface-container-lowest/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-gutter-mobile flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm min-w-0"><div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[22px]">accessibility_new</span></div><div class="flex flex-col truncate"><span class="font-headline-sm text-headline-sm text-on-surface truncate leading-tight">AccessOne</span><span class="font-label-sm text-label-sm text-on-surface-variant font-medium tracking-wider uppercase">Clinical AI</span></div></div><div class="flex items-center gap-space-xs shrink-0"><button aria-label="Adjust font size" class="w-11 h-11 flex items-center justify-center rounded-lg text-on-surface hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-[20px]">format_size</span></button><button aria-label="Toggle contrast mode" class="w-11 h-11 flex items-center justify-center rounded-lg text-on-surface hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-[20px]">contrast</span></button><a aria-label="Emergency SOS Assistance" class="min-h-[44px] px-space-sm rounded-lg bg-tertiary text-on-tertiary flex items-center gap-space-xs font-label-md text-label-md hover:bg-tertiary-container transition-colors shadow-sm" data-path="safety-assist" href="#"><span class="material-symbols-outlined text-[18px]">e911_emergency</span><span class="font-bold">SOS</span></a><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 ml-space-xs"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex flex-col relative w-full pt-16 pb-safe bg-surface px-gutter-mobile"><div class="flex flex-col w-full pb-6 space-y-4">
+<!-- System Operational Telemetry Banner -->
+<div class="bg-surface-container-low rounded-xl p-3 flex items-center justify-between shadow-sm">
+<div class="flex items-center space-x-2.5 min-w-0">
+<span class="relative flex h-3 w-3 shrink-0">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+</span>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm text-primary font-bold tracking-wide uppercase truncate">Clinically Certified AI v4.2</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">All systems active • Mic &amp; Cam Ready</span>
+</div>
+</div>
+<div class="flex items-center space-x-1 shrink-0 ml-2">
+<span class="material-symbols-outlined text-primary text-[20px]" title="Hardware Encrypted">verified_user</span>
+</div>
+</div>
+<!-- Personalized Greeting & Quick Sensory Controls -->
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col space-y-3">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium block">Patient Portal Active</span>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Welcome back, Sarah</h1>
+</div>
+<div class="h-12 w-12 rounded-full overflow-hidden shrink-0 shadow-sm">
+<img class="h-full w-full object-cover" data-alt="Close-up portrait of a woman in her early 30s with friendly warm expression, wearing lightweight modern audio glasses, soft clinical daylight, high key studio lighting, calm professional healthcare palette" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvX2_6JkE7N9hks4FgPc_Wjhcw_uhYYK8s72IYoiB8QLRBDKIzupqem-mUaFpoK00MIG8rsYjQNsxJH0pw9P4bFl7aGq_35Wpll2SHSfY0Ay_o-VS_n113NVIZm_9NkHpp3qfSvNgsdHaCgZYQiLSlWmTpKE6eJ7l5iI8UPRP5v6vnVD2PRtrsKGdeAHxM7qzfhnOJg-k8R8Epn9TF_4mEooUYczalWMXUNF9TSUQ"/>
+</div>
+</div>
+<!-- Micro-adjustment Accessibility Bar -->
+<div class="flex items-center justify-between pt-1 gap-2">
+<div aria-label="Quick font resize" class="flex items-center bg-surface-container rounded-lg p-1 space-x-1" role="group">
+<button aria-label="Decrease text size" class="h-10 px-3 flex items-center justify-center rounded-md font-label-md text-label-md text-on-surface hover:bg-surface-container-lowest transition-colors active:scale-95" id="font-decrease" type="button">
+          A-
+        </button>
+<button aria-label="Standard text size" class="h-10 px-3 flex items-center justify-center rounded-md font-label-md text-label-md bg-surface-container-lowest text-primary font-bold shadow-xs active:scale-95" id="font-std" type="button">
+          Std
+        </button>
+<button aria-label="Increase text size" class="h-10 px-3 flex items-center justify-center rounded-md font-label-md text-label-md text-on-surface hover:bg-surface-container-lowest transition-colors active:scale-95" id="font-increase" type="button">
+          A+
+        </button>
+</div>
+<button aria-label="Toggle max contrast mode" class="h-10 px-3.5 flex items-center space-x-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors active:scale-95" id="toggle-contrast" type="button">
+<span class="material-symbols-outlined text-[18px]">wb_sunny</span>
+<span class="font-label-sm text-label-sm">High Contrast</span>
+</button>
+</div>
+</div>
+<!-- Quick Medical Alert Priority Capsule -->
+<div class="bg-error-container rounded-xl p-3.5 flex items-center justify-between shadow-xs">
+<div class="flex items-center space-x-2.5 min-w-0">
+<div class="w-10 h-10 rounded-lg bg-tertiary text-on-tertiary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[24px]">crisis_alert</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-tertiary-fixed-variant font-bold truncate">Care Ring Online</span>
+<span class="font-body-sm text-body-sm text-on-tertiary-fixed-variant truncate">Dr. Evans + St. Jude Response Station linked</span>
+</div>
+</div>
+<a class="min-h-[44px] px-3 flex items-center justify-center rounded-lg bg-tertiary text-on-tertiary font-label-sm text-label-sm font-bold shrink-0 hover:opacity-90 active:scale-95 shadow-sm" data-path="safety-assist" href="#">
+      SOS Hub
+    </a>
+</div>
+<!-- Primary Feature Cards Stack (48px+ targets, Clinical clarity) -->
+<div class="space-y-4">
+<!-- Card 1: Vision Assist -->
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col space-y-3">
+<div class="flex items-start justify-between">
+<div class="flex items-center space-x-3">
+<div class="w-12 h-12 rounded-xl bg-primary-container text-on-primary flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[28px]">visibility</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Vision Assist</h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Optical Telemetry &amp; OCR</span>
+</div>
+</div>
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-label-sm font-label-sm bg-primary-fixed text-on-primary-fixed">
+<span class="w-1.5 h-1.5 rounded-full bg-primary mr-1.5"></span>
+          Camera Ready
+        </span>
+</div>
+<div class="relative w-full h-28 rounded-lg overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="First-person HUD view of a prescription medication vial with holographic teal bounding box and highlighted dosage typography, clinically crisp lighting, hyper-legible graphic overlay" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBKeKZHSVwqC_PAvk6FDa8UAIjJcce3nbPaEi-zmqrPAPTLrspA3cX4IMSPG4B9rSOThNGA5Q-CKxLYgeqRG-6jGFJSkqY1efnOoL2Vvs5w497KIfEXoG5BrTew3ESZIqrtukfJkqOPzmAtdjPVSRNNWEsGJ84lUzQoSjWCVvZI49q88WcA1gwZ8cMp4NGsaTUsBqP8gPn4mOW6_VxfyJxr-X9hLWmZAomwGMh5_I8"/>
+<div class="absolute inset-0 bg-gradient-to-t from-on-surface/80 via-transparent to-transparent flex items-end p-2.5">
+<span class="font-label-sm text-label-sm text-surface-container-lowest font-medium flex items-center space-x-1">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed">document_scanner</span>
+<span>Live Scene • Pill Dispenser detected at 45cm</span>
+</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+        High-precision neural reading for prescriptions, spatial obstacles, and room orientation with real-time audio guidance.
+      </p>
+<a class="w-full min-h-[48px] rounded-lg bg-primary text-on-primary flex items-center justify-center space-x-2 font-label-lg text-label-lg shadow-sm hover:bg-primary-container active:scale-[0.99] transition-all" data-path="vision-assist" href="#">
+<span class="material-symbols-outlined text-[20px]">center_focus_strong</span>
+<span>Launch Vision Assist</span>
+</a>
+</div>
+<!-- Card 2: Hearing Assist -->
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col space-y-3">
+<div class="flex items-start justify-between">
+<div class="flex items-center space-x-3">
+<div class="w-12 h-12 rounded-xl bg-secondary text-on-secondary flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[28px]">hearing</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Hearing Assist</h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Acoustic Spectrum &amp; Captions</span>
+</div>
+</div>
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-label-sm font-label-sm bg-secondary-container text-on-secondary-container">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary mr-1.5"></span>
+          Mic Ready
+        </span>
+</div>
+<!-- Real-time Sound Spectrum SVG Display -->
+<div class="bg-surface-container-low rounded-lg p-3 flex flex-col space-y-2">
+<div class="flex items-center justify-between text-label-sm font-label-sm text-on-surface-variant">
+<span class="flex items-center space-x-1">
+<span class="material-symbols-outlined text-[16px] text-primary">graphic_eq</span>
+<span>Acoustic Isolation: 38 dB Ambient</span>
+</span>
+<span class="text-primary font-bold">Clear Speech</span>
+</div>
+<div class="h-10 w-full flex items-center justify-between gap-1 px-1">
+<div class="w-1.5 bg-primary/40 rounded-full h-3"></div>
+<div class="w-1.5 bg-primary/60 rounded-full h-5"></div>
+<div class="w-1.5 bg-primary rounded-full h-8 animate-pulse"></div>
+<div class="w-1.5 bg-primary rounded-full h-10"></div>
+<div class="w-1.5 bg-primary-container rounded-full h-6"></div>
+<div class="w-1.5 bg-primary/80 rounded-full h-9 animate-pulse"></div>
+<div class="w-1.5 bg-primary/50 rounded-full h-4"></div>
+<div class="w-1.5 bg-primary/30 rounded-full h-2"></div>
+<div class="w-1.5 bg-primary/70 rounded-full h-7"></div>
+<div class="w-1.5 bg-primary rounded-full h-9"></div>
+<div class="w-1.5 bg-primary/80 rounded-full h-6"></div>
+<div class="w-1.5 bg-primary/40 rounded-full h-3"></div>
+<div class="w-1.5 bg-primary/20 rounded-full h-2"></div>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+        Live speaker transcription, non-speech alert flashers (fire alarms, doorbells, IV chimes), and sensory haptics.
+      </p>
+<a class="w-full min-h-[48px] rounded-lg bg-primary text-on-primary flex items-center justify-center space-x-2 font-label-lg text-label-lg shadow-sm hover:bg-primary-container active:scale-[0.99] transition-all" data-path="hearing-assist" href="#">
+<span class="material-symbols-outlined text-[20px]">mic</span>
+<span>Start Listening</span>
+</a>
+</div>
+<!-- Card 3: Bridge Comm -->
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col space-y-3">
+<div class="flex items-start justify-between">
+<div class="flex items-center space-x-3">
+<div class="w-12 h-12 rounded-xl bg-surface-tint text-on-primary flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[28px]">forum</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Bridge Comm</h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Dual-Channel Dialogue</span>
+</div>
+</div>
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-label-sm font-label-sm bg-primary-fixed-dim text-on-primary-fixed">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container mr-1.5"></span>
+          Dialogue Ready
+        </span>
+</div>
+<div class="bg-surface-container-low rounded-lg p-3 space-y-2">
+<div class="flex items-start space-x-2">
+<span class="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5">chat_bubble</span>
+<p class="font-body-sm text-body-sm text-on-surface">
+<strong class="font-bold text-primary">Doctor:</strong> “The blood pressure is stable. Let's review the new prescription.”
+          </p>
+</div>
+<div class="flex justify-end">
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container px-2 py-0.5 rounded">ASL &amp; Rapid TTS Active</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+        Fosters natural two-way conversation between Deaf/hard-of-hearing patients and healthcare providers with sub-second synthesis.
+      </p>
+<a class="w-full min-h-[48px] rounded-lg bg-primary text-on-primary flex items-center justify-center space-x-2 font-label-lg text-label-lg shadow-sm hover:bg-primary-container active:scale-[0.99] transition-all" data-path="bridge-comm" href="#">
+<span class="material-symbols-outlined text-[20px]">swap_horiz</span>
+<span>Open Bridge Dialogue</span>
+</a>
+</div>
+<!-- Card 4: Safety Assist -->
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col space-y-3">
+<div class="flex items-start justify-between">
+<div class="flex items-center space-x-3">
+<div class="w-12 h-12 rounded-xl bg-tertiary-container text-on-tertiary-container flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[28px]">shield_with_heart</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Safety Assist</h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Emergency &amp; Care Circle</span>
+</div>
+</div>
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-label-sm font-label-sm bg-tertiary-fixed text-on-tertiary-fixed">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary mr-1.5"></span>
+          GPS Monitored
+        </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+        Autonomous fall verification, geo-fenced safety boundaries, direct 911 clinical payload transmission, and caregiver check-ins.
+      </p>
+<div class="grid grid-cols-2 gap-2 text-label-sm font-label-sm">
+<div class="bg-surface-container-low p-2 rounded flex items-center space-x-1.5 text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-primary">pin_drop</span>
+<span class="truncate">Room 304, West Wing</span>
+</div>
+<div class="bg-surface-container-low p-2 rounded flex items-center space-x-1.5 text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-primary">group</span>
+<span class="truncate">3 Contacts Alerted</span>
+</div>
+</div>
+<a class="w-full min-h-[48px] rounded-lg bg-surface-container-high text-on-surface hover:bg-surface-container-highest flex items-center justify-center space-x-2 font-label-lg text-label-lg active:scale-[0.99] transition-all" data-path="safety-assist" href="#">
+<span class="material-symbols-outlined text-[20px] text-tertiary">emergency</span>
+<span>Open Safety Hub</span>
+</a>
+</div>
+</div>
+<!-- Active Clinical Profile Card -->
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-2.5">
+<span class="material-symbols-outlined text-primary text-[24px]">tune</span>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Active Profile</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Prescribed Adaptation Matrix</span>
+</div>
+</div>
+<a class="h-10 px-3 rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high flex items-center font-label-md text-label-md transition-colors" data-path="settings" href="#">
+        Adjust Profile
+      </a>
+</div>
+<div class="bg-primary-fixed/30 rounded-lg p-3 flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-primary text-[20px]">medical_information</span>
+<span class="font-label-md text-label-md text-on-primary-fixed font-bold">Low Vision + Hearing Friendly</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary font-semibold">Tier AAA</span>
+</div>
+<div class="grid grid-cols-3 gap-2 text-center pt-1">
+<div class="bg-surface-container-low p-2 rounded-lg">
+<span class="block font-label-sm text-label-sm text-on-surface-variant">Haptics</span>
+<span class="block font-headline-sm text-headline-sm text-on-surface font-bold">Max</span>
+</div>
+<div class="bg-surface-container-low p-2 rounded-lg">
+<span class="block font-label-sm text-label-sm text-on-surface-variant">Speech Rate</span>
+<span class="block font-headline-sm text-headline-sm text-on-surface font-bold">0.85x</span>
+</div>
+<div class="bg-surface-container-low p-2 rounded-lg">
+<span class="block font-label-sm text-label-sm text-on-surface-variant">Contrast</span>
+<span class="block font-headline-sm text-headline-sm text-on-surface font-bold">+40%</span>
+</div>
+</div>
+</div>
+<!-- Device & Hardware Sensors Status Widget -->
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-secondary text-[22px]">developer_board</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Device &amp; Telemetry</h3>
+</div>
+<span class="font-label-sm text-label-sm text-primary font-semibold flex items-center">
+<span class="w-2 h-2 rounded-full bg-primary inline-block mr-1"></span>
+        Synchronized
+      </span>
+</div>
+<div class="space-y-2">
+<!-- Battery Status -->
+<div class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-primary text-[20px]">battery_charging_90</span>
+<span class="font-body-sm text-body-sm text-on-surface font-medium">Battery Level</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface font-bold">92% • Fast Charging</span>
+</div>
+<!-- Neural Engine Status -->
+<div class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-primary text-[20px]">memory</span>
+<span class="font-body-sm text-body-sm text-on-surface font-medium">Neural Engine</span>
+</div>
+<span class="font-label-md text-label-md text-primary font-semibold">On-Device (0ms Latency)</span>
+</div>
+<!-- Lapel Sensor AI-8 -->
+<div class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-primary text-[20px]">bluetooth_connected</span>
+<span class="font-body-sm text-body-sm text-on-surface font-medium">Lapel Mic AI-8</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface font-bold">Connected (BLE 5.3)</span>
+</div>
+</div>
+</div>
+<!-- Recent Assistive Activity Log Summary -->
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-primary text-[22px]">history</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Recent Activity</h3>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Today</span>
+</div>
+<div class="space-y-2">
+<!-- Item 1 -->
+<div class="flex items-start space-x-3 p-2.5 rounded-lg bg-surface-container-low">
+<div class="w-8 h-8 rounded-lg bg-primary-fixed text-on-primary-fixed flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]">document_scanner</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate">Prescription OCR Scan</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">10:14 AM</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">
+            Amoxicillin 500mg - dosage schedule saved to notes.
+          </p>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex items-start space-x-3 p-2.5 rounded-lg bg-surface-container-low">
+<div class="w-8 h-8 rounded-lg bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]">transcribe</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate">Clinical Consultation</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">8:30 AM</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">
+            18-minute session with Dr. Evans transcribed &amp; highlighted.
+          </p>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="flex items-start space-x-3 p-2.5 rounded-lg bg-surface-container-low">
+<div class="w-8 h-8 rounded-lg bg-primary-fixed-dim text-on-primary-fixed flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]">notification_important</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate">Environmental Warning</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Yesterday</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">
+            Siren detected (84 dB). Haptic pulse dispatched to wrist.
+          </p>
+</div>
+</div>
+</div>
+<button class="w-full min-h-[44px] rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center justify-center transition-colors" type="button">
+      View All Clinical Logs
+    </button>
+</div>
+</div>
+<script>
+  // Simple accessible micro-interaction for font resizing and high contrast preview
+  (function() {
+    const btnDecrease = document.getElementById('font-decrease');
+    const btnStd = document.getElementById('font-std');
+    const btnIncrease = document.getElementById('font-increase');
+    const btnContrast = document.getElementById('toggle-contrast');
+    
+    let currentScale = 1;
+    let isHighContrast = false;
+
+    if (btnDecrease && btnStd && btnIncrease) {
+      btnDecrease.addEventListener('click', () => {
+        currentScale = Math.max(0.9, currentScale - 0.05);
+        document.body.style.zoom = currentScale;
+        updateActiveButton(btnDecrease);
+      });
+
+      btnStd.addEventListener('click', () => {
+        currentScale = 1;
+        document.body.style.zoom = 1;
+        updateActiveButton(btnStd);
+      });
+
+      btnIncrease.addEventListener('click', () => {
+        currentScale = Math.min(1.25, currentScale + 0.05);
+        document.body.style.zoom = currentScale;
+        updateActiveButton(btnIncrease);
+      });
+    }
+
+    function updateActiveButton(activeBtn) {
+      [btnDecrease, btnStd, btnIncrease].forEach(btn => {
+        btn.classList.remove('bg-surface-container-lowest', 'text-primary', 'font-bold', 'shadow-xs');
+      });
+      activeBtn.classList.add('bg-surface-container-lowest', 'text-primary', 'font-bold', 'shadow-xs');
+    }
+
+    if (btnContrast) {
+      btnContrast.addEventListener('click', () => {
+        isHighContrast = !isHighContrast;
+        if (isHighContrast) {
+          document.documentElement.classList.add('contrast-125');
+          btnContrast.classList.add('bg-primary', 'text-on-primary');
+          btnContrast.classList.remove('bg-surface-container', 'text-on-surface');
+        } else {
+          document.documentElement.classList.remove('contrast-125');
+          btnContrast.classList.remove('bg-primary', 'text-on-primary');
+          btnContrast.classList.add('bg-surface-container', 'text-on-surface');
+        }
+      });
+    }
+  })();
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface-container-lowest/80 backdrop-blur-xl shadow-[0_-1px_8px_rgba(0,0,0,0.04)]" data-active-classes="text-primary font-bold"><div class="flex items-center justify-between h-16 px-space-xs"><a aria-current="page" class="flex flex-1 flex-col items-center justify-center py-space-xs min-h-[48px] transition-colors text-primary font-bold" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[22px]">grid_view</span><span class="font-label-sm text-label-sm mt-0.5 tracking-tight">Dashboard</span></a><a class="flex flex-1 flex-col items-center justify-center py-space-xs min-h-[48px] text-on-surface-variant hover:text-on-surface transition-colors" data-path="vision-assist" href="#"><span class="material-symbols-outlined text-[22px]">visibility</span><span class="font-label-sm text-label-sm mt-0.5 tracking-tight">Vision</span></a><a class="flex flex-1 flex-col items-center justify-center py-space-xs min-h-[48px] text-on-surface-variant hover:text-on-surface transition-colors" data-path="hearing-assist" href="#"><span class="material-symbols-outlined text-[22px]">hearing</span><span class="font-label-sm text-label-sm mt-0.5 tracking-tight">Hearing</span></a><a class="flex flex-1 flex-col items-center justify-center py-space-xs min-h-[48px] text-on-surface-variant hover:text-on-surface transition-colors" data-path="bridge-comm" href="#"><span class="material-symbols-outlined text-[22px]">forum</span><span class="font-label-sm text-label-sm mt-0.5 tracking-tight">Bridge</span></a><a class="flex flex-1 flex-col items-center justify-center py-space-xs min-h-[48px] text-on-surface-variant hover:text-on-surface transition-colors" data-path="safety-assist" href="#"><span class="material-symbols-outlined text-[22px]">shield_with_heart</span><span class="font-label-sm text-label-sm mt-0.5 tracking-tight">Safety</span></a><a class="flex flex-1 flex-col items-center justify-center py-space-xs min-h-[48px] text-on-surface-variant hover:text-on-surface transition-colors" data-path="settings" href="#"><span class="material-symbols-outlined text-[22px]">settings</span><span class="font-label-sm text-label-sm mt-0.5 tracking-tight">Settings</span></a></div></nav></body></html>
