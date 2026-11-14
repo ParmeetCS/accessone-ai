@@ -1,71 +1,103 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import {
   Mic,
   MicOff,
-  Radio,
-  Sliders,
+  StopCircle,
+  Copy,
+  Save,
+  Trash2,
+  Globe,
   Volume2,
   Bell,
   CheckCircle2,
-  Sparkles,
   AlertCircle,
   Activity,
-  Plus,
+  Check,
 } from 'lucide-react-native';
 import { useAppTheme } from '../theme/ThemeContext';
-import { useHearingStore } from '../store/hearingStore';
+import { useHearingStore, CaptionMessage } from '../store/hearingStore';
 import { SoundRadar } from '../components/SoundRadar';
 import { WaveformBar } from '../components/WaveformBar';
+
+const SUPPORTED_LANGUAGES = [
+  { code: 'en-US', label: 'English (US)' },
+  { code: 'es-ES', label: 'Español' },
+  { code: 'hi-IN', label: 'हिन्दी' },
+  { code: 'ta-IN', label: 'தமிழ்' },
+  { code: 'fr-FR', label: 'Français' },
+];
 
 export const HearingScreen: React.FC = () => {
   const { colors, scaleFont } = useAppTheme();
 
   const isListening = useHearingStore((s) => s.isListening);
-  const toggleListening = useHearingStore((s) => s.toggleListening);
+  const isPaused = useHearingStore((s) => s.isPaused);
+  const recordingStatus = useHearingStore((s) => s.recordingStatus);
   const ambientDb = useHearingStore((s) => s.ambientDb);
   const transcripts = useHearingStore((s) => s.transcripts);
   const soundEvents = useHearingStore((s) => s.soundEvents);
   const activeAlert = useHearingStore((s) => s.activeAlert);
   const selectedCaptionSize = useHearingStore((s) => s.selectedCaptionSize);
+  const selectedLanguage = useHearingStore((s) => s.selectedLanguage);
+  const errorMessage = useHearingStore((s) => s.errorMessage);
+
   const setCaptionSize = useHearingStore((s) => s.setCaptionSize);
+  const setLanguage = useHearingStore((s) => s.setLanguage);
+  const toggleListening = useHearingStore((s) => s.toggleListening);
+  const startListening = useHearingStore((s) => s.startListening);
+  const pauseListening = useHearingStore((s) => s.pauseListening);
+  const resumeListening = useHearingStore((s) => s.resumeListening);
+  const stopSession = useHearingStore((s) => s.stopSession);
+  const clearTranscripts = useHearingStore((s) => s.clearTranscripts);
+  const copyTranscript = useHearingStore((s) => s.copyTranscript);
+  const saveTranscript = useHearingStore((s) => s.saveTranscript);
   const triggerMockSoundEvent = useHearingStore((s) => s.triggerMockSoundEvent);
-  const addTranscript = useHearingStore((s) => s.addTranscript);
+  const dismissAlert = useHearingStore((s) => s.dismissAlert);
+  const cleanup = useHearingStore((s) => s.cleanup);
 
-  // Dynamic simulated speaker incoming when listening is active
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+
+  // Proper cleanup on unmount: stops recording and releases hardware
   useEffect(() => {
-    if (!isListening) return;
+    return () => {
+      cleanup();
+    };
+  }, []);
 
-    const interval = setInterval(() => {
-      const mockQuotes = [
-        {
-          speaker: 'Dr. Evans',
-          role: 'doctor' as const,
-          avatarInitials: 'DE',
-          text: 'The inflammatory markers are down significantly compared to Tuesday.',
-        },
-        {
-          speaker: 'Nurse Chloe',
-          role: 'nurse' as const,
-          avatarInitials: 'NC',
-          text: 'Vitals logged into EHR. I have scheduled the telemetry follow up.',
-        },
-      ];
+  const showNotification = (msg: string) => {
+    setFeedbackMessage(msg);
+    setTimeout(() => {
+      setFeedbackMessage(null);
+    }, 3000);
+  };
 
-      // Add one message randomly
-      const randomQuote = mockQuotes[Math.floor(Math.random() * mockQuotes.length)];
-      addTranscript({
-        id: `t-${Date.now()}`,
-        speaker: randomQuote.speaker,
-        role: randomQuote.role,
-        avatarInitials: randomQuote.avatarInitials,
-        text: randomQuote.text,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      });
-    }, 9000);
+  const handleCopy = async () => {
+    if (transcripts.length === 0) {
+      showNotification('No transcripts to copy yet.');
+      return;
+    }
+    const success = await copyTranscript();
+    if (success) {
+      showNotification('Transcript copied to clipboard.');
+    }
+  };
 
-    return () => clearInterval(interval);
-  }, [isListening]);
+  const handleSave = async () => {
+    if (transcripts.length === 0) {
+      showNotification('No transcripts to save.');
+      return;
+    }
+    const success = await saveTranscript();
+    if (success) {
+      showNotification('Transcript saved to activity records.');
+    }
+  };
+
+  const handleClear = () => {
+    clearTranscripts();
+    showNotification('Caption stream cleared.');
+  };
 
   const getCaptionFontSize = () => {
     switch (selectedCaptionSize) {
@@ -79,12 +111,58 @@ export const HearingScreen: React.FC = () => {
     }
   };
 
+  const getStatusLabel = () => {
+    if (recordingStatus === 'recording') {
+      return `RECORDING LIVE • ${selectedLanguage.toUpperCase()} SPEECH`;
+    }
+    if (recordingStatus === 'paused') {
+      return 'MICROPHONE PAUSED';
+    }
+    if (recordingStatus === 'transcribing') {
+      return 'PROCESSING SPEECH...';
+    }
+    if (recordingStatus === 'error') {
+      return 'MICROPHONE ERROR';
+    }
+    return 'STANDBY • READY TO LISTEN';
+  };
+
   return (
     <ScrollView
       style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={styles.scrollContent}
       showsVerticalScrollIndicator={false}
     >
+      {/* Feedback Notification Toast */}
+      {feedbackMessage && (
+        <View style={[styles.feedbackBanner, { backgroundColor: colors.primaryContainer, borderColor: colors.primary }]}>
+          <CheckCircle2 size={15} color={colors.onPrimary} />
+          <Text style={[styles.feedbackText, { color: colors.onPrimary, fontSize: scaleFont(12) }]}>
+            {feedbackMessage}
+          </Text>
+        </View>
+      )}
+
+      {/* Error / Permission Banner */}
+      {errorMessage && (
+        <View style={[styles.errorBanner, { backgroundColor: colors.sosContainer, borderColor: colors.sos }]}>
+          <AlertCircle size={16} color={colors.sos} />
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.errorTitle, { color: colors.sos, fontSize: scaleFont(12) }]}>
+              {errorMessage}
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={[styles.retryBtn, { backgroundColor: colors.sos }]}
+            onPress={() => startListening()}
+            accessibilityLabel="Retry microphone connection"
+            accessibilityRole="button"
+          >
+            <Text style={[styles.retryText, { fontSize: scaleFont(10) }]}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* 1. Status & Environmental Live Telemetry Bar */}
       <View
         style={[
@@ -109,11 +187,16 @@ export const HearingScreen: React.FC = () => {
               />
             </View>
             <View>
-              <Text style={[styles.statusTitle, { color: isListening ? colors.primary : colors.textSecondary, fontSize: scaleFont(12) }]}>
-                {isListening ? 'LISTENING ACTIVE • 3 SPEAKERS DETECTED' : 'MICROPHONE PAUSED'}
+              <Text
+                style={[
+                  styles.statusTitle,
+                  { color: isListening ? colors.primary : colors.textSecondary, fontSize: scaleFont(12) },
+                ]}
+              >
+                {getStatusLabel()}
               </Text>
               <Text style={[styles.statusSub, { color: colors.textMuted, fontSize: scaleFont(11) }]}>
-                Active Noise Cancellation: -22dB
+                Acoustic Filter Active • No Background Rec
               </Text>
             </View>
           </View>
@@ -167,8 +250,8 @@ export const HearingScreen: React.FC = () => {
               { backgroundColor: isListening ? colors.primary : colors.surfaceContainerHigh },
             ]}
             onPress={toggleListening}
-            accessibilityLabel={isListening ? 'Stop Listening' : 'Start Listening'}
-            accessibilityHint="Toggles microphone capture and live acoustic speech transcription"
+            accessibilityLabel={isListening ? 'Pause Listening' : 'Start Listening'}
+            accessibilityHint="Toggles genuine microphone capture and acoustic speech recognition"
             accessibilityRole="switch"
             accessibilityState={{ checked: isListening }}
           >
@@ -179,11 +262,18 @@ export const HearingScreen: React.FC = () => {
                   Listening
                 </Text>
               </>
-            ) : (
+            ) : isPaused ? (
               <>
                 <MicOff size={16} color={colors.text} />
                 <Text style={[styles.micToggleText, { color: colors.text, fontSize: scaleFont(12) }]}>
                   Resume
+                </Text>
+              </>
+            ) : (
+              <>
+                <Mic size={16} color={colors.text} />
+                <Text style={[styles.micToggleText, { color: colors.text, fontSize: scaleFont(12) }]}>
+                  Start
                 </Text>
               </>
             )}
@@ -191,7 +281,97 @@ export const HearingScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* 2. Visual Sound Map / 360 Spatial Radar & Frequency Spectrum Visualizer */}
+      {/* 2. Language Selection Ribbon */}
+      <View style={[styles.langBarCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={styles.langHeader}>
+          <Globe size={14} color={colors.primary} />
+          <Text style={[styles.langTitle, { color: colors.text, fontSize: scaleFont(11) }]}>
+            Speech Language:
+          </Text>
+        </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.langScroll}>
+          {SUPPORTED_LANGUAGES.map((l) => (
+            <TouchableOpacity
+              key={l.code}
+              style={[
+                styles.langPill,
+                selectedLanguage === l.code
+                  ? { backgroundColor: colors.primary, borderColor: colors.primary }
+                  : { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border },
+              ]}
+              onPress={() => setLanguage(l.code)}
+              accessibilityLabel={`Select speech language ${l.label}`}
+              accessibilityRole="button"
+            >
+              <Text
+                style={[
+                  styles.langPillText,
+                  {
+                    color: selectedLanguage === l.code ? colors.onPrimary : colors.text,
+                    fontWeight: selectedLanguage === l.code ? '700' : '500',
+                    fontSize: scaleFont(11),
+                  },
+                ]}
+              >
+                {l.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
+      {/* 3. Session Action Controls (Start, Pause, Stop, Save, Clear, Copy) */}
+      <View style={[styles.actionControlsBar, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <TouchableOpacity
+          style={[styles.actionBtn, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}
+          onPress={stopSession}
+          accessibilityLabel="Stop current listening session"
+          accessibilityRole="button"
+        >
+          <StopCircle size={15} color={colors.sos} />
+          <Text style={[styles.actionBtnText, { color: colors.sos, fontSize: scaleFont(11) }]}>
+            Stop
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.actionBtn, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}
+          onPress={handleSave}
+          accessibilityLabel="Save session transcript"
+          accessibilityRole="button"
+        >
+          <Save size={15} color={colors.primary} />
+          <Text style={[styles.actionBtnText, { color: colors.primary, fontSize: scaleFont(11) }]}>
+            Save
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.actionBtn, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}
+          onPress={handleCopy}
+          accessibilityLabel="Copy transcript to clipboard"
+          accessibilityRole="button"
+        >
+          <Copy size={15} color={colors.text} />
+          <Text style={[styles.actionBtnText, { color: colors.text, fontSize: scaleFont(11) }]}>
+            Copy
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.actionBtn, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}
+          onPress={handleClear}
+          accessibilityLabel="Clear caption stream"
+          accessibilityRole="button"
+        >
+          <Trash2 size={15} color={colors.textMuted} />
+          <Text style={[styles.actionBtnText, { color: colors.textMuted, fontSize: scaleFont(11) }]}>
+            Clear
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* 4. Visual Sound Map / 360 Spatial Radar & Frequency Spectrum Visualizer */}
       <View style={styles.radarSpectrumGrid}>
         {/* Radar Widget */}
         <View style={{ flex: 1 }}>
@@ -222,22 +402,22 @@ export const HearingScreen: React.FC = () => {
           </View>
 
           <Text style={[styles.spectrumLatency, { color: colors.textSecondary, fontSize: scaleFont(10) }]}>
-            HVAC Damping: -22dB • 12ms Latency
+            HVAC Damping: -22dB • FFT Peak Active
           </Text>
         </View>
       </View>
 
-      {/* 3. Environmental Alert Badges (Simulate Haptic Alerts) */}
+      {/* 5. Environmental Alert Badges (Physical Sound Detection Triggers) */}
       <View style={[styles.alertTriggerBar, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <View style={styles.alertHeaderRow}>
           <View style={styles.alertHeaderLeft}>
             <Bell size={16} color={colors.sos} />
             <Text style={[styles.alertBarTitle, { color: colors.text, fontSize: scaleFont(12) }]}>
-              Environmental Sound Alert Triggers
+              Environmental Sound Detection Alerts
             </Text>
           </View>
           <Text style={[styles.hapticHint, { color: colors.textMuted, fontSize: scaleFont(10) }]}>
-            Haptic Pulses
+            Physical Model
           </Text>
         </View>
 
@@ -245,7 +425,7 @@ export const HearingScreen: React.FC = () => {
           <TouchableOpacity
             style={[styles.alertTestBtn, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}
             onPress={() => triggerMockSoundEvent('door')}
-            accessibilityLabel="Simulate Door Knock sound alert"
+            accessibilityLabel="Test Door Knock acoustic alert"
             accessibilityRole="button"
           >
             <Text style={[styles.alertTestText, { color: colors.text, fontSize: scaleFont(11) }]}>
@@ -255,29 +435,29 @@ export const HearingScreen: React.FC = () => {
 
           <TouchableOpacity
             style={[styles.alertTestBtn, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}
+            onPress={() => triggerMockSoundEvent('alarm')}
+            accessibilityLabel="Test Smoke / Fire Alarm acoustic alert"
+            accessibilityRole="button"
+          >
+            <Text style={[styles.alertTestText, { color: colors.sos, fontSize: scaleFont(11) }]}>
+              🔥 Fire Alarm 3.1k
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.alertTestBtn, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}
             onPress={() => triggerMockSoundEvent('siren')}
-            accessibilityLabel="Simulate Emergency Siren sound alert"
+            accessibilityLabel="Test Emergency Siren acoustic alert"
             accessibilityRole="button"
           >
             <Text style={[styles.alertTestText, { color: colors.sos, fontSize: scaleFont(11) }]}>
               🚨 Siren 84dB
             </Text>
           </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.alertTestBtn, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}
-            onPress={() => triggerMockSoundEvent('speech')}
-            accessibilityLabel="Simulate Speech Detected event"
-            accessibilityRole="button"
-          >
-            <Text style={[styles.alertTestText, { color: colors.primary, fontSize: scaleFont(11) }]}>
-              🗣️ Doc Calling
-            </Text>
-          </TouchableOpacity>
         </View>
       </View>
 
-      {/* 4. Live Real-Time Transcription Stream Container */}
+      {/* 6. Live Real-Time Transcription Stream Container */}
       <View style={styles.transcriptHeaderRow}>
         <View style={styles.transcriptTitleGroup}>
           <Volume2 size={18} color={colors.primary} />
@@ -286,13 +466,29 @@ export const HearingScreen: React.FC = () => {
           </Text>
         </View>
         <View style={styles.syncIndicator}>
-          <View style={[styles.syncDot, { backgroundColor: colors.primary }]} />
+          <View style={[styles.syncDot, { backgroundColor: isListening ? colors.primary : colors.textMuted }]} />
           <Text style={[styles.syncText, { color: colors.textSecondary, fontSize: scaleFont(11) }]}>
-            Real-Time Sync
+            {isListening ? 'Real-Time ASR Sync' : 'Stream Idle'}
           </Text>
         </View>
       </View>
 
+      {/* Empty State when no speech transcripts */}
+      {transcripts.length === 0 && (
+        <View style={[styles.emptyContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <Mic size={28} color={colors.primary} />
+          <Text style={[styles.emptyTitle, { color: colors.text, fontSize: scaleFont(14) }]}>
+            {isListening ? 'Listening for Speech...' : 'Microphone Ready'}
+          </Text>
+          <Text style={[styles.emptyDesc, { color: colors.textMuted, fontSize: scaleFont(12) }]}>
+            {isListening
+              ? 'Speak clearly into the microphone. Genuine live captions and environmental sounds will appear here.'
+              : 'Tap "Start" above to begin acoustic speech recognition and live captioning.'}
+          </Text>
+        </View>
+      )}
+
+      {/* Real Transcripts Feed */}
       <View style={styles.transcriptList}>
         {transcripts.map((item) => (
           <View
@@ -327,14 +523,23 @@ export const HearingScreen: React.FC = () => {
                     {item.speaker}
                   </Text>
                   <Text style={[styles.speakerRole, { color: colors.textMuted, fontSize: scaleFont(10) }]}>
-                    {item.role === 'doctor' ? 'Physician' : item.role === 'nurse' ? 'Care Team' : 'Patient'}
+                    {item.role === 'doctor' ? 'Care Team' : item.role === 'nurse' ? 'Nurse' : 'Patient'}
                   </Text>
                 </View>
               </View>
 
-              <Text style={[styles.timestampText, { color: colors.textMuted, fontSize: scaleFont(11) }]}>
-                {item.timestamp}
-              </Text>
+              <View style={styles.metaRight}>
+                {item.confidence !== undefined && (
+                  <View style={[styles.confBadge, { backgroundColor: colors.surfaceContainerLow }]}>
+                    <Text style={[styles.confText, { color: colors.primary, fontSize: scaleFont(10) }]}>
+                      {Math.round(item.confidence)}% Conf
+                    </Text>
+                  </View>
+                )}
+                <Text style={[styles.timestampText, { color: colors.textMuted, fontSize: scaleFont(11) }]}>
+                  {item.timestamp}
+                </Text>
+              </View>
             </View>
 
             <Text
@@ -363,7 +568,38 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 16,
     gap: 12,
-    paddingBottom: 28,
+    paddingBottom: 32,
+  },
+  feedbackBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  feedbackText: {
+    fontWeight: '600',
+  },
+  errorBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  errorTitle: {
+    fontWeight: '600',
+  },
+  retryBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 6,
+  },
+  retryText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
   telemetryCard: {
     borderRadius: 14,
@@ -462,6 +698,57 @@ const styles = StyleSheet.create({
   },
   micToggleText: {
     fontWeight: '700',
+  },
+  langBarCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+    borderRadius: 10,
+    borderWidth: StyleSheet.hairlineWidth,
+    gap: 8,
+  },
+  langHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingLeft: 4,
+  },
+  langTitle: {
+    fontWeight: '600',
+  },
+  langScroll: {
+    flexDirection: 'row',
+    gap: 6,
+    alignItems: 'center',
+  },
+  langPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 6,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  langPillText: {
+    fontWeight: '600',
+  },
+  actionControlsBar: {
+    flexDirection: 'row',
+    gap: 8,
+    padding: 8,
+    borderRadius: 10,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  actionBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+    height: 36,
+    borderRadius: 8,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  actionBtnText: {
+    fontWeight: '600',
   },
   radarSpectrumGrid: {
     flexDirection: 'row',
@@ -585,6 +872,23 @@ const styles = StyleSheet.create({
   syncText: {
     fontWeight: '600',
   },
+  emptyContainer: {
+    borderRadius: 14,
+    borderWidth: StyleSheet.hairlineWidth,
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  emptyTitle: {
+    fontWeight: '700',
+    marginTop: 4,
+  },
+  emptyDesc: {
+    textAlign: 'center',
+    lineHeight: 18,
+    maxWidth: 280,
+  },
   transcriptList: {
     gap: 10,
   },
@@ -626,6 +930,18 @@ const styles = StyleSheet.create({
   },
   speakerRole: {
     fontWeight: '500',
+  },
+  metaRight: {
+    alignItems: 'flex-end',
+    gap: 2,
+  },
+  confBadge: {
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    borderRadius: 4,
+  },
+  confText: {
+    fontWeight: '700',
   },
   timestampText: {
     fontWeight: '500',

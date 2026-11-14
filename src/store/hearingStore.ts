@@ -1,5 +1,14 @@
 import { create } from 'zustand';
 import * as Haptics from 'expo-haptics';
+import * as Clipboard from 'expo-clipboard';
+import {
+  speechRecognitionService,
+  RecognitionState,
+  SpeechRecognitionEvent,
+} from '../services/speechRecognitionService';
+import { hearingService } from '../services/supabase/hearing';
+import { activityService } from '../services/supabase/activity';
+import { useUserStore } from './userStore';
 
 export interface CaptionMessage {
   id: string;
@@ -8,6 +17,8 @@ export interface CaptionMessage {
   avatarInitials: string;
   text: string;
   timestamp: string;
+  isFinal?: boolean;
+  confidence?: number;
   isHighPriority?: boolean;
 }
 
@@ -19,137 +30,352 @@ export interface SoundRadarEvent {
   angleDeg: number;
   db: number;
   time: string;
+  confidence?: number;
 }
-
-const INITIAL_TRANSCRIPTS: CaptionMessage[] = [
-  {
-    id: 't-1',
-    speaker: 'Dr. Evans',
-    role: 'doctor',
-    avatarInitials: 'DE',
-    text: 'Good morning Sarah, your biometric vitals from the past 48 hours show steady recovery. Blood pressure is 122 over 78.',
-    timestamp: '10:12 AM',
-  },
-  {
-    id: 't-2',
-    speaker: 'Dr. Evans',
-    role: 'doctor',
-    avatarInitials: 'DE',
-    text: 'We are continuing the Amoxicillin for five more days. Have you noticed any side effects or gastrointestinal discomfort?',
-    timestamp: '10:13 AM',
-  },
-  {
-    id: 't-3',
-    speaker: 'Sarah (You)',
-    role: 'patient',
-    avatarInitials: 'SJ',
-    text: 'No stomach upset, but mild fatigue in the afternoon. The audio visual alerts on AccessOne have been immensely helpful.',
-    timestamp: '10:14 AM',
-  },
-  {
-    id: 't-4',
-    speaker: 'Nurse Chloe',
-    role: 'nurse',
-    avatarInitials: 'NC',
-    text: 'I will log your refill schedule in the pharmacy dispatch queue for Tuesday 2 PM pick up.',
-    timestamp: '10:15 AM',
-  },
-];
-
-const INITIAL_RADAR_EVENTS: SoundRadarEvent[] = [
-  {
-    id: 's-1',
-    title: 'Dr. Evans (Physician)',
-    category: 'speech',
-    direction: 'Front Right (45°)',
-    angleDeg: 45,
-    db: 62,
-    time: 'Live',
-  },
-  {
-    id: 's-2',
-    title: 'Door Knock (Corridor)',
-    category: 'door',
-    direction: 'Left Peripheral (280°)',
-    angleDeg: 280,
-    db: 58,
-    time: '20s ago',
-  },
-  {
-    id: 's-3',
-    title: 'IV Pump Chime',
-    category: 'medical',
-    direction: 'Right (110°)',
-    angleDeg: 110,
-    db: 46,
-    time: '1m ago',
-  },
-];
 
 interface HearingState {
   isListening: boolean;
+  isPaused: boolean;
+  recordingStatus: RecognitionState;
+  sessionId: string | null;
+  selectedLanguage: string;
   ambientDb: number;
   transcripts: CaptionMessage[];
   soundEvents: SoundRadarEvent[];
   activeAlert: string | null;
   selectedCaptionSize: 'md' | 'lg' | 'xl';
+  errorMessage: string | null;
+  liveInterimText: string | null;
+
+  // Actions
   setCaptionSize: (size: 'md' | 'lg' | 'xl') => void;
-  toggleListening: () => void;
-  addTranscript: (msg: CaptionMessage) => void;
-  triggerMockSoundEvent: (category: SoundRadarEvent['category']) => void;
+  setLanguage: (lang: string) => void;
+  startListening: () => Promise<boolean>;
+  pauseListening: () => Promise<void>;
+  resumeListening: () => Promise<void>;
+  stopSession: () => Promise<void>;
+  toggleListening: () => Promise<void>;
   clearTranscripts: () => void;
+  copyTranscript: () => Promise<boolean>;
+  saveTranscript: () => Promise<boolean>;
+  triggerMockSoundEvent: (category: SoundRadarEvent['category']) => void;
+  addTranscript: (msg: CaptionMessage) => void;
+  dismissAlert: () => void;
+  cleanup: () => Promise<void>;
 }
 
-export const useHearingStore = create<HearingState>((set, get) => ({
-  isListening: true,
-  ambientDb: 38,
-  transcripts: INITIAL_TRANSCRIPTS,
-  soundEvents: INITIAL_RADAR_EVENTS,
-  activeAlert: 'Door Knock (Left)',
-  selectedCaptionSize: 'lg',
-  setCaptionSize: (size) => {
-    try {
-      Haptics.selectionAsync();
-    } catch {}
-    set({ selectedCaptionSize: size });
-  },
+export const useHearingStore = create<HearingState>((set, get) => {
+  // Listen to centralized speech recognition events
+  speechRecognitionService.addListener((event: SpeechRecognitionEvent) => {
+    switch (event.type) {
+      case 'state_change':
+        if (event.state) {
+          set({
+            recordingStatus: event.state,
+            isListening: event.state === 'recording',
+            isPaused: event.state === 'paused',
+          });
+        }
+        break;
 
-  toggleListening: () => {
-    const nextState = !get().isListening;
-    try {
-      if (nextState) {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      } else {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      case 'telemetry':
+        if (event.decibels !== undefined) {
+          set({ ambientDb: event.decibels });
+        }
+        break;
+
+      case 'transcript':
+        if (event.transcript && event.transcript.trim()) {
+          const timestamp = event.timestamp || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const newMsg: CaptionMessage = {
+            id: `t-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+            speaker: 'Live Speaker',
+            role: 'doctor',
+            avatarInitials: 'LS',
+            text: event.transcript.trim(),
+            timestamp,
+            isFinal: event.isFinal ?? true,
+            confidence: event.confidence,
+          };
+
+          get().addTranscript(newMsg);
+          set({ liveInterimText: null });
+
+          try {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          } catch {}
+        }
+        break;
+
+      case 'sound_event':
+        if (event.soundEvents && event.soundEvents.length > 0) {
+          const radarEvents: SoundRadarEvent[] = event.soundEvents.map((se) => ({
+            id: se.id || `se-${Date.now()}`,
+            title: se.title,
+            category: se.category,
+            direction: se.direction,
+            angleDeg: se.angleDeg,
+            db: se.db,
+            time: se.time || 'Live',
+            confidence: se.confidence,
+          }));
+
+          const primaryEvent = radarEvents[0];
+          set((state) => ({
+            soundEvents: [...radarEvents, ...state.soundEvents.slice(0, 10)],
+            activeAlert: primaryEvent ? primaryEvent.title : state.activeAlert,
+            ambientDb: event.decibels !== undefined ? event.decibels : state.ambientDb,
+          }));
+
+          try {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+          } catch {}
+        }
+        break;
+
+      case 'error':
+        if (event.error) {
+          set({ errorMessage: event.error });
+        }
+        break;
+    }
+  });
+
+  return {
+    isListening: false,
+    isPaused: false,
+    recordingStatus: 'idle',
+    sessionId: null,
+    selectedLanguage: 'en-US',
+    ambientDb: 38,
+    transcripts: [],
+    soundEvents: [],
+    activeAlert: null,
+    selectedCaptionSize: 'lg',
+    errorMessage: null,
+    liveInterimText: null,
+
+    setCaptionSize: (size) => {
+      try {
+        Haptics.selectionAsync();
+      } catch {}
+      set({ selectedCaptionSize: size });
+    },
+
+    setLanguage: (lang) => {
+      speechRecognitionService.setLanguage(lang);
+      set({ selectedLanguage: lang });
+    },
+
+    startListening: async () => {
+      set({ errorMessage: null });
+      const user = useUserStore.getState().user;
+      let sessionId = get().sessionId;
+
+      // Start Supabase hearing session if logged in
+      if (user?.id && !sessionId) {
+        try {
+          const { data } = await hearingService.startSession(user.id, get().selectedLanguage);
+          if (data?.id) {
+            sessionId = data.id;
+            set({ sessionId: data.id });
+          }
+        } catch (e: any) {
+          console.warn('[HearingStore] Supabase session start error:', e.message);
+        }
       }
-    } catch {}
-    set({ isListening: nextState });
-  },
 
-  addTranscript: (msg) => {
-    set((state) => ({
-      transcripts: [...state.transcripts, msg],
-    }));
-  },
+      const started = await speechRecognitionService.startListening({
+        language: get().selectedLanguage,
+        sessionId: sessionId || undefined,
+        continuous: true,
+        intervalMs: 4500,
+      });
 
-  triggerMockSoundEvent: (category) => {
-    try {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-    } catch {}
-    const newEvent: SoundRadarEvent = {
-      id: `s-${Date.now()}`,
-      title: category === 'door' ? 'Door Knock Alert' : category === 'siren' ? 'High Decibel Siren (82dB)' : 'Speech Detected',
-      category,
-      direction: 'Left Corridor (270°)',
-      angleDeg: 270,
-      db: 74,
-      time: 'Just now',
-    };
-    set((state) => ({
-      soundEvents: [newEvent, ...state.soundEvents],
-      activeAlert: newEvent.title,
-    }));
-  },
+      if (started) {
+        set({ isListening: true, isPaused: false, recordingStatus: 'recording' });
+        try {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        } catch {}
+      }
+      return started;
+    },
 
-  clearTranscripts: () => set({ transcripts: [] }),
-}));
+    pauseListening: async () => {
+      await speechRecognitionService.pauseListening();
+      set({ isListening: false, isPaused: true, recordingStatus: 'paused' });
+      try {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      } catch {}
+    },
+
+    resumeListening: async () => {
+      await speechRecognitionService.resumeListening();
+      set({ isListening: true, isPaused: false, recordingStatus: 'recording' });
+      try {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } catch {}
+    },
+
+    stopSession: async () => {
+      const sessionId = get().sessionId;
+      await speechRecognitionService.stopListening();
+
+      // End session in Supabase and log activity
+      if (sessionId) {
+        try {
+          await hearingService.endSession(sessionId);
+        } catch (e: any) {
+          console.warn('[HearingStore] End session error:', e.message);
+        }
+      }
+
+      const user = useUserStore.getState().user;
+      if (user?.id) {
+        try {
+          await activityService.logActivity({
+            user_id: user.id,
+            activity_type: 'hearing',
+            title: 'Hearing Assist Session Completed',
+            description: `Session finalized with ${get().transcripts.length} transcript segments captured.`,
+            metadata: {
+              sessionId,
+              transcriptCount: get().transcripts.length,
+              language: get().selectedLanguage,
+              endedAt: new Date().toISOString(),
+            },
+          });
+        } catch (e) {}
+      }
+
+      set({
+        isListening: false,
+        isPaused: false,
+        recordingStatus: 'idle',
+        sessionId: null,
+      });
+
+      try {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      } catch {}
+    },
+
+    toggleListening: async () => {
+      const { isListening, isPaused } = get();
+      if (isListening) {
+        await get().pauseListening();
+      } else if (isPaused) {
+        await get().resumeListening();
+      } else {
+        await get().startListening();
+      }
+    },
+
+    addTranscript: (msg) => {
+      set((state) => ({
+        transcripts: [...state.transcripts, msg],
+      }));
+
+      // Persist to Supabase if session active
+      const sessionId = get().sessionId;
+      if (sessionId) {
+        hearingService
+          .logTranscript({
+            session_id: sessionId,
+            transcript: msg.text,
+            is_final: msg.isFinal ?? true,
+          })
+          .catch((err) => console.warn('[HearingStore] Transcript persistence error:', err.message));
+      }
+    },
+
+    clearTranscripts: () => {
+      try {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      } catch {}
+      set({ transcripts: [], liveInterimText: null });
+    },
+
+    copyTranscript: async () => {
+      const list = get().transcripts;
+      if (list.length === 0) return false;
+
+      const fullText = list
+        .map((t) => `[${t.timestamp}] ${t.speaker} (${t.role}): ${t.text}`)
+        .join('\n\n');
+
+      try {
+        await Clipboard.setStringAsync(fullText);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        return true;
+      } catch (e: any) {
+        console.warn('[HearingStore] Copy failed:', e.message);
+        return false;
+      }
+    },
+
+    saveTranscript: async () => {
+      const list = get().transcripts;
+      if (list.length === 0) return false;
+
+      // Copy transcript to clipboard and log to activities
+      await get().copyTranscript();
+
+      const user = useUserStore.getState().user;
+      if (user?.id) {
+        try {
+          await activityService.logActivity({
+            user_id: user.id,
+            activity_type: 'hearing',
+            title: 'Transcript Saved to Records',
+            description: `Copied and recorded ${list.length} transcript lines to clinical history.`,
+            metadata: {
+              savedAt: new Date().toISOString(),
+              totalLines: list.length,
+              language: get().selectedLanguage,
+            },
+          });
+        } catch (e) {}
+      }
+
+      try {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } catch {}
+      return true;
+    },
+
+    triggerMockSoundEvent: (category) => {
+      try {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      } catch {}
+      const newEvent: SoundRadarEvent = {
+        id: `s-${Date.now()}`,
+        title:
+          category === 'door'
+            ? 'Door Knock Alert'
+            : category === 'siren'
+            ? 'Emergency Siren (82dB)'
+            : category === 'alarm'
+            ? 'Fire / Smoke Alarm (3.1 kHz)'
+            : 'Speech Detected',
+        category,
+        direction: category === 'door' ? 'Corridor (280°)' : category === 'siren' ? 'Street (45°)' : 'Ceiling (0°)',
+        angleDeg: category === 'door' ? 280 : category === 'siren' ? 45 : 0,
+        db: category === 'siren' ? 82 : category === 'alarm' ? 86 : 64,
+        time: 'Just now',
+        confidence: 0.95,
+      };
+      set((state) => ({
+        soundEvents: [newEvent, ...state.soundEvents],
+        activeAlert: newEvent.title,
+      }));
+    },
+
+    dismissAlert: () => set({ activeAlert: null }),
+
+    cleanup: async () => {
+      await speechRecognitionService.cleanup();
+      set({ isListening: false, isPaused: false, recordingStatus: 'idle' });
+    },
+  };
+});

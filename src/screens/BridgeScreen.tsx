@@ -27,6 +27,9 @@ import {
   CheckCheck,
   Shield,
   Layers,
+  Check,
+  X,
+  MicOff,
 } from 'lucide-react-native';
 import { useAppTheme } from '../theme/ThemeContext';
 import { useBridgeStore } from '../store/bridgeStore';
@@ -42,9 +45,19 @@ export const BridgeScreen: React.FC = () => {
   const showAslDrawer = useBridgeStore((s) => s.showAslDrawer);
   const typedVoiceText = useBridgeStore((s) => s.typedVoiceText);
   const bridgeSpeed = useBridgeStore((s) => s.bridgeSpeed);
+  const isUserVoiceRecording = useBridgeStore((s) => s.isUserVoiceRecording);
+  const pendingTranscript = useBridgeStore((s) => s.pendingTranscript);
+  const pendingConfidence = useBridgeStore((s) => s.pendingConfidence);
+  const pendingSender = useBridgeStore((s) => s.pendingSender);
+  const isReviewingTranscript = useBridgeStore((s) => s.isReviewingTranscript);
 
   const setBridgeSpeed = useBridgeStore((s) => s.setBridgeSpeed);
   const togglePartnerListening = useBridgeStore((s) => s.togglePartnerListening);
+  const startUserVoiceInput = useBridgeStore((s) => s.startUserVoiceInput);
+  const stopUserVoiceInput = useBridgeStore((s) => s.stopUserVoiceInput);
+  const setPendingTranscript = useBridgeStore((s) => s.setPendingTranscript);
+  const approvePendingTranscript = useBridgeStore((s) => s.approvePendingTranscript);
+  const discardPendingTranscript = useBridgeStore((s) => s.discardPendingTranscript);
   const toggleCounterFlipped = useBridgeStore((s) => s.toggleCounterFlipped);
   const toggleAslDrawer = useBridgeStore((s) => s.toggleAslDrawer);
   const setTypedVoiceText = useBridgeStore((s) => s.setTypedVoiceText);
@@ -331,6 +344,75 @@ export const BridgeScreen: React.FC = () => {
         </View>
 
         {/* 5. Dual Input Console (Partner Mic & Typed Voice) */}
+        {/* Live Transcription Review & Approval Banner */}
+        {isReviewingTranscript && (
+          <View style={[styles.reviewCard, { backgroundColor: colors.surface, borderColor: colors.primary }]}>
+            <View style={styles.reviewHeader}>
+              <View style={styles.reviewHeaderLeft}>
+                <Sparkles size={16} color={colors.primary} />
+                <Text style={[styles.reviewTitle, { color: colors.text, fontSize: scaleFont(13) }]}>
+                  {pendingSender === 'user' ? 'Review Your Spoken Message' : 'Review Provider Transcript'}
+                </Text>
+              </View>
+              {pendingConfidence && (
+                <View style={[styles.confPill, { backgroundColor: colors.primaryFixed }]}>
+                  <Text style={[styles.confPillText, { color: colors.onPrimaryFixed, fontSize: scaleFont(10) }]}>
+                    {Math.round(pendingConfidence)}% Conf
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            <Text style={[styles.reviewHint, { color: colors.textMuted, fontSize: scaleFont(11) }]}>
+              Verify or refine recognized text before sending to conversation:
+            </Text>
+
+            <TextInput
+              style={[
+                styles.reviewInput,
+                {
+                  backgroundColor: colors.surfaceContainerLow,
+                  borderColor: colors.border,
+                  color: colors.text,
+                  fontSize: scaleFont(14),
+                },
+              ]}
+              value={pendingTranscript || ''}
+              onChangeText={setPendingTranscript}
+              multiline
+              numberOfLines={3}
+              placeholder="Edit transcript before sending..."
+              placeholderTextColor={colors.textMuted}
+            />
+
+            <View style={styles.reviewActions}>
+              <TouchableOpacity
+                style={[styles.discardBtn, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}
+                onPress={discardPendingTranscript}
+                accessibilityLabel="Discard transcription"
+                accessibilityRole="button"
+              >
+                <X size={15} color={colors.textMuted} />
+                <Text style={[styles.discardBtnText, { color: colors.textMuted, fontSize: scaleFont(12) }]}>
+                  Discard
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.approveBtn, { backgroundColor: colors.primary }]}
+                onPress={approvePendingTranscript}
+                accessibilityLabel="Approve and send message"
+                accessibilityRole="button"
+              >
+                <Check size={16} color={colors.onPrimary} />
+                <Text style={[styles.approveBtnText, { color: colors.onPrimary, fontSize: scaleFont(12) }]}>
+                  Approve & Send
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
         <View style={[styles.inputConsoleCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           {/* Partner Mic Audio Capture */}
           <View style={[styles.partnerMicRow, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}>
@@ -425,6 +507,33 @@ export const BridgeScreen: React.FC = () => {
               >
                 <Text style={[styles.clearBtnText, { color: colors.textSecondary, fontSize: scaleFont(12) }]}>
                   Clear
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.clearBtn,
+                  {
+                    backgroundColor: isUserVoiceRecording ? colors.sos : colors.surfaceContainerLow,
+                    borderColor: isUserVoiceRecording ? colors.sos : colors.border,
+                  },
+                ]}
+                onPress={isUserVoiceRecording ? stopUserVoiceInput : startUserVoiceInput}
+                accessibilityLabel={isUserVoiceRecording ? 'Stop voice recording' : 'Record voice with microphone'}
+                accessibilityRole="button"
+              >
+                <Mic size={14} color={isUserVoiceRecording ? '#FFFFFF' : colors.primary} />
+                <Text
+                  style={[
+                    styles.clearBtnText,
+                    {
+                      color: isUserVoiceRecording ? '#FFFFFF' : colors.primary,
+                      fontSize: scaleFont(12),
+                      fontWeight: '600',
+                    },
+                  ]}
+                >
+                  {isUserVoiceRecording ? 'Finish' : 'Voice'}
                 </Text>
               </TouchableOpacity>
 
@@ -855,6 +964,77 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   speakAloudBtnText: {
+    fontWeight: '700',
+  },
+  reviewCard: {
+    borderRadius: 14,
+    borderWidth: 1.5,
+    padding: 14,
+    gap: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  reviewHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  reviewHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  reviewTitle: {
+    fontWeight: '700',
+  },
+  confPill: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  confPillText: {
+    fontWeight: '700',
+  },
+  reviewHint: {
+    fontWeight: '500',
+  },
+  reviewInput: {
+    borderRadius: 10,
+    borderWidth: StyleSheet.hairlineWidth,
+    padding: 10,
+    minHeight: 64,
+    textAlignVertical: 'top',
+  },
+  reviewActions: {
+    flexDirection: 'row',
+    gap: 10,
+    justifyContent: 'flex-end',
+    marginTop: 4,
+  },
+  discardBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 12,
+    height: 38,
+    borderRadius: 8,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  discardBtnText: {
+    fontWeight: '600',
+  },
+  approveBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 16,
+    height: 38,
+    borderRadius: 8,
+  },
+  approveBtnText: {
     fontWeight: '700',
   },
 });

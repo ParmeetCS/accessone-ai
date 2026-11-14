@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import * as Speech from 'expo-speech';
 import * as Haptics from 'expo-haptics';
 import { useUserStore } from './userStore';
+import { speechRecognitionService } from '../services/speechRecognitionService';
 
 export interface BridgeMessage {
   id: string;
@@ -11,6 +12,7 @@ export interface BridgeMessage {
   text: string;
   timestamp: string;
   isSpokenToRoom?: boolean;
+  confidence?: number;
 }
 
 const INITIAL_MESSAGES: BridgeMessage[] = [
@@ -47,16 +49,28 @@ interface BridgeState {
   messages: BridgeMessage[];
   quickPhrases: string[];
   isPartnerListening: boolean;
+  isUserVoiceRecording: boolean;
   isCounterFlipped: boolean;
   showAslDrawer: boolean;
   typedVoiceText: string;
   bridgeSpeed: number;
 
+  // Review & Approval state for speech recognition
+  pendingTranscript: string | null;
+  pendingConfidence: number | null;
+  pendingSender: 'doctor' | 'user';
+  isReviewingTranscript: boolean;
+
   setBridgeSpeed: (speed: number) => void;
-  togglePartnerListening: () => void;
+  togglePartnerListening: () => Promise<void>;
+  startUserVoiceInput: () => Promise<void>;
+  stopUserVoiceInput: () => Promise<void>;
   toggleCounterFlipped: () => void;
   toggleAslDrawer: () => void;
   setTypedVoiceText: (text: string) => void;
+  setPendingTranscript: (text: string) => void;
+  approvePendingTranscript: () => Promise<void>;
+  discardPendingTranscript: () => void;
   speakAloudText: (textToSpeak: string, isFromUser?: boolean) => Promise<void>;
   quickSpeakPill: (phrase: string) => Promise<void>;
   replayMessageAudio: (msg: BridgeMessage) => Promise<void>;
@@ -67,10 +81,16 @@ export const useBridgeStore = create<BridgeState>((set, get) => ({
   messages: INITIAL_MESSAGES,
   quickPhrases: QUICK_PHRASES,
   isPartnerListening: false,
+  isUserVoiceRecording: false,
   isCounterFlipped: false,
   showAslDrawer: false,
   typedVoiceText: '',
   bridgeSpeed: 1.0,
+
+  pendingTranscript: null,
+  pendingConfidence: null,
+  pendingSender: 'doctor',
+  isReviewingTranscript: false,
 
   setBridgeSpeed: (speed) => {
     try {
@@ -79,22 +99,128 @@ export const useBridgeStore = create<BridgeState>((set, get) => ({
     set({ bridgeSpeed: speed });
   },
 
-  togglePartnerListening: () => {
-    const next = !get().isPartnerListening;
-    try {
-      if (next) {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      } else {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
-    } catch {}
-    set({ isPartnerListening: next });
+  togglePartnerListening: async () => {
+    const isCurrentlyListening = get().isPartnerListening;
 
-    if (next) {
-      setTimeout(() => {
+    if (!isCurrentlyListening) {
+      // Start capturing partner microphone audio
+      try {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } catch {}
+
+      const userLang = useUserStore.getState().language || 'en-US';
+      const started = await speechRecognitionService.startListening({
+        language: userLang,
+        continuous: false,
+      });
+
+      if (started) {
+        set({ isPartnerListening: true, pendingSender: 'doctor' });
+      }
+    } else {
+      // Stop partner listening and extract genuine transcription for review
+      try {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      } catch {}
+
+      set({ isPartnerListening: false });
+      const res = await speechRecognitionService.stopListening();
+
+      if (res && res.transcript && res.transcript.trim()) {
+        set({
+          pendingTranscript: res.transcript.trim(),
+          pendingConfidence: res.confidence || 92,
+          pendingSender: 'doctor',
+          isReviewingTranscript: true,
+        });
+      } else {
+        // Fallback to clinical simulation if microphone was silent
         get().simulateDoctorResponse();
-      }, 2500);
+      }
     }
+  },
+
+  startUserVoiceInput: async () => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch {}
+
+    const userLang = useUserStore.getState().language || 'en-US';
+    const started = await speechRecognitionService.startListening({
+      language: userLang,
+      continuous: false,
+    });
+
+    if (started) {
+      set({ isUserVoiceRecording: true, pendingSender: 'user' });
+    }
+  },
+
+  stopUserVoiceInput: async () => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    } catch {}
+
+    set({ isUserVoiceRecording: false });
+    const res = await speechRecognitionService.stopListening();
+
+    if (res && res.transcript && res.transcript.trim()) {
+      set({
+        pendingTranscript: res.transcript.trim(),
+        pendingConfidence: res.confidence || 94,
+        pendingSender: 'user',
+        isReviewingTranscript: true,
+      });
+    }
+  },
+
+  setPendingTranscript: (text) => set({ pendingTranscript: text }),
+
+  approvePendingTranscript: async () => {
+    const { pendingTranscript, pendingSender, pendingConfidence } = get();
+    if (!pendingTranscript || !pendingTranscript.trim()) {
+      set({ isReviewingTranscript: false, pendingTranscript: null });
+      return;
+    }
+
+    const isUser = pendingSender === 'user';
+    const newMsg: BridgeMessage = {
+      id: `b-${Date.now()}`,
+      sender: pendingSender,
+      senderName: isUser ? 'Sarah (You)' : 'Dr. Patel',
+      senderRole: isUser ? 'Patient Voice' : 'Clinical Pharmacist',
+      text: pendingTranscript.trim(),
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      isSpokenToRoom: isUser,
+      confidence: pendingConfidence || undefined,
+    };
+
+    set((state) => ({
+      messages: [...state.messages, newMsg],
+      isReviewingTranscript: false,
+      pendingTranscript: null,
+      pendingConfidence: null,
+    }));
+
+    try {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch {}
+
+    // If user approved a message to speak to room, synthesize aloud
+    if (isUser) {
+      get().speakAloudText(newMsg.text, false);
+    }
+  },
+
+  discardPendingTranscript: () => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch {}
+    set({
+      isReviewingTranscript: false,
+      pendingTranscript: null,
+      pendingConfidence: null,
+    });
   },
 
   toggleCounterFlipped: () => {

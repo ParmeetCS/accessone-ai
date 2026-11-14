@@ -26,6 +26,33 @@ export interface VisionApiResponse {
   limitations?: string;
 }
 
+export interface HearingSoundEvent {
+  id: string;
+  title: string;
+  category: 'door' | 'alarm' | 'siren' | 'speech' | 'medical';
+  direction: string;
+  angleDeg: number;
+  db: number;
+  confidence: number;
+  time: string;
+}
+
+export interface HearingTranscribeResponse {
+  success: boolean;
+  transcript: string;
+  is_final: boolean;
+  confidence?: number;
+  timestamp: string;
+  status: string;
+  decibels: number;
+  is_speech: boolean;
+  sound_events: HearingSoundEvent[];
+  processing_ms: number;
+  session_id?: string;
+  language: string;
+  error?: string;
+}
+
 export interface VoiceSynthesisRequest {
   text: string;
   speechRate?: number;
@@ -123,6 +150,68 @@ export const api = {
   },
 
   hearing: {
+    /**
+     * POST /api/v1/hearing/transcribe
+     * Sends recorded audio payload to backend for genuine speech-to-text recognition
+     * and spectral environmental sound event detection (fire alarm, siren, door knock, etc.).
+     */
+    transcribe: async (payload: {
+      audio: string;
+      format?: string;
+      language?: string;
+      sessionId?: string;
+      isFinal?: boolean;
+    }): Promise<HearingTranscribeResponse> => {
+      const startTime = Date.now();
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+
+        const res = await fetch(`${API_BASE_URL}/hearing/transcribe`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            audio: payload.audio,
+            format: payload.format || 'm4a',
+            language: payload.language || 'en-US',
+            session_id: payload.sessionId,
+            is_final: payload.isFinal !== undefined ? payload.isFinal : true,
+          }),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!res.ok) {
+          const errBody = await res.text();
+          throw new Error(`Server status ${res.status}: ${errBody}`);
+        }
+
+        const data: HearingTranscribeResponse = await res.json();
+        return data;
+      } catch (error: any) {
+        console.warn('[Hearing API] Transcribe request error:', error.message);
+        const duration = Date.now() - startTime;
+        return {
+          success: false,
+          transcript: '',
+          is_final: payload.isFinal !== undefined ? payload.isFinal : true,
+          confidence: undefined,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          status: 'network_failure',
+          decibels: 36,
+          is_speech: false,
+          sound_events: [],
+          processing_ms: duration,
+          session_id: payload.sessionId,
+          language: payload.language || 'en-US',
+          error: error.message || 'Network unreachable',
+        };
+      }
+    },
+
     streamAudioChunk: async (chunkBase64: string) => {
       return { transcriptChunk: '', decibels: 38, isSpeech: true };
     },
