@@ -1,0 +1,57 @@
+{
+  "expo": {
+    "name": "AccessOne AI",
+    "slug": "accessone-ai",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": false,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F8FAFC"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "AccessOne AI requires camera access for Vision Assist OCR and object recognition.",
+        "NSMicrophoneUsageDescription": "AccessOne AI requires microphone access for Hearing Assist and Bridge speech recognition.",
+        "NSLocationWhenInUseUsageDescription": "AccessOne AI requires location access to dispatch emergency services and GPS telemetry."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0D7A5F"
+      },
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "VIBRATE"
+      ],
+      "package": "com.accessone.ai"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "AccessOne AI requires camera access for Vision Assist OCR."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "AccessOne AI requires location access for Safety Assist."
+        }
+      ],
+      "expo-asset",
+      "expo-font"
+    ]
+  }
+}
