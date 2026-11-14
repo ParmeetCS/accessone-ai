@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,8 +6,12 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import { useIsFocused } from '@react-navigation/native';
+import * as ImagePicker from 'expo-image-picker';
+import * as Clipboard from 'expo-clipboard';
 import {
   Camera,
   ScanLine,
@@ -23,6 +27,12 @@ import {
   Sun,
   Ruler,
   Compass,
+  Upload,
+  Video,
+  SwitchCamera,
+  Contrast,
+  Pause,
+  Play,
 } from 'lucide-react-native';
 import { useAppTheme } from '../theme/ThemeContext';
 import { useVisionStore, VisionMode } from '../store/visionStore';
@@ -31,31 +41,122 @@ import { useUserStore } from '../store/userStore';
 export const VisionScreen: React.FC = () => {
   const { colors, scaleFont } = useAppTheme();
   const [permission, requestPermission] = useCameraPermissions();
+  const isFocused = useIsFocused();
+  const cameraRef = useRef<any>(null);
   const [copied, setCopied] = useState(false);
 
+  // Vision Store State & Actions
   const currentMode = useVisionStore((s) => s.currentMode);
   const setMode = useVisionStore((s) => s.setMode);
   const isScanning = useVisionStore((s) => s.isScanning);
+  const scanError = useVisionStore((s) => s.scanError);
+  const clearError = useVisionStore((s) => s.clearError);
   const torchOn = useVisionStore((s) => s.torchOn);
   const toggleTorch = useVisionStore((s) => s.toggleTorch);
+  const cameraFacing = useVisionStore((s) => s.cameraFacing);
+  const toggleCameraFacing = useVisionStore((s) => s.toggleCameraFacing);
+  const isLive = useVisionStore((s) => s.isLive);
+  const toggleLive = useVisionStore((s) => s.toggleLive);
   const isSpeaking = useVisionStore((s) => s.isSpeaking);
+  const isPaused = useVisionStore((s) => s.isPaused);
   const activeResult = useVisionStore((s) => s.activeResult);
-  const scanOCR = useVisionStore((s) => s.scanOCR);
-  const describeScene = useVisionStore((s) => s.describeScene);
+  const analyzeImageBase64 = useVisionStore((s) => s.analyzeImageBase64);
   const readAloud = useVisionStore((s) => s.readAloud);
+  const pauseSpeaking = useVisionStore((s) => s.pauseSpeaking);
+  const resumeSpeaking = useVisionStore((s) => s.resumeSpeaking);
   const stopSpeaking = useVisionStore((s) => s.stopSpeaking);
+  const replaySpeaking = useVisionStore((s) => s.replaySpeaking);
+
+  // User Settings State
   const speechRate = useUserStore((s) => s.speechRate);
   const setSpeechRate = useUserStore((s) => s.setSpeechRate);
+  const toggleHighContrast = useUserStore((s) => s.toggleHighContrast);
+  const isHighContrast = useUserStore((s) => s.isHighContrast);
 
+  // Permission Request on Mount
   useEffect(() => {
     if (permission && !permission.granted && permission.canAskAgain) {
       requestPermission();
     }
   }, []);
 
-  const handleCopy = () => {
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  // Live Auto-Capture Loop when Live Mode is active
+  useEffect(() => {
+    if (!isLive || !isFocused || !permission?.granted) return;
+
+    const interval = setInterval(async () => {
+      if (cameraRef.current && !isScanning) {
+        try {
+          const photo = await cameraRef.current.takePictureAsync({
+            base64: true,
+            quality: 0.6,
+            skipProcessing: true,
+          });
+          if (photo?.base64) {
+            analyzeImageBase64(photo.base64);
+          }
+        } catch (e) {
+          console.warn('[Live Auto-Capture] Frame capture skipped:', e);
+        }
+      }
+    }, 4500); // 4.5s cadence to avoid overwhelming device or backend
+
+    return () => clearInterval(interval);
+  }, [isLive, isFocused, permission?.granted, isScanning]);
+
+  // Capture from live camera
+  const handleCaptureAndAnalyze = async () => {
+    if (isScanning) return;
+    if (!cameraRef.current) {
+      alert('Camera is not ready. Please ensure camera permissions are granted.');
+      return;
+    }
+
+    try {
+      const photo = await cameraRef.current.takePictureAsync({
+        base64: true,
+        quality: 0.7,
+        skipProcessing: false,
+      });
+
+      if (photo?.base64) {
+        await analyzeImageBase64(photo.base64);
+      }
+    } catch (e: any) {
+      console.warn('[Camera Capture Error]', e);
+    }
+  };
+
+  // Upload image from photo library
+  const handleUploadImage = async () => {
+    if (isScanning) return;
+
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: false,
+        quality: 0.8,
+        base64: true,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const asset = result.assets[0];
+        if (asset.base64) {
+          await analyzeImageBase64(asset.base64);
+        }
+      }
+    } catch (e: any) {
+      console.warn('[Image Upload Error]', e);
+    }
+  };
+
+  // Copy transcription to clipboard
+  const handleCopy = async () => {
+    if (activeResult?.labelText) {
+      await Clipboard.setStringAsync(activeResult.labelText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   return (
@@ -140,51 +241,75 @@ export const VisionScreen: React.FC = () => {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* 2. Speed Controller Quick Bar */}
+      {/* 2. Speed Controller & High Contrast Quick Bar */}
       <View style={[styles.speedBar, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <View style={styles.speedLabelRow}>
           <Volume2 size={16} color={colors.primary} />
           <Text style={[styles.speedLabel, { color: colors.textSecondary, fontSize: scaleFont(12) }]}>
-            TTS Speed
+            Speed
           </Text>
-        </View>
-        <View style={styles.speedButtonGroup}>
-          {[0.85, 1.0, 1.25].map((rate) => (
-            <TouchableOpacity
-              key={rate}
-              style={[
-                styles.speedBtn,
-                speechRate === rate
-                  ? { backgroundColor: colors.primary }
-                  : { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border },
-              ]}
-              onPress={() => setSpeechRate(rate)}
-              accessibilityLabel={`Set speech speed to ${rate}x`}
-              accessibilityRole="button"
-            >
-              <Text
+          <View style={styles.speedButtonGroup}>
+            {[0.85, 1.0, 1.25, 1.5].map((rate) => (
+              <TouchableOpacity
+                key={rate}
                 style={[
-                  styles.speedBtnText,
-                  {
-                    color: speechRate === rate ? colors.onPrimary : colors.text,
-                    fontWeight: speechRate === rate ? '700' : '500',
-                  },
+                  styles.speedBtn,
+                  speechRate === rate
+                    ? { backgroundColor: colors.primary }
+                    : { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border },
                 ]}
+                onPress={() => setSpeechRate(rate)}
+                accessibilityLabel={`Set speech speed to ${rate}x`}
+                accessibilityRole="button"
               >
-                {rate}x
-              </Text>
-            </TouchableOpacity>
-          ))}
+                <Text
+                  style={[
+                    styles.speedBtnText,
+                    {
+                      color: speechRate === rate ? colors.onPrimary : colors.text,
+                      fontWeight: speechRate === rate ? '700' : '500',
+                    },
+                  ]}
+                >
+                  {rate}x
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
+
+        <TouchableOpacity
+          style={[
+            styles.contrastBtn,
+            {
+              backgroundColor: isHighContrast ? colors.primary : colors.surfaceContainerLow,
+              borderColor: colors.border,
+            },
+          ]}
+          onPress={toggleHighContrast}
+          accessibilityLabel="Toggle High Contrast Mode"
+          accessibilityRole="button"
+        >
+          <Contrast size={14} color={isHighContrast ? colors.onPrimary : colors.text} />
+          <Text
+            style={[
+              styles.contrastBtnText,
+              { color: isHighContrast ? colors.onPrimary : colors.text, fontSize: scaleFont(11) },
+            ]}
+          >
+            Contrast
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {/* 3. Live Camera Viewfinder & HUD */}
       <View style={[styles.viewfinderCard, { borderColor: colors.primary }]}>
-        {permission?.granted ? (
+        {permission?.granted && isFocused ? (
           <CameraView
+            ref={cameraRef}
             style={styles.camera}
             enableTorch={torchOn}
-            facing="back"
+            facing={cameraFacing}
           >
             {/* Top HUD Indicators */}
             <View style={styles.hudTopRow}>
@@ -199,31 +324,73 @@ export const VisionScreen: React.FC = () => {
                 </View>
               </View>
 
-              <TouchableOpacity
-                style={[styles.torchButton, torchOn && { backgroundColor: '#F59E0B' }]}
-                onPress={toggleTorch}
-                accessibilityLabel="Toggle camera flashlight"
-                accessibilityRole="button"
-              >
-                <Flashlight size={18} color="#FFFFFF" />
-              </TouchableOpacity>
+              <View style={styles.hudActionGroup}>
+                <TouchableOpacity
+                  style={[styles.hudCircleBtn, torchOn && { backgroundColor: '#F59E0B' }]}
+                  onPress={toggleTorch}
+                  accessibilityLabel="Toggle camera flashlight"
+                  accessibilityRole="button"
+                >
+                  <Flashlight size={18} color="#FFFFFF" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.hudCircleBtn}
+                  onPress={toggleCameraFacing}
+                  accessibilityLabel="Switch camera facing"
+                  accessibilityRole="button"
+                >
+                  <SwitchCamera size={18} color="#FFFFFF" />
+                </TouchableOpacity>
+              </View>
             </View>
 
             {/* AI Bounding Target Box */}
-            <View style={[styles.boundingTarget, { borderColor: colors.primaryFixedDim }]}>
+            <View
+              style={[
+                styles.boundingTarget,
+                {
+                  borderColor: isScanning ? '#F59E0B' : colors.primaryFixedDim,
+                  borderStyle: isScanning ? 'solid' : 'dashed',
+                },
+              ]}
+            >
               <View style={styles.targetHeader}>
-                <View style={[styles.confidenceBadge, { backgroundColor: colors.primary }]}>
+                <View
+                  style={[
+                    styles.confidenceBadge,
+                    { backgroundColor: isScanning ? '#F59E0B' : colors.primary },
+                  ]}
+                >
                   <Sparkles size={11} color="#FFFFFF" />
                   <Text style={styles.confidenceText}>
-                    {currentMode === 'ocr' ? 'TEXT DETECTED: 99.4%' : 'SCENE MAPPED: 97.8%'}
+                    {isScanning
+                      ? 'ANALYZING SCENE...'
+                      : activeResult
+                      ? `CONFIDENCE: ${activeResult.confidence}%`
+                      : currentMode === 'ocr'
+                      ? 'ALIGN TEXT IN FRAME'
+                      : currentMode === 'objects'
+                      ? 'OBJECT DETECTION READY'
+                      : 'SURROUNDINGS READY'}
                   </Text>
                 </View>
               </View>
+
               <View style={styles.targetFooter}>
                 <Text style={styles.targetTagText}>
-                  {currentMode === 'ocr' ? 'Rx Label Aligned' : 'Clinical Spatial Grid'}
+                  {currentMode === 'ocr'
+                    ? 'Optical Character Recognition'
+                    : currentMode === 'objects'
+                    ? 'Neural Spatial Object Grid'
+                    : 'Environmental Overview'}
                 </Text>
-                <View style={[styles.activeLaserDot, { backgroundColor: colors.primaryFixedDim }]} />
+                <View
+                  style={[
+                    styles.activeLaserDot,
+                    { backgroundColor: isLive ? '#EF4444' : colors.primaryFixedDim },
+                  ]}
+                />
               </View>
             </View>
           </CameraView>
@@ -231,30 +398,39 @@ export const VisionScreen: React.FC = () => {
           <View style={[styles.permissionFallback, { backgroundColor: colors.surfaceContainerLow }]}>
             <Camera size={38} color={colors.primary} />
             <Text style={[styles.permissionText, { color: colors.text, fontSize: scaleFont(14) }]}>
-              Camera Access Required for Vision Assist
+              {!permission?.granted
+                ? 'Camera Access Required for Vision Assist'
+                : 'Camera Paused in Background'}
             </Text>
-            <TouchableOpacity
-              style={[styles.permissionBtn, { backgroundColor: colors.primary }]}
-              onPress={requestPermission}
-              accessibilityLabel="Grant Camera Permission"
-              accessibilityRole="button"
-            >
-              <Text style={[styles.permissionBtnText, { color: colors.onPrimary }]}>
-                Grant Camera Permission
-              </Text>
-            </TouchableOpacity>
+            {!permission?.granted && (
+              <TouchableOpacity
+                style={[styles.permissionBtn, { backgroundColor: colors.primary }]}
+                onPress={requestPermission}
+                accessibilityLabel="Grant Camera Permission"
+                accessibilityRole="button"
+              >
+                <Text style={[styles.permissionBtnText, { color: colors.onPrimary }]}>
+                  Grant Camera Permission
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
       </View>
 
-      {/* 4. Primary Capture & Analysis Buttons */}
-      <View style={styles.actionButtonsGrid}>
+      {/* 4. Primary Mobile Capture Controls Grid (Capture & Analyze, Live, Upload) */}
+      <View style={styles.primaryControlsGrid}>
+        {/* Col-span-2: Capture & Analyze Button */}
         <TouchableOpacity
-          style={[styles.primaryCaptureBtn, { backgroundColor: colors.primary }]}
-          onPress={scanOCR}
+          style={[
+            styles.captureMainBtn,
+            { backgroundColor: colors.primary },
+            isScanning && { opacity: 0.8 },
+          ]}
+          onPress={handleCaptureAndAnalyze}
           disabled={isScanning}
-          accessibilityLabel="Scan Text OCR"
-          accessibilityHint="Captures photo and reads prescription label or document text"
+          accessibilityLabel="Capture photo and analyze"
+          accessibilityHint="Takes a live photo and performs AI text reading or scene identification"
           accessibilityRole="button"
         >
           {isScanning ? (
@@ -263,56 +439,112 @@ export const VisionScreen: React.FC = () => {
             <Camera size={20} color={colors.onPrimary} />
           )}
           <Text style={[styles.captureBtnText, { color: colors.onPrimary, fontSize: scaleFont(14) }]}>
-            {isScanning ? 'Analyzing Scene...' : 'Scan Text (OCR)'}
+            {isScanning ? 'Analyzing...' : 'Capture & Analyze'}
           </Text>
         </TouchableOpacity>
 
+        {/* Col-span-1: Live Mode Toggle Button */}
         <TouchableOpacity
-          style={[styles.secondaryDescribeBtn, { backgroundColor: colors.surfaceContainerHigh, borderColor: colors.border }]}
-          onPress={describeScene}
-          disabled={isScanning}
-          accessibilityLabel="Describe Scene Surroundings"
-          accessibilityHint="Audibly narrates obstacles, walking paths, and detected objects"
+          style={[
+            styles.auxControlBtn,
+            {
+              backgroundColor: isLive ? colors.primaryFixed : colors.surfaceContainerHigh,
+              borderColor: colors.border,
+            },
+          ]}
+          onPress={toggleLive}
+          accessibilityLabel={isLive ? 'Disable Live continuous scan' : 'Enable Live continuous scan'}
           accessibilityRole="button"
         >
-          <Eye size={18} color={colors.primary} />
-          <Text style={[styles.describeBtnText, { color: colors.text, fontSize: scaleFont(13) }]}>
-            Describe Scene
+          <Video size={18} color={isLive ? colors.onPrimaryFixed : colors.primary} />
+          <Text
+            style={[
+              styles.auxBtnText,
+              { color: isLive ? colors.onPrimaryFixed : colors.text, fontSize: scaleFont(11) },
+            ]}
+          >
+            {isLive ? 'Live On' : 'Live'}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Col-span-1: Upload Existing Image Button */}
+        <TouchableOpacity
+          style={[
+            styles.auxControlBtn,
+            { backgroundColor: colors.surfaceContainerHigh, borderColor: colors.border },
+          ]}
+          onPress={handleUploadImage}
+          disabled={isScanning}
+          accessibilityLabel="Upload photo from gallery"
+          accessibilityRole="button"
+        >
+          <Upload size={18} color={colors.secondary} />
+          <Text style={[styles.auxBtnText, { color: colors.text, fontSize: scaleFont(11) }]}>
+            Upload
           </Text>
         </TouchableOpacity>
       </View>
 
+      {/* Error Alert Banner */}
+      {scanError && (
+        <View style={[styles.errorBanner, { backgroundColor: colors.sosContainer, borderColor: colors.sos }]}>
+          <AlertTriangle size={16} color={colors.sos} />
+          <Text style={[styles.errorText, { color: colors.sos, fontSize: scaleFont(12) }]}>
+            {scanError}
+          </Text>
+          <TouchableOpacity onPress={clearError} style={styles.errorDismissBtn}>
+            <Text style={[styles.errorDismissText, { color: colors.sos }]}>Dismiss</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* 5. Detection Result Card */}
-      {activeResult && (
+      {activeResult ? (
         <View style={[styles.resultCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <View style={styles.resultHeader}>
             <View style={styles.resultHeaderLeft}>
               <View style={[styles.resultIconBox, { backgroundColor: colors.primaryFixed }]}>
-                <ScanLine size={18} color={colors.primary} />
+                {currentMode === 'ocr' ? (
+                  <ScanLine size={18} color={colors.primary} />
+                ) : currentMode === 'objects' ? (
+                  <Sparkles size={18} color={colors.primary} />
+                ) : (
+                  <Eye size={18} color={colors.primary} />
+                )}
               </View>
-              <View>
+              <View style={styles.resultTitleWrap}>
                 <Text style={[styles.resultModelTag, { color: colors.primary, fontSize: scaleFont(10) }]}>
-                  CLINICAL VISION ENGINE v4
+                  {activeResult.category.toUpperCase()}
                 </Text>
                 <Text style={[styles.resultTitle, { color: colors.text, fontSize: scaleFont(15) }]}>
                   {activeResult.title}
                 </Text>
               </View>
             </View>
-            <View style={[styles.verifiedBadge, { backgroundColor: colors.primaryFixed }]}>
-              <Text style={[styles.verifiedText, { color: colors.onPrimaryFixed, fontSize: scaleFont(11) }]}>
-                Verified
-              </Text>
+
+            <View style={styles.badgesRight}>
+              {activeResult.processingMs ? (
+                <View style={[styles.metricBadge, { backgroundColor: colors.surfaceContainerLow }]}>
+                  <Text style={[styles.metricText, { color: colors.textMuted, fontSize: scaleFont(10) }]}>
+                    {activeResult.processingMs} ms
+                  </Text>
+                </View>
+              ) : null}
+              <View style={[styles.verifiedBadge, { backgroundColor: colors.primaryFixed }]}>
+                <Text style={[styles.verifiedText, { color: colors.onPrimaryFixed, fontSize: scaleFont(11) }]}>
+                  {activeResult.confidence > 0 ? `${activeResult.confidence}%` : 'Verified'}
+                </Text>
+              </View>
             </View>
           </View>
 
-          {/* Read Aloud Working Audio Synthesis Bar */}
+          {/* Speech Synthesis Audio Bar (Read Aloud, Pause, Replay) */}
           <View style={[styles.audioPlaybackBar, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}>
             <View style={styles.audioPlaybackTop}>
               <View style={styles.audioTitleRow}>
                 <Volume2 size={16} color={colors.primary} />
                 <Text style={[styles.audioPlaybackTitle, { color: colors.text, fontSize: scaleFont(12) }]}>
-                  {isSpeaking ? 'Speaking Aloud Now...' : 'Text-to-Speech Synthesizer'}
+                  {isSpeaking ? (isPaused ? 'Speech Paused' : 'Reading Aloud...') : 'Text-to-Speech'}
                 </Text>
               </View>
               <Text style={[styles.audioDuration, { color: colors.textMuted, fontSize: scaleFont(11) }]}>
@@ -321,21 +553,22 @@ export const VisionScreen: React.FC = () => {
             </View>
 
             <View style={styles.audioActionRow}>
+              {/* Primary Read / Stop Button */}
               <TouchableOpacity
                 style={[
                   styles.readAloudMainBtn,
-                  { backgroundColor: isSpeaking ? colors.sos : colors.primary },
+                  { backgroundColor: isSpeaking && !isPaused ? colors.sos : colors.primary },
                 ]}
                 onPress={() => readAloud()}
-                accessibilityLabel={isSpeaking ? 'Stop speaking readout' : 'Read Aloud with Text-to-Speech'}
-                accessibilityHint="Uses phone speaker to vocalize the prescription label"
+                accessibilityLabel={isSpeaking && !isPaused ? 'Stop speaking readout' : 'Read Aloud with Text-to-Speech'}
+                accessibilityHint="Uses device speech synthesizer to vocalize recognized text"
                 accessibilityRole="button"
               >
-                {isSpeaking ? (
+                {isSpeaking && !isPaused ? (
                   <>
                     <VolumeX size={18} color="#FFFFFF" />
                     <Text style={[styles.readAloudBtnText, { color: '#FFFFFF', fontSize: scaleFont(14) }]}>
-                      Stop Reading
+                      Stop
                     </Text>
                   </>
                 ) : (
@@ -348,12 +581,22 @@ export const VisionScreen: React.FC = () => {
                 )}
               </TouchableOpacity>
 
+              {/* Pause / Resume Button */}
+              {isSpeaking && (
+                <TouchableOpacity
+                  style={[styles.playbackControlBtn, { backgroundColor: colors.surfaceContainerHigh }]}
+                  onPress={isPaused ? resumeSpeaking : pauseSpeaking}
+                  accessibilityLabel={isPaused ? 'Resume speaking' : 'Pause speaking'}
+                  accessibilityRole="button"
+                >
+                  {isPaused ? <Play size={16} color={colors.text} /> : <Pause size={16} color={colors.text} />}
+                </TouchableOpacity>
+              )}
+
+              {/* Replay Button */}
               <TouchableOpacity
-                style={[styles.replayBtn, { backgroundColor: colors.surfaceContainerHigh }]}
-                onPress={() => {
-                  stopSpeaking();
-                  setTimeout(() => readAloud(), 200);
-                }}
+                style={[styles.playbackControlBtn, { backgroundColor: colors.surfaceContainerHigh }]}
+                onPress={replaySpeaking}
                 accessibilityLabel="Replay speech from start"
                 accessibilityRole="button"
               >
@@ -362,11 +605,11 @@ export const VisionScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* Prescription Label Transcription */}
+          {/* Transcription / Analysis Result Box */}
           <View style={[styles.transcriptionBox, { backgroundColor: colors.surfaceContainer, borderColor: colors.border }]}>
             <View style={styles.transcriptionTopRow}>
               <Text style={[styles.transcriptionLabel, { color: colors.textSecondary, fontSize: scaleFont(11) }]}>
-                LABEL TRANSCRIPTION
+                {currentMode === 'ocr' ? 'EXTRACTED TEXT' : currentMode === 'objects' ? 'OBJECTS RECOGNIZED' : 'SCENE DESCRIPTION'}
               </Text>
               <TouchableOpacity
                 onPress={handleCopy}
@@ -391,7 +634,7 @@ export const VisionScreen: React.FC = () => {
               <AlertTriangle size={18} color={colors.sos} style={styles.warningIcon} />
               <View style={styles.warningContent}>
                 <Text style={[styles.warningTitle, { color: colors.sos, fontSize: scaleFont(12) }]}>
-                  Patient Safety Advisory
+                  Safety Notice
                 </Text>
                 <Text style={[styles.warningBody, { color: colors.text, fontSize: scaleFont(12) }]}>
                   {activeResult.warningText}
@@ -400,13 +643,25 @@ export const VisionScreen: React.FC = () => {
             </View>
           )}
 
-          {/* Surrounding Context */}
+          {/* Surrounding Context & Model Limitations */}
           <View style={[styles.surroundBox, { backgroundColor: colors.surfaceContainerLow }]}>
             <Compass size={14} color={colors.primary} />
             <Text style={[styles.surroundText, { color: colors.textSecondary, fontSize: scaleFont(11) }]}>
-              Spatial Obstacle Distance: 18cm • Lighting level optimal
+              Spatial Distance: {activeResult.distance} • Illumination: {activeResult.lux} Lux
+              {activeResult.limitations ? ` • ${activeResult.limitations}` : ''}
             </Text>
           </View>
+        </View>
+      ) : (
+        /* Empty / Prompt State when no scan has been performed */
+        <View style={[styles.emptyCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <ScanLine size={32} color={colors.primary} />
+          <Text style={[styles.emptyTitle, { color: colors.text, fontSize: scaleFont(15) }]}>
+            Ready to Scan
+          </Text>
+          <Text style={[styles.emptySubtitle, { color: colors.textSecondary, fontSize: scaleFont(12) }]}>
+            Point your camera at a prescription label, document, or room and tap "Capture & Analyze", or tap "Upload" to analyze an existing photo.
+          </Text>
         </View>
       )}
     </ScrollView>
@@ -449,24 +704,37 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    flexWrap: 'wrap',
   },
   speedLabel: {
     fontWeight: '600',
   },
   speedButtonGroup: {
     flexDirection: 'row',
-    gap: 6,
+    gap: 4,
   },
   speedBtn: {
-    paddingHorizontal: 10,
-    height: 34,
+    paddingHorizontal: 8,
+    height: 32,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: StyleSheet.hairlineWidth,
   },
   speedBtnText: {
-    fontSize: 12,
+    fontSize: 11,
+  },
+  contrastBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    height: 32,
+    borderRadius: 8,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  contrastBtnText: {
+    fontWeight: '600',
   },
   viewfinderCard: {
     height: 250,
@@ -503,7 +771,11 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '600',
   },
-  torchButton: {
+  hudActionGroup: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  hudCircleBtn: {
     width: 38,
     height: 38,
     borderRadius: 19,
@@ -517,7 +789,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     borderRadius: 12,
     borderWidth: 2,
-    borderStyle: 'dashed',
     justifyContent: 'space-between',
     padding: 10,
   },
@@ -561,60 +832,83 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
     padding: 20,
+    gap: 12,
   },
   permissionText: {
-    textAlign: 'center',
     fontWeight: '600',
+    textAlign: 'center',
   },
   permissionBtn: {
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    height: 44,
     borderRadius: 8,
-    minHeight: 44,
     alignItems: 'center',
     justifyContent: 'center',
   },
   permissionBtnText: {
-    fontWeight: '700',
+    fontWeight: '600',
+    fontSize: 13,
   },
-  actionButtonsGrid: {
+  primaryControlsGrid: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
   },
-  primaryCaptureBtn: {
+  captureMainBtn: {
     flex: 2,
+    minHeight: 52,
+    borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    minHeight: 50,
-    borderRadius: 12,
-    paddingHorizontal: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   captureBtnText: {
     fontWeight: '700',
   },
-  secondaryDescribeBtn: {
-    flex: 1.5,
-    flexDirection: 'row',
+  auxControlBtn: {
+    flex: 1,
+    minHeight: 52,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    minHeight: 50,
-    borderRadius: 12,
+    gap: 2,
     borderWidth: StyleSheet.hairlineWidth,
-    paddingHorizontal: 10,
   },
-  describeBtnText: {
+  auxBtnText: {
     fontWeight: '600',
+  },
+  errorBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: StyleSheet.hairlineWidth,
+    gap: 8,
+  },
+  errorText: {
+    flex: 1,
+    fontWeight: '500',
+  },
+  errorDismissBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  errorDismissText: {
+    fontWeight: '700',
+    fontSize: 11,
   },
   resultCard: {
     borderRadius: 16,
-    borderWidth: StyleSheet.hairlineWidth,
     padding: 16,
-    gap: 12,
+    gap: 14,
+    borderWidth: StyleSheet.hairlineWidth,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
@@ -630,21 +924,36 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+    flex: 1,
+  },
+  resultTitleWrap: {
+    flex: 1,
   },
   resultIconBox: {
     width: 36,
     height: 36,
-    borderRadius: 10,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
   resultModelTag: {
     fontWeight: '700',
-    letterSpacing: 0.6,
+    letterSpacing: 0.5,
   },
   resultTitle: {
     fontWeight: '700',
-    marginTop: 1,
+  },
+  badgesRight: {
+    alignItems: 'flex-end',
+    gap: 4,
+  },
+  metricBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  metricText: {
+    fontWeight: '500',
   },
   verifiedBadge: {
     paddingHorizontal: 8,
@@ -656,9 +965,9 @@ const styles = StyleSheet.create({
   },
   audioPlaybackBar: {
     borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
     padding: 12,
     gap: 10,
+    borderWidth: StyleSheet.hairlineWidth,
   },
   audioPlaybackTop: {
     flexDirection: 'row',
@@ -682,28 +991,28 @@ const styles = StyleSheet.create({
   },
   readAloudMainBtn: {
     flex: 1,
+    minHeight: 44,
+    borderRadius: 10,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    minHeight: 48,
-    borderRadius: 10,
   },
   readAloudBtnText: {
     fontWeight: '700',
   },
-  replayBtn: {
-    width: 48,
-    height: 48,
+  playbackControlBtn: {
+    width: 44,
+    height: 44,
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
   transcriptionBox: {
     borderRadius: 12,
+    padding: 12,
+    gap: 8,
     borderWidth: StyleSheet.hairlineWidth,
-    padding: 14,
-    gap: 6,
   },
   transcriptionTopRow: {
     flexDirection: 'row',
@@ -718,43 +1027,63 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    padding: 2,
+    paddingVertical: 2,
+    paddingHorizontal: 6,
   },
   copyText: {
     fontWeight: '600',
   },
   transcriptionBody: {
-    fontWeight: '600',
+    fontWeight: '500',
     lineHeight: 22,
   },
   safetyWarningBox: {
     flexDirection: 'row',
     padding: 12,
-    borderRadius: 10,
-    borderWidth: 1,
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
     gap: 10,
+    alignItems: 'flex-start',
   },
   warningIcon: {
     marginTop: 2,
   },
   warningContent: {
     flex: 1,
+    gap: 2,
   },
   warningTitle: {
     fontWeight: '700',
   },
   warningBody: {
-    marginTop: 2,
-    lineHeight: 17,
+    lineHeight: 18,
   },
   surroundBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
     padding: 10,
-    borderRadius: 8,
+    borderRadius: 10,
   },
   surroundText: {
-    fontWeight: '500',
+    flex: 1,
+    lineHeight: 16,
+  },
+  emptyCard: {
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderStyle: 'dashed',
+  },
+  emptyTitle: {
+    fontWeight: '700',
+  },
+  emptySubtitle: {
+    textAlign: 'center',
+    lineHeight: 18,
+    maxWidth: 320,
   },
 });

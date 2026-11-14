@@ -1,7 +1,3 @@
-import * as Battery from 'expo-battery';
-import * as Network from 'expo-network';
-import { Camera } from 'expo-camera';
-
 export interface DeviceTelemetryData {
   batteryLevel: number | null; // e.g. 85 or null if unavailable
   batteryState: string; // 'Charging', 'Unplugged', 'Full', 'Not Available'
@@ -19,27 +15,30 @@ export const getDeviceTelemetry = async (): Promise<DeviceTelemetryData> => {
   let batteryState = 'Not Available';
 
   try {
-    const isBatteryAvailable = await Battery.isAvailableAsync();
-    if (isBatteryAvailable) {
-      const rawLevel = await Battery.getBatteryLevelAsync();
-      if (rawLevel !== -1) {
-        batteryLevel = Math.round(rawLevel * 100);
-      }
+    const Battery = require('expo-battery');
+    if (Battery && Battery.isAvailableAsync) {
+      const isBatteryAvailable = await Battery.isAvailableAsync();
+      if (isBatteryAvailable) {
+        const rawLevel = await Battery.getBatteryLevelAsync();
+        if (rawLevel !== -1) {
+          batteryLevel = Math.round(rawLevel * 100);
+        }
 
-      const state = await Battery.getBatteryStateAsync();
-      switch (state) {
-        case Battery.BatteryState.CHARGING:
-          batteryState = 'Charging';
-          break;
-        case Battery.BatteryState.UNPLUGGED:
-          batteryState = 'Discharging';
-          break;
-        case Battery.BatteryState.FULL:
-          batteryState = 'Full (100%)';
-          break;
-        default:
-          batteryState = batteryLevel !== null ? 'Battery Active' : 'Not Available';
-          break;
+        const state = await Battery.getBatteryStateAsync();
+        switch (state) {
+          case Battery.BatteryState?.CHARGING:
+            batteryState = 'Charging';
+            break;
+          case Battery.BatteryState?.UNPLUGGED:
+            batteryState = 'Discharging';
+            break;
+          case Battery.BatteryState?.FULL:
+            batteryState = 'Full (100%)';
+            break;
+          default:
+            batteryState = batteryLevel !== null ? 'Battery Active' : 'Not Available';
+            break;
+        }
       }
     }
   } catch {
@@ -52,11 +51,17 @@ export const getDeviceTelemetry = async (): Promise<DeviceTelemetryData> => {
   let micPermission: 'Granted' | 'Denied' | 'Not Determined' = 'Not Determined';
 
   try {
-    const camPerm = await Camera.getCameraPermissionsAsync();
-    cameraPermission = camPerm.granted ? 'Granted' : camPerm.canAskAgain ? 'Not Determined' : 'Denied';
-
-    const micPerm = await Camera.getMicrophonePermissionsAsync();
-    micPermission = micPerm.granted ? 'Granted' : micPerm.canAskAgain ? 'Not Determined' : 'Denied';
+    const { Camera } = require('expo-camera');
+    if (Camera) {
+      if (Camera.getCameraPermissionsAsync) {
+        const camPerm = await Camera.getCameraPermissionsAsync();
+        cameraPermission = camPerm.granted ? 'Granted' : camPerm.canAskAgain ? 'Not Determined' : 'Denied';
+      }
+      if (Camera.getMicrophonePermissionsAsync) {
+        const micPerm = await Camera.getMicrophonePermissionsAsync();
+        micPermission = micPerm.granted ? 'Granted' : micPerm.canAskAgain ? 'Not Determined' : 'Denied';
+      }
+    }
   } catch {
     cameraPermission = 'Not Determined';
     micPermission = 'Not Determined';
@@ -67,25 +72,28 @@ export const getDeviceTelemetry = async (): Promise<DeviceTelemetryData> => {
   let isConnected = true;
 
   try {
-    const net = await Network.getNetworkStateAsync();
-    isConnected = !!net.isConnected && !!net.isInternetReachable;
+    const Network = require('expo-network');
+    if (Network && Network.getNetworkStateAsync) {
+      const net = await Network.getNetworkStateAsync();
+      isConnected = !!net.isConnected && !!net.isInternetReachable;
 
-    if (!net.isConnected) {
-      networkType = 'Offline';
-    } else {
-      switch (net.type) {
-        case Network.NetworkStateType.WIFI:
-          networkType = 'Wi-Fi Active';
-          break;
-        case Network.NetworkStateType.CELLULAR:
-          networkType = 'Cellular Active';
-          break;
-        case Network.NetworkStateType.ETHERNET:
-          networkType = 'Ethernet Active';
-          break;
-        default:
-          networkType = 'Online';
-          break;
+      if (!net.isConnected) {
+        networkType = 'Offline';
+      } else {
+        switch (net.type) {
+          case Network.NetworkStateType?.WIFI:
+            networkType = 'Wi-Fi Active';
+            break;
+          case Network.NetworkStateType?.CELLULAR:
+            networkType = 'Cellular Active';
+            break;
+          case Network.NetworkStateType?.ETHERNET:
+            networkType = 'Ethernet Active';
+            break;
+          default:
+            networkType = 'Online';
+            break;
+        }
       }
     }
   } catch {

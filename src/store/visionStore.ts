@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import * as Speech from 'expo-speech';
 import * as Haptics from 'expo-haptics';
 import { useUserStore } from './userStore';
+import { api, VisionApiResponse } from '../services/api';
+import { visionService } from '../services/supabase/vision';
 
 export type VisionMode = 'ocr' | 'describe' | 'objects' | 'barcode';
 
@@ -14,42 +16,35 @@ export interface DetectionResult {
   distance: string;
   lux: number;
   timestamp: string;
+  processingMs?: number;
+  entities?: Record<string, any>;
+  objectsDetected?: Array<{ label: string; confidence: number; position: string; box?: number[] }>;
+  hazards?: string[];
+  limitations?: string;
 }
-
-const DEFAULT_OCR_RESULT: DetectionResult = {
-  title: 'Prescription Medication Bottle',
-  category: 'Pharmaceutical Oral Antibiotic',
-  confidence: 99.4,
-  labelText: 'Amoxicillin 500mg – Take 1 capsule twice daily with food. Prescribed by Dr. Patel. Expiry: 12/2026. Rx #492810',
-  warningText: 'Finish entire course even if symptoms subside. If severe rash or swelling occurs, cease intake and trigger SOS immediately.',
-  distance: '18 cm',
-  lux: 480,
-  timestamp: 'Just now',
-};
-
-const DEFAULT_SCENE_RESULT: DetectionResult = {
-  title: 'Clinical Consultation Room',
-  category: 'Spatial Scene Overview',
-  confidence: 97.8,
-  labelText: 'Interior clinical exam room. Table at 1.2m directly ahead with prescription bottle. Doctor Patel seated at 2.5m on your right. Clear walking path to door at 10 o\'clock.',
-  warningText: 'Low step threshold near doorway. Lighting level optimal (520 Lux).',
-  distance: '1.2 m - 3.0 m',
-  lux: 520,
-  timestamp: 'Just now',
-};
 
 interface VisionState {
   currentMode: VisionMode;
   setMode: (mode: VisionMode) => void;
   isScanning: boolean;
+  scanError: string | null;
+  clearError: () => void;
   torchOn: boolean;
   toggleTorch: () => void;
+  cameraFacing: 'back' | 'front';
+  toggleCameraFacing: () => void;
+  isLive: boolean;
+  toggleLive: () => void;
   isSpeaking: boolean;
+  isPaused: boolean;
   activeResult: DetectionResult | null;
-  scanOCR: () => Promise<void>;
-  describeScene: () => Promise<void>;
+  analyzeImageBase64: (base64: string) => Promise<void>;
   readAloud: (overrideText?: string) => Promise<void>;
+  pauseSpeaking: () => Promise<void>;
+  resumeSpeaking: () => Promise<void>;
   stopSpeaking: () => Promise<void>;
+  replaySpeaking: () => Promise<void>;
+  clearResult: () => void;
 }
 
 export const useVisionStore = create<VisionState>((set, get) => ({
@@ -58,14 +53,13 @@ export const useVisionStore = create<VisionState>((set, get) => ({
     try {
       Haptics.selectionAsync();
     } catch {}
-    set({ currentMode: mode });
-    if (mode === 'ocr') {
-      set({ activeResult: DEFAULT_OCR_RESULT });
-    } else if (mode === 'describe') {
-      set({ activeResult: DEFAULT_SCENE_RESULT });
-    }
+    set({ currentMode: mode, scanError: null });
   },
+
   isScanning: false,
+  scanError: null,
+  clearError: () => set({ scanError: null }),
+
   torchOn: false,
   toggleTorch: () => {
     try {
@@ -73,45 +67,100 @@ export const useVisionStore = create<VisionState>((set, get) => ({
     } catch {}
     set((state) => ({ torchOn: !state.torchOn }));
   },
-  isSpeaking: false,
-  activeResult: DEFAULT_OCR_RESULT,
 
-  scanOCR: async () => {
+  cameraFacing: 'back',
+  toggleCameraFacing: () => {
     try {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     } catch {}
-    set({ isScanning: true });
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    set({
-      isScanning: false,
-      currentMode: 'ocr',
-      activeResult: {
-        ...DEFAULT_OCR_RESULT,
-        timestamp: 'Just now',
-      },
-    });
-    try {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } catch {}
+    set((state) => ({ cameraFacing: state.cameraFacing === 'back' ? 'front' : 'back' }));
   },
 
-  describeScene: async () => {
+  isLive: false,
+  toggleLive: () => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch {}
+    set((state) => ({ isLive: !state.isLive }));
+  },
+
+  isSpeaking: false,
+  isPaused: false,
+  activeResult: null,
+
+  clearResult: () => {
+    get().stopSpeaking();
+    set({ activeResult: null, scanError: null });
+  },
+
+  analyzeImageBase64: async (base64: string) => {
+    const { currentMode, isScanning } = get();
+    if (isScanning) return;
+
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     } catch {}
-    set({ isScanning: true });
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    set({
-      isScanning: false,
-      currentMode: 'describe',
-      activeResult: {
-        ...DEFAULT_SCENE_RESULT,
-        timestamp: 'Just now',
-      },
-    });
+
+    set({ isScanning: true, scanError: null });
+
     try {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } catch {}
+      const res = await api.vision.analyze({
+        image: base64,
+        mode: currentMode,
+        language: useUserStore.getState().language || 'en-US',
+      });
+
+      const newResult: DetectionResult = {
+        title: res.title || (currentMode === 'ocr' ? 'Document / Prescription OCR' : currentMode === 'objects' ? 'Objects Detected' : 'Surroundings Overview'),
+        category: res.category || 'Vision Assist',
+        confidence: res.confidence || 0.0,
+        labelText: res.result_text || 'No text or description recognized.',
+        warningText: res.warning_text,
+        distance: res.distance || 'Approx. 30 cm',
+        lux: res.lux || 480,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        processingMs: res.processing_ms,
+        entities: res.entities,
+        objectsDetected: res.objects_detected,
+        hazards: res.hazards,
+        limitations: res.limitations,
+      };
+
+      set({
+        isScanning: false,
+        activeResult: newResult,
+        scanError: null,
+      });
+
+      try {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } catch {}
+
+      // Prompt Requirement 7: Store only useful metadata in vision_scans.
+      // Do not automatically store raw images, medical prescriptions or sensitive OCR content permanently.
+      const user = useUserStore.getState().user;
+      if (user?.id) {
+        let safeExtractedText = res.result_text;
+        if (currentMode === 'ocr') {
+          safeExtractedText = `[OCR Analysis: ${res.title} — ${res.result_text.split(/\s+/).length} words detected]`;
+        }
+        visionService.logScan({
+          user_id: user.id,
+          scan_mode: currentMode,
+          extracted_text: safeExtractedText,
+          confidence: Number((res.confidence || 0).toFixed(1)),
+          processing_time_ms: res.processing_ms || 120,
+        }).catch((err) => console.warn('[Supabase] Vision scan log skipped:', err));
+      }
+    } catch (err: any) {
+      set({
+        isScanning: false,
+        scanError: err.message || 'Vision analysis failed. Please try again.',
+      });
+      try {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      } catch {}
+    }
   },
 
   readAloud: async (overrideText) => {
@@ -121,22 +170,56 @@ export const useVisionStore = create<VisionState>((set, get) => ({
       return;
     }
 
-    const textToRead = overrideText || (activeResult ? `${activeResult.title}. ${activeResult.labelText}. ${activeResult.warningText || ''}` : 'No text available to read.');
+    const textToRead =
+      overrideText ||
+      (activeResult
+        ? `${activeResult.title}. ${activeResult.labelText}. ${
+            activeResult.warningText ? 'Patient safety advisory: ' + activeResult.warningText : ''
+          }`
+        : 'No text or scene description available to read.');
+
     const userSpeechRate = useUserStore.getState().speechRate || 1.0;
 
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      set({ isSpeaking: true });
+      set({ isSpeaking: true, isPaused: false });
       Speech.speak(textToRead, {
         rate: userSpeechRate,
         pitch: 1.0,
         language: 'en-US',
-        onDone: () => set({ isSpeaking: false }),
-        onStopped: () => set({ isSpeaking: false }),
-        onError: () => set({ isSpeaking: false }),
+        onDone: () => set({ isSpeaking: false, isPaused: false }),
+        onStopped: () => set({ isSpeaking: false, isPaused: false }),
+        onError: () => set({ isSpeaking: false, isPaused: false }),
       });
-    } catch (e) {
-      set({ isSpeaking: false });
+    } catch {
+      set({ isSpeaking: false, isPaused: false });
+    }
+  },
+
+  pauseSpeaking: async () => {
+    try {
+      if (Speech.pause) {
+        await Speech.pause();
+        set({ isPaused: true });
+      } else {
+        await Speech.stop();
+        set({ isSpeaking: false, isPaused: true });
+      }
+    } catch {
+      set({ isSpeaking: false, isPaused: false });
+    }
+  },
+
+  resumeSpeaking: async () => {
+    try {
+      if (Speech.resume) {
+        await Speech.resume();
+        set({ isPaused: false });
+      } else {
+        get().readAloud();
+      }
+    } catch {
+      get().readAloud();
     }
   },
 
@@ -144,6 +227,13 @@ export const useVisionStore = create<VisionState>((set, get) => ({
     try {
       await Speech.stop();
     } catch {}
-    set({ isSpeaking: false });
+    set({ isSpeaking: false, isPaused: false });
+  },
+
+  replaySpeaking: async () => {
+    await get().stopSpeaking();
+    setTimeout(() => {
+      get().readAloud();
+    }, 200);
   },
 }));

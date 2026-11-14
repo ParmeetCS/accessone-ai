@@ -1,29 +1,29 @@
 /**
  * AccessOne AI - Clinical Backend API Service
- * Cleanly typed stubs for FastAPI backend integration.
+ * Multimodal neural assistive API client connected to FastAPI backend.
  */
 
-export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+import Constants from 'expo-constants';
 
-export interface VisionOCRResponse {
+// Automatically detect dev server host IP when running in Expo Go
+const devHost = Constants?.expoConfig?.hostUri?.split(':')[0] || 'localhost';
+export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || `http://${devHost}:8000/api/v1`;
+
+export interface VisionApiResponse {
   success: boolean;
-  text: string;
+  mode: string;
+  result_text: string;
   confidence: number;
-  entities: {
-    medicationName?: string;
-    dosage?: string;
-    frequency?: string;
-    warning?: string;
-  };
-  processedAt: string;
-}
-
-export interface SceneDescriptionResponse {
-  success: boolean;
-  description: string;
-  hazards: string[];
-  lightingLux: number;
-  objectsDetected: Array<{ label: string; distanceMeters: number; position: string }>;
+  processing_ms: number;
+  title: string;
+  category: string;
+  warning_text?: string;
+  distance?: string;
+  lux?: number;
+  entities?: Record<string, any>;
+  objects_detected?: Array<{ label: string; confidence: number; position: string; box?: number[] }>;
+  hazards?: string[];
+  limitations?: string;
 }
 
 export interface VoiceSynthesisRequest {
@@ -56,50 +56,74 @@ export interface SosResponse {
 export const api = {
   healthCheck: async (): Promise<{ status: string; version: string; neuralEngine: string }> => {
     try {
-      // In production: const res = await fetch(`${API_BASE_URL}/health`); return await res.json();
-      return { status: 'healthy', version: '4.2.0', neuralEngine: 'On-Device CoreML/NNAPI' };
+      const res = await fetch(`${API_BASE_URL.replace('/api/v1', '')}/health`);
+      if (res.ok) {
+        return await res.json();
+      }
+      return { status: 'offline', version: '4.2.0', neuralEngine: 'On-Device CoreML/NNAPI' };
     } catch (e) {
       return { status: 'offline', version: '4.2.0', neuralEngine: 'Fallback Local' };
     }
   },
 
   vision: {
-    scanOcr: async (imageBase64: string): Promise<VisionOCRResponse> => {
-      // Mocked realistic fast response matching FastAPI endpoint
-      await new Promise((r) => setTimeout(r, 600));
-      return {
-        success: true,
-        text: 'Amoxicillin 500mg - Take 1 capsule twice daily with food. Prescribed by Dr. Patel. Expiry: 12/2026.',
-        confidence: 0.994,
-        entities: {
-          medicationName: 'Amoxicillin 500mg',
-          dosage: '1 capsule',
-          frequency: 'twice daily with food',
-          warning: 'Finish entire course even if symptoms subside. Cease intake if rash occurs.',
-        },
-        processedAt: new Date().toISOString(),
-      };
-    },
+    /**
+     * POST /api/v1/vision
+     * Sends captured or uploaded image to backend for OCR, Scene Description, or Object Identification.
+     */
+    analyze: async (payload: {
+      image: string;
+      mode: 'ocr' | 'describe' | 'objects' | 'barcode' | 'scene';
+      language?: string;
+    }): Promise<VisionApiResponse> => {
+      const startTime = Date.now();
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
 
-    describeScene: async (imageBase64: string): Promise<SceneDescriptionResponse> => {
-      await new Promise((r) => setTimeout(r, 800));
-      return {
-        success: true,
-        description: 'Exam room with table 1.2m ahead, prescription bottle centered, doctor seated at 2.5m.',
-        hazards: ['Step threshold near corridor door at 10 o\'clock'],
-        lightingLux: 520,
-        objectsDetected: [
-          { label: 'Prescription Bottle', distanceMeters: 0.2, position: 'center' },
-          { label: 'Doctor Patel', distanceMeters: 2.5, position: 'right-45' },
-          { label: 'Doorway', distanceMeters: 3.2, position: 'left-60' },
-        ],
-      };
+        const res = await fetch(`${API_BASE_URL}/vision`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            image: payload.image,
+            mode: payload.mode,
+            language: payload.language || 'en-US',
+          }),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!res.ok) {
+          const errBody = await res.text();
+          throw new Error(`Server status ${res.status}: ${errBody}`);
+        }
+
+        const data: VisionApiResponse = await res.json();
+        return data;
+      } catch (error: any) {
+        console.warn('[Vision API] Backend request failed:', error.message);
+        const duration = Date.now() - startTime;
+        return {
+          success: false,
+          mode: payload.mode,
+          result_text: `Vision service unreachable (${error.message}). Please ensure the AccessOne AI backend server is running at ${API_BASE_URL}.`,
+          confidence: 0,
+          processing_ms: duration,
+          title: 'Vision Service Unavailable',
+          category: 'Network / Offline Mode',
+          warning_text: 'Unable to connect to the AI vision backend. Verify network connection and backend status.',
+          distance: 'Not Available',
+          lux: 400,
+        };
+      }
     },
   },
 
   hearing: {
     streamAudioChunk: async (chunkBase64: string) => {
-      // Audio stream chunking for live transcription
       return { transcriptChunk: '', decibels: 38, isSpeech: true };
     },
   },
