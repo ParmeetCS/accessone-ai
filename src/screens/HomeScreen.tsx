@@ -1,5 +1,13 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  RefreshControl,
+  ActivityIndicator,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import {
   ShieldCheck,
@@ -19,6 +27,10 @@ import {
   CheckCircle2,
   ChevronRight,
   Activity,
+  Wifi,
+  Camera,
+  Mic,
+  Clock,
 } from 'lucide-react-native';
 import { useAppTheme } from '../theme/ThemeContext';
 import { useUserStore } from '../store/userStore';
@@ -27,18 +39,83 @@ import { WaveformBar } from '../components/WaveformBar';
 export const HomeScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const { colors, fontScale, scaleFont, isHighContrast, toggleHighContrast, cycleFontScale } = useAppTheme();
-  const patientName = useUserStore((s) => s.patientName);
+
+  const displayName = useUserStore((s) => s.displayName);
+  const isAuthenticated = useUserStore((s) => s.isAuthenticated);
+  const openAuthModal = useUserStore((s) => s.openAuthModal);
   const careRingOnline = useUserStore((s) => s.careRingOnline);
   const sensoryProfile = useUserStore((s) => s.sensoryProfile);
   const speechRate = useUserStore((s) => s.speechRate);
+  const hapticIntensity = useUserStore((s) => s.hapticIntensity);
+
+  // Real Supabase and Device Telemetry Data
+  const recentActivities = useUserStore((s) => s.recentActivities);
+  const isLoadingActivities = useUserStore((s) => s.isLoadingActivities);
+  const emergencyContactsCount = useUserStore((s) => s.emergencyContactsCount);
+  const primaryContact = useUserStore((s) => s.primaryContact);
+  const telemetry = useUserStore((s) => s.telemetry);
+  const isRefreshingDashboard = useUserStore((s) => s.isRefreshingDashboard);
+  const refreshDashboardData = useUserStore((s) => s.refreshDashboardData);
+
+  useEffect(() => {
+    refreshDashboardData();
+  }, []);
+
+  const getInitials = (name: string): string => {
+    if (!name || name === 'Guest Patient') return 'GP';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    return name.slice(0, 2).toUpperCase();
+  };
+
+  const formatActivityTime = (dateStr: string): string => {
+    try {
+      const d = new Date(dateStr);
+      const now = new Date();
+      const isToday = d.toDateString() === now.toDateString();
+      if (isToday) {
+        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+      return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    } catch {
+      return 'Recent';
+    }
+  };
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case 'vision':
+        return <Eye size={16} color={colors.primary} />;
+      case 'hearing':
+        return <Ear size={16} color={colors.secondary} />;
+      case 'bridge':
+        return <MessageSquare size={16} color={colors.primary} />;
+      case 'safety':
+        return <ShieldAlert size={16} color={colors.sos} />;
+      case 'auth':
+        return <ShieldCheck size={16} color={colors.primary} />;
+      default:
+        return <FileText size={16} color={colors.textSecondary} />;
+    }
+  };
+
+  const isSensorReady = telemetry.cameraPermission === 'Granted' && telemetry.micPermission === 'Granted';
 
   return (
     <ScrollView
       style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={styles.scrollContent}
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefreshingDashboard}
+          onRefresh={refreshDashboardData}
+          colors={[colors.primary]}
+          tintColor={colors.primary}
+        />
+      }
     >
-      {/* 1. Operational Telemetry Banner */}
+      {/* 1. Operational Telemetry Banner (Real Sensor State) */}
       <View
         style={[
           styles.telemetryBanner,
@@ -46,26 +123,38 @@ export const HomeScreen: React.FC = () => {
         ]}
         accessible={true}
         accessibilityRole="summary"
-        accessibilityLabel="Clinically Certified AI v4.2. All systems active. Microphone and Camera ready."
+        accessibilityLabel={`Clinically Certified AI v4.2. ${isSensorReady ? 'All systems active. Mic and camera ready.' : 'Permissions check needed.'}`}
       >
         <View style={styles.telemetryLeft}>
           <View style={styles.pulseContainer}>
-            <View style={[styles.pingCircle, { backgroundColor: colors.primary }]} />
-            <View style={[styles.activeDot, { backgroundColor: colors.primary }]} />
+            <View
+              style={[
+                styles.pingCircle,
+                { backgroundColor: isSensorReady ? colors.primary : '#D97706' },
+              ]}
+            />
+            <View
+              style={[
+                styles.activeDot,
+                { backgroundColor: isSensorReady ? colors.primary : '#D97706' },
+              ]}
+            />
           </View>
           <View style={styles.telemetryTextContainer}>
             <Text style={[styles.telemetryTitle, { color: colors.primary, fontSize: scaleFont(11) }]}>
               CLINICALLY CERTIFIED AI v4.2
             </Text>
             <Text style={[styles.telemetrySub, { color: colors.textSecondary, fontSize: scaleFont(12) }]}>
-              All systems active • Mic & Cam Ready
+              {isSensorReady
+                ? 'All systems active • Mic & Cam Ready'
+                : `Sensors: Cam ${telemetry.cameraPermission} • Mic ${telemetry.micPermission}`}
             </Text>
           </View>
         </View>
         <ShieldCheck size={20} color={colors.primary} />
       </View>
 
-      {/* 2. Personalized Greeting & Accessibility Quick Bar */}
+      {/* 2. Personalized Greeting & Micro Accessibility Bar */}
       <View
         style={[
           styles.card,
@@ -73,17 +162,27 @@ export const HomeScreen: React.FC = () => {
         ]}
       >
         <View style={styles.greetingRow}>
-          <View>
+          <TouchableOpacity
+            style={{ flex: 1 }}
+            onPress={() => (isAuthenticated ? navigation.navigate('Settings') : openAuthModal())}
+            accessibilityLabel={`Welcome back, ${displayName.split(' ')[0]}. Tap to view or calibrate profile`}
+            accessibilityRole="button"
+          >
             <Text style={[styles.portalTag, { color: colors.textMuted, fontSize: scaleFont(11) }]}>
-              Patient Portal Active
+              {isAuthenticated ? 'Clinical Profile Verified' : 'Guest Offline Mode'}
             </Text>
             <Text style={[styles.greetingHeading, { color: colors.text, fontSize: scaleFont(22) }]}>
-              Welcome back, {patientName.split(' ')[0]}
+              Welcome back, {displayName ? displayName.split(' ')[0] : 'Patient'}
             </Text>
-          </View>
-          <View style={[styles.avatarCircle, { backgroundColor: colors.primaryContainer }]}>
-            <Text style={styles.avatarText}>SJ</Text>
-          </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.avatarCircle, { backgroundColor: colors.primaryContainer }]}
+            onPress={() => (isAuthenticated ? navigation.navigate('Settings') : openAuthModal())}
+            accessibilityLabel="Profile avatar. Tap to open Settings or Authenticate"
+            accessibilityRole="button"
+          >
+            <Text style={[styles.avatarText, { color: colors.primary }]}>{getInitials(displayName)}</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Micro-adjustment accessibility bar */}
@@ -156,13 +255,13 @@ export const HomeScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* 3. Care Ring Online Priority Alert Capsule */}
+      {/* 3. Care Ring Summary (Connected to Supabase Emergency Contacts) */}
       <View
         style={[
           styles.careRingCapsule,
           {
-            backgroundColor: careRingOnline ? colors.surfaceContainer : colors.sosContainer,
-            borderColor: careRingOnline ? colors.primaryFixedDim : colors.sos,
+            backgroundColor: emergencyContactsCount > 0 ? colors.surfaceContainer : colors.surfaceContainerLow,
+            borderColor: emergencyContactsCount > 0 ? colors.primaryFixedDim : colors.border,
           },
         ]}
       >
@@ -170,17 +269,21 @@ export const HomeScreen: React.FC = () => {
           <View
             style={[
               styles.careRingIconBox,
-              { backgroundColor: careRingOnline ? colors.primary : colors.sos },
+              { backgroundColor: emergencyContactsCount > 0 ? colors.primary : colors.secondary },
             ]}
           >
             <Activity size={18} color="#FFFFFF" strokeWidth={2.5} />
           </View>
           <View style={styles.careRingTextCol}>
             <Text style={[styles.careRingTitle, { color: colors.text, fontSize: scaleFont(13) }]}>
-              {careRingOnline ? 'Care Ring Online' : 'Care Ring Alert'}
+              {emergencyContactsCount > 0 ? 'Care Ring Connected' : 'Care Ring Standby'}
             </Text>
             <Text style={[styles.careRingDesc, { color: colors.textSecondary, fontSize: scaleFont(12) }]}>
-              Dr. Evans + St. Jude Response Station linked
+              {emergencyContactsCount > 0
+                ? primaryContact
+                  ? `${primaryContact.name} (${primaryContact.relationship}) linked`
+                  : `${emergencyContactsCount} Emergency Contact${emergencyContactsCount > 1 ? 's' : ''} configured`
+                : 'No emergency contacts registered yet'}
             </Text>
           </View>
         </View>
@@ -214,27 +317,31 @@ export const HomeScreen: React.FC = () => {
               </View>
             </View>
             <View style={[styles.readyPill, { backgroundColor: colors.primaryFixed }]}>
-              <View style={[styles.readyDot, { backgroundColor: colors.primary }]} />
+              <View
+                style={[
+                  styles.readyDot,
+                  { backgroundColor: telemetry.cameraPermission === 'Granted' ? colors.primary : '#D97706' },
+                ]}
+              />
               <Text style={[styles.readyText, { color: colors.onPrimaryFixed, fontSize: scaleFont(11) }]}>
-                Camera Ready
+                {telemetry.cameraPermission === 'Granted' ? 'Camera Ready' : 'Permission Required'}
               </Text>
             </View>
           </View>
 
-          {/* Visual Scene Banner */}
           <View style={[styles.previewPlaceholder, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}>
             <View style={styles.hudOverlay}>
               <View style={styles.hudBadge}>
                 <CheckCircle2 size={13} color={colors.primary} />
                 <Text style={[styles.hudText, { color: colors.text, fontSize: scaleFont(11) }]}>
-                  Live Scene • Rx Pill Dispenser at 18cm
+                  Real-time OCR • Text-to-Speech active
                 </Text>
               </View>
             </View>
           </View>
 
           <Text style={[styles.cardDesc, { color: colors.textSecondary, fontSize: scaleFont(13) }]}>
-            High-precision neural reading for prescriptions, spatial obstacles, and room orientation with real-time audio guidance.
+            High-precision optical recognition for prescriptions, documents, and room navigation with instant voice readouts.
           </Text>
 
           <TouchableOpacity
@@ -269,18 +376,22 @@ export const HomeScreen: React.FC = () => {
               </View>
             </View>
             <View style={[styles.readyPill, { backgroundColor: colors.secondaryContainer }]}>
-              <View style={[styles.readyDot, { backgroundColor: colors.secondary }]} />
+              <View
+                style={[
+                  styles.readyDot,
+                  { backgroundColor: telemetry.micPermission === 'Granted' ? colors.secondary : '#D97706' },
+                ]}
+              />
               <Text style={[styles.readyText, { color: colors.onSecondaryContainer, fontSize: scaleFont(11) }]}>
-                Mic Ready
+                {telemetry.micPermission === 'Granted' ? 'Mic Ready' : 'Permission Required'}
               </Text>
             </View>
           </View>
 
-          {/* Sound Waveform Simulation */}
           <View style={[styles.spectrumContainer, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}>
             <View style={styles.spectrumTop}>
               <Text style={[styles.spectrumStatus, { color: colors.textSecondary, fontSize: scaleFont(11) }]}>
-                Acoustic Isolation: 38 dB Ambient
+                Acoustic Processing: Online
               </Text>
               <Text style={[styles.spectrumMode, { color: colors.primary, fontSize: scaleFont(11) }]}>
                 Clear Speech
@@ -290,7 +401,7 @@ export const HomeScreen: React.FC = () => {
           </View>
 
           <Text style={[styles.cardDesc, { color: colors.textSecondary, fontSize: scaleFont(13) }]}>
-            Live speaker transcription, non-speech alert flashers (fire alarms, doorbells, IV chimes), and sensory haptics.
+            Live conversational transcription, environmental sound detection, and synchronized vibrotactile haptics.
           </Text>
 
           <TouchableOpacity
@@ -327,27 +438,19 @@ export const HomeScreen: React.FC = () => {
             <View style={[styles.readyPill, { backgroundColor: colors.primaryFixed }]}>
               <View style={[styles.readyDot, { backgroundColor: colors.primary }]} />
               <Text style={[styles.readyText, { color: colors.onPrimaryFixed, fontSize: scaleFont(11) }]}>
-                Dialogue Ready
+                Voice Engine Ready
               </Text>
             </View>
           </View>
 
           <View style={[styles.dialogueSnippet, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}>
             <Text style={[styles.snippetText, { color: colors.text, fontSize: scaleFont(13) }]}>
-              <Text style={{ fontWeight: '700', color: colors.primary }}>Dr. Patel: </Text>
-              "The blood pressure is stable. Let's review the new prescription."
+              Two-way accessible dialogue between deaf/hard-of-hearing patients and healthcare providers.
             </Text>
-            <View style={styles.aslBadgeRow}>
-              <View style={[styles.aslMiniBadge, { backgroundColor: colors.surfaceContainer }]}>
-                <Text style={[styles.aslMiniText, { color: colors.textSecondary, fontSize: scaleFont(10) }]}>
-                  ASL & Rapid TTS Active
-                </Text>
-              </View>
-            </View>
           </View>
 
           <Text style={[styles.cardDesc, { color: colors.textSecondary, fontSize: scaleFont(13) }]}>
-            Fosters natural two-way conversation between Deaf/hard-of-hearing patients and healthcare providers with sub-second synthesis.
+            Translates typed speech into neural audio and transcribes spoken responses in real time.
           </Text>
 
           <TouchableOpacity
@@ -390,18 +493,13 @@ export const HomeScreen: React.FC = () => {
           </View>
 
           <Text style={[styles.cardDesc, { color: colors.textSecondary, fontSize: scaleFont(13) }]}>
-            Autonomous fall verification, geo-fenced safety boundaries, direct 911 clinical payload transmission, and caregiver check-ins.
+            Autonomous fall detection alerts, GPS coordinates broadcast, and emergency contact SMS dispatch.
           </Text>
 
           <View style={styles.safetyInfoGrid}>
             <View style={[styles.safetyInfoPill, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}>
               <Text style={[styles.safetyPillText, { color: colors.text, fontSize: scaleFont(11) }]}>
-                📍 Room 304, West Wing
-              </Text>
-            </View>
-            <View style={[styles.safetyInfoPill, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}>
-              <Text style={[styles.safetyPillText, { color: colors.text, fontSize: scaleFont(11) }]}>
-                👥 3 Contacts Alerted
+                👥 {emergencyContactsCount} Contact{emergencyContactsCount === 1 ? '' : 's'} Configured
               </Text>
             </View>
           </View>
@@ -422,7 +520,7 @@ export const HomeScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* 5. Active Clinical Profile Summary */}
+      {/* 5. Active Clinical Profile Summary (Real State) */}
       <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <View style={styles.cardHeader}>
           <View style={styles.cardHeaderLeft}>
@@ -451,7 +549,7 @@ export const HomeScreen: React.FC = () => {
 
         <View style={[styles.tierCapsule, { backgroundColor: colors.surfaceContainer }]}>
           <Text style={[styles.tierTitle, { color: colors.primary, fontSize: scaleFont(13) }]}>
-            {sensoryProfile.toUpperCase()} DUAL-SENSORY
+            {sensoryProfile.toUpperCase()} FOCUS
           </Text>
           <Text style={[styles.tierBadge, { color: colors.textSecondary, fontSize: scaleFont(11) }]}>
             Tier AAA
@@ -464,7 +562,7 @@ export const HomeScreen: React.FC = () => {
               Haptics
             </Text>
             <Text style={[styles.telemetryItemVal, { color: colors.text, fontSize: scaleFont(16) }]}>
-              Max
+              {hapticIntensity.toUpperCase()}
             </Text>
           </View>
           <View style={[styles.telemetryItem, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}>
@@ -486,7 +584,7 @@ export const HomeScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* 6. Device & Telemetry */}
+      {/* 6. Device & Telemetry (Connected to Actual Device APIs) */}
       <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <View style={styles.cardHeader}>
           <View style={styles.cardHeaderLeft}>
@@ -498,12 +596,13 @@ export const HomeScreen: React.FC = () => {
           <View style={styles.syncRow}>
             <View style={[styles.syncDot, { backgroundColor: colors.primary }]} />
             <Text style={[styles.syncText, { color: colors.primary, fontSize: scaleFont(11) }]}>
-              Synchronized
+              {telemetry.lastSyncAt !== 'Never' ? `Synced ${telemetry.lastSyncAt}` : 'Online'}
             </Text>
           </View>
         </View>
 
         <View style={styles.deviceList}>
+          {/* Battery Level */}
           <View style={[styles.deviceRow, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}>
             <View style={styles.deviceRowLeft}>
               <BatteryCharging size={18} color={colors.primary} />
@@ -512,37 +611,75 @@ export const HomeScreen: React.FC = () => {
               </Text>
             </View>
             <Text style={[styles.deviceVal, { color: colors.text, fontSize: scaleFont(13) }]}>
-              92% • Fast Charging
+              {telemetry.batteryLevel !== null ? `${telemetry.batteryLevel}% • ${telemetry.batteryState}` : telemetry.batteryState}
             </Text>
           </View>
 
+          {/* Camera Sensor */}
           <View style={[styles.deviceRow, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}>
             <View style={styles.deviceRowLeft}>
-              <Cpu size={18} color={colors.primary} />
+              <Camera size={18} color={colors.primary} />
               <Text style={[styles.deviceName, { color: colors.text, fontSize: scaleFont(13) }]}>
-                Neural Engine
+                Camera Sensor
               </Text>
             </View>
-            <Text style={[styles.deviceVal, { color: colors.primary, fontSize: scaleFont(13) }]}>
-              On-Device (0ms Latency)
+            <Text
+              style={[
+                styles.deviceVal,
+                { color: telemetry.cameraPermission === 'Granted' ? colors.primary : '#D97706', fontSize: scaleFont(13) },
+              ]}
+            >
+              {telemetry.cameraPermission}
             </Text>
           </View>
 
+          {/* Microphone Sensor */}
           <View style={[styles.deviceRow, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}>
             <View style={styles.deviceRowLeft}>
-              <Bluetooth size={18} color={colors.primary} />
+              <Mic size={18} color={colors.primary} />
               <Text style={[styles.deviceName, { color: colors.text, fontSize: scaleFont(13) }]}>
-                Lapel Mic AI-8
+                Microphone Sensor
+              </Text>
+            </View>
+            <Text
+              style={[
+                styles.deviceVal,
+                { color: telemetry.micPermission === 'Granted' ? colors.primary : '#D97706', fontSize: scaleFont(13) },
+              ]}
+            >
+              {telemetry.micPermission}
+            </Text>
+          </View>
+
+          {/* Network Connectivity */}
+          <View style={[styles.deviceRow, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}>
+            <View style={styles.deviceRowLeft}>
+              <Wifi size={18} color={colors.primary} />
+              <Text style={[styles.deviceName, { color: colors.text, fontSize: scaleFont(13) }]}>
+                Network Connectivity
               </Text>
             </View>
             <Text style={[styles.deviceVal, { color: colors.text, fontSize: scaleFont(13) }]}>
-              Connected (BLE 5.3)
+              {telemetry.networkType}
+            </Text>
+          </View>
+
+          {/* Bluetooth Status (Strictly un-fabricated) */}
+          <View style={[styles.deviceRow, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}>
+            <View style={styles.deviceRowLeft}>
+              <Bluetooth size={18} color={colors.textSecondary} />
+              <Text style={[styles.deviceName, { color: colors.text, fontSize: scaleFont(13) }]}>
+                Bluetooth Peripheral
+              </Text>
+            </View>
+            <Text style={[styles.deviceVal, { color: colors.textMuted, fontSize: scaleFont(13) }]}>
+              {telemetry.bluetoothStatus}
             </Text>
           </View>
         </View>
       </View>
 
-      {/* 7. Recent Assistive Activity */}
+      {/* 7. Recent Assistive Activity (Real activity_logs from Supabase) */}
       <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border, marginBottom: 24 }]}>
         <View style={styles.cardHeader}>
           <View style={styles.cardHeaderLeft}>
@@ -551,72 +688,61 @@ export const HomeScreen: React.FC = () => {
               Recent Activity
             </Text>
           </View>
-          <Text style={[styles.todayTag, { color: colors.textMuted, fontSize: scaleFont(11) }]}>
-            Today
-          </Text>
+          <TouchableOpacity
+            onPress={refreshDashboardData}
+            accessibilityLabel="Refresh recent activity"
+            accessibilityRole="button"
+          >
+            <Text style={[styles.todayTag, { color: colors.primary, fontSize: scaleFont(11) }]}>
+              Refresh
+            </Text>
+          </TouchableOpacity>
         </View>
 
-        <View style={styles.activityList}>
-          {/* Item 1 */}
-          <View style={[styles.activityItem, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}>
-            <View style={[styles.activityIconBox, { backgroundColor: colors.primaryFixed }]}>
-              <FileText size={16} color={colors.primary} />
-            </View>
-            <View style={styles.activityContent}>
-              <View style={styles.activityTop}>
-                <Text style={[styles.activityTitle, { color: colors.text, fontSize: scaleFont(13) }]}>
-                  Prescription OCR Scan
-                </Text>
-                <Text style={[styles.activityTime, { color: colors.textMuted, fontSize: scaleFont(11) }]}>
-                  10:14 AM
-                </Text>
-              </View>
-              <Text style={[styles.activityDesc, { color: colors.textSecondary, fontSize: scaleFont(12) }]}>
-                Amoxicillin 500mg - dosage schedule saved to notes.
-              </Text>
-            </View>
+        {isLoadingActivities ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="small" color={colors.primary} />
+            <Text style={[styles.emptySubtitle, { color: colors.textMuted, fontSize: scaleFont(12) }]}>
+              Loading activity history...
+            </Text>
           </View>
-
-          {/* Item 2 */}
-          <View style={[styles.activityItem, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}>
-            <View style={[styles.activityIconBox, { backgroundColor: colors.secondaryContainer }]}>
-              <MessageSquare size={16} color={colors.secondary} />
-            </View>
-            <View style={styles.activityContent}>
-              <View style={styles.activityTop}>
-                <Text style={[styles.activityTitle, { color: colors.text, fontSize: scaleFont(13) }]}>
-                  Clinical Consultation
-                </Text>
-                <Text style={[styles.activityTime, { color: colors.textMuted, fontSize: scaleFont(11) }]}>
-                  8:30 AM
-                </Text>
+        ) : recentActivities.length > 0 ? (
+          <View style={styles.activityList}>
+            {recentActivities.map((act) => (
+              <View
+                key={act.id}
+                style={[styles.activityItem, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}
+              >
+                <View style={[styles.activityIconBox, { backgroundColor: colors.surfaceContainer }]}>
+                  {getActivityIcon(act.activity_type)}
+                </View>
+                <View style={styles.activityContent}>
+                  <View style={styles.activityTop}>
+                    <Text style={[styles.activityTitle, { color: colors.text, fontSize: scaleFont(13) }]}>
+                      {act.title}
+                    </Text>
+                    <Text style={[styles.activityTime, { color: colors.textMuted, fontSize: scaleFont(11) }]}>
+                      {formatActivityTime(act.created_at)}
+                    </Text>
+                  </View>
+                  <Text style={[styles.activityDesc, { color: colors.textSecondary, fontSize: scaleFont(12) }]}>
+                    {act.description}
+                  </Text>
+                </View>
               </View>
-              <Text style={[styles.activityDesc, { color: colors.textSecondary, fontSize: scaleFont(12) }]}>
-                18-minute session with Dr. Evans transcribed & highlighted.
-              </Text>
-            </View>
+            ))}
           </View>
-
-          {/* Item 3 */}
-          <View style={[styles.activityItem, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}>
-            <View style={[styles.activityIconBox, { backgroundColor: colors.sosContainer }]}>
-              <AlertTriangle size={16} color={colors.sos} />
-            </View>
-            <View style={styles.activityContent}>
-              <View style={styles.activityTop}>
-                <Text style={[styles.activityTitle, { color: colors.text, fontSize: scaleFont(13) }]}>
-                  Environmental Warning
-                </Text>
-                <Text style={[styles.activityTime, { color: colors.textMuted, fontSize: scaleFont(11) }]}>
-                  Yesterday
-                </Text>
-              </View>
-              <Text style={[styles.activityDesc, { color: colors.textSecondary, fontSize: scaleFont(12) }]}>
-                Siren detected (84 dB). Haptic pulse dispatched to wrist.
-              </Text>
-            </View>
+        ) : (
+          <View style={[styles.emptyStateContainer, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.border }]}>
+            <Clock size={28} color={colors.textSecondary} />
+            <Text style={[styles.emptyTitle, { color: colors.text, fontSize: scaleFont(14) }]}>
+              No Recent Activity Logged
+            </Text>
+            <Text style={[styles.emptySubtitle, { color: colors.textMuted, fontSize: scaleFont(12) }]}>
+              Completed vision scans, hearing captions, and emergency alerts will appear here in real time.
+            </Text>
           </View>
-        </View>
+        )}
       </View>
     </ScrollView>
   );
@@ -636,14 +762,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 14,
     paddingVertical: 10,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: StyleSheet.hairlineWidth,
   },
   telemetryLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    flex: 1,
   },
   pulseContainer: {
     width: 14,
@@ -664,15 +789,14 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   telemetryTextContainer: {
-    flex: 1,
+    gap: 1,
   },
   telemetryTitle: {
     fontWeight: '700',
     letterSpacing: 0.6,
   },
   telemetrySub: {
-    fontWeight: '500',
-    marginTop: 1,
+    letterSpacing: 0.1,
   },
   card: {
     borderRadius: 16,
@@ -687,17 +811,16 @@ const styles = StyleSheet.create({
   },
   greetingRow: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
   portalTag: {
     fontWeight: '600',
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
   },
   greetingHeading: {
     fontWeight: '700',
     letterSpacing: -0.4,
-    marginTop: 2,
   },
   avatarCircle: {
     width: 44,
@@ -707,43 +830,36 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   avatarText: {
-    color: '#FFFFFF',
     fontWeight: '700',
-    fontSize: 16,
   },
   microAdjustRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 10,
-    paddingTop: 4,
+    gap: 8,
+    paddingTop: 8,
   },
   fontStepperGroup: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 10,
     borderWidth: StyleSheet.hairlineWidth,
-    padding: 3,
-    height: 42,
+    overflow: 'hidden',
   },
   stepperBtn: {
     paddingHorizontal: 12,
-    height: 36,
-    borderRadius: 7,
+    height: 38,
     alignItems: 'center',
     justifyContent: 'center',
-    minWidth: 40,
   },
   stepperText: {
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: 12,
   },
   contrastToggleBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingHorizontal: 14,
-    height: 42,
+    height: 38,
+    paddingHorizontal: 12,
     borderRadius: 10,
     borderWidth: StyleSheet.hairlineWidth,
   },
@@ -756,14 +872,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 12,
     borderRadius: 14,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
   },
   careRingLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
     flex: 1,
-    paddingRight: 8,
   },
   careRingIconBox: {
     width: 36,
@@ -782,25 +897,23 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   sosHubBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 8,
-    minHeight: 44,
+    paddingHorizontal: 12,
+    height: 36,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
   sosHubText: {
     fontWeight: '700',
     fontSize: 12,
-    letterSpacing: 0.5,
   },
   cardsStack: {
     gap: 14,
   },
   cardHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
   cardHeaderLeft: {
     flexDirection: 'row',
@@ -808,8 +921,8 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   moduleIconBox: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
@@ -819,15 +932,14 @@ const styles = StyleSheet.create({
   },
   cardSubtitle: {
     fontWeight: '500',
-    marginTop: 1,
   },
   readyPill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 20,
+    borderRadius: 12,
   },
   readyDot: {
     width: 6,
@@ -835,58 +947,50 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   readyText: {
-    fontWeight: '700',
+    fontWeight: '600',
   },
   previewPlaceholder: {
-    height: 80,
-    borderRadius: 10,
+    height: 64,
+    borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
     overflow: 'hidden',
-    justifyContent: 'flex-end',
-    padding: 8,
+    justifyContent: 'center',
+    paddingHorizontal: 12,
   },
   hudOverlay: {
     flexDirection: 'row',
-    alignItems: 'center',
   },
   hudBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(255,255,255,0.92)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
   },
   hudText: {
     fontWeight: '600',
   },
   cardDesc: {
-    lineHeight: 19,
+    lineHeight: 18,
   },
   launchBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    minHeight: 48,
-    borderRadius: 10,
-    paddingHorizontal: 16,
-    marginTop: 4,
+    height: 48,
+    borderRadius: 12,
   },
   launchBtnText: {
     fontWeight: '700',
   },
   spectrumContainer: {
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
     padding: 10,
-    gap: 6,
+    gap: 8,
   },
   spectrumTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
   },
   spectrumStatus: {
     fontWeight: '500',
@@ -895,25 +999,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   dialogueSnippet: {
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
     padding: 12,
-    gap: 8,
   },
   snippetText: {
     lineHeight: 18,
-  },
-  aslBadgeRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-  },
-  aslMiniBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  aslMiniText: {
-    fontWeight: '600',
   },
   safetyInfoGrid: {
     flexDirection: 'row',
@@ -921,10 +1012,10 @@ const styles = StyleSheet.create({
   },
   safetyInfoPill: {
     flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
+    padding: 8,
     borderRadius: 8,
     borderWidth: StyleSheet.hairlineWidth,
+    alignItems: 'center',
   },
   safetyPillText: {
     fontWeight: '600',
@@ -933,8 +1024,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 2,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     borderRadius: 8,
     borderWidth: StyleSheet.hairlineWidth,
   },
@@ -947,13 +1038,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: 10,
   },
   tierTitle: {
     fontWeight: '700',
+    letterSpacing: 0.3,
   },
   tierBadge: {
-    fontWeight: '700',
+    fontWeight: '600',
   },
   telemetryGrid: {
     flexDirection: 'row',
@@ -961,17 +1053,16 @@ const styles = StyleSheet.create({
   },
   telemetryItem: {
     flex: 1,
-    alignItems: 'center',
-    paddingVertical: 8,
-    borderRadius: 8,
+    padding: 10,
+    borderRadius: 10,
     borderWidth: StyleSheet.hairlineWidth,
+    gap: 2,
   },
   telemetryItemLabel: {
-    fontWeight: '500',
+    fontWeight: '600',
   },
   telemetryItemVal: {
     fontWeight: '700',
-    marginTop: 2,
   },
   syncRow: {
     flexDirection: 'row',
@@ -987,7 +1078,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   deviceList: {
-    gap: 6,
+    gap: 8,
   },
   deviceRow: {
     flexDirection: 'row',
@@ -995,7 +1086,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 12,
     paddingVertical: 10,
-    borderRadius: 8,
+    borderRadius: 10,
     borderWidth: StyleSheet.hairlineWidth,
   },
   deviceRowLeft: {
@@ -1004,10 +1095,10 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   deviceName: {
-    fontWeight: '500',
+    fontWeight: '600',
   },
   deviceVal: {
-    fontWeight: '700',
+    fontWeight: '600',
   },
   todayTag: {
     fontWeight: '600',
@@ -1017,18 +1108,18 @@ const styles = StyleSheet.create({
   },
   activityItem: {
     flexDirection: 'row',
-    padding: 10,
-    borderRadius: 10,
+    alignItems: 'center',
+    gap: 12,
+    padding: 12,
+    borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    gap: 10,
   },
   activityIconBox: {
-    width: 32,
-    height: 32,
+    width: 34,
+    height: 34,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 2,
   },
   activityContent: {
     flex: 1,
@@ -1039,13 +1130,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   activityTitle: {
-    fontWeight: '600',
+    fontWeight: '700',
   },
   activityTime: {
     fontWeight: '500',
   },
   activityDesc: {
     marginTop: 2,
+    lineHeight: 16,
+  },
+  loadingContainer: {
+    padding: 24,
+    alignItems: 'center',
+    gap: 8,
+  },
+  emptyStateContainer: {
+    padding: 20,
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    alignItems: 'center',
+    gap: 6,
+  },
+  emptyTitle: {
+    fontWeight: '700',
+    marginTop: 4,
+  },
+  emptySubtitle: {
+    textAlign: 'center',
     lineHeight: 16,
   },
 });
