@@ -337,7 +337,7 @@ class SpeechRecognitionService {
     let result: HearingTranscribeResponse | null = null;
     try {
       const audioBase64 = await this.stopAndExtractBase64();
-      if (audioBase64) {
+      if (audioBase64 && audioBase64.length > 80) {
         result = await api.hearing.transcribe({
           audio: audioBase64,
           format: Platform.OS === 'web' ? 'webm' : 'm4a',
@@ -390,7 +390,7 @@ class SpeechRecognitionService {
           }
         }
 
-        if (audioBase64) {
+        if (audioBase64 && audioBase64.length > 80) {
           const res = await api.hearing.transcribe({
             audio: audioBase64,
             format: Platform.OS === 'web' ? 'webm' : 'm4a',

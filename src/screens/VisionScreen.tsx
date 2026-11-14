@@ -305,95 +305,98 @@ export const VisionScreen: React.FC = () => {
       {/* 3. Live Camera Viewfinder & HUD */}
       <View style={[styles.viewfinderCard, { borderColor: colors.primary }]}>
         {permission?.granted && isFocused ? (
-          <CameraView
-            ref={cameraRef}
-            style={styles.camera}
-            enableTorch={torchOn}
-            facing={cameraFacing}
-          >
-            {/* Top HUD Indicators */}
-            <View style={styles.hudTopRow}>
-              <View style={styles.hudPillGroup}>
-                <View style={styles.hudPill}>
-                  <Sun size={12} color="#D1FAE5" />
-                  <Text style={styles.hudPillText}>{activeResult?.lux || 480} Lux</Text>
+          <View style={StyleSheet.absoluteFill}>
+            <CameraView
+              ref={cameraRef}
+              style={StyleSheet.absoluteFill}
+              enableTorch={torchOn}
+              facing={cameraFacing}
+            />
+            {/* Top HUD Indicators & Bounding Target Overlay */}
+            <View style={[StyleSheet.absoluteFill, { justifyContent: 'space-between', padding: 12 }]} pointerEvents="box-none">
+              <View style={styles.hudTopRow}>
+                <View style={styles.hudPillGroup}>
+                  <View style={styles.hudPill}>
+                    <Sun size={12} color="#D1FAE5" />
+                    <Text style={styles.hudPillText}>{activeResult?.lux || 480} Lux</Text>
+                  </View>
+                  <View style={styles.hudPill}>
+                    <Ruler size={12} color="#D1FAE5" />
+                    <Text style={styles.hudPillText}>{activeResult?.distance || '18 cm'}</Text>
+                  </View>
                 </View>
-                <View style={styles.hudPill}>
-                  <Ruler size={12} color="#D1FAE5" />
-                  <Text style={styles.hudPillText}>{activeResult?.distance || '18 cm'}</Text>
+
+                <View style={styles.hudActionGroup}>
+                  <TouchableOpacity
+                    style={[styles.hudCircleBtn, torchOn && { backgroundColor: '#F59E0B' }]}
+                    onPress={toggleTorch}
+                    accessibilityLabel="Toggle camera flashlight"
+                    accessibilityRole="button"
+                  >
+                    <Flashlight size={18} color="#FFFFFF" />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.hudCircleBtn}
+                    onPress={toggleCameraFacing}
+                    accessibilityLabel="Switch camera facing"
+                    accessibilityRole="button"
+                  >
+                    <SwitchCamera size={18} color="#FFFFFF" />
+                  </TouchableOpacity>
                 </View>
               </View>
 
-              <View style={styles.hudActionGroup}>
-                <TouchableOpacity
-                  style={[styles.hudCircleBtn, torchOn && { backgroundColor: '#F59E0B' }]}
-                  onPress={toggleTorch}
-                  accessibilityLabel="Toggle camera flashlight"
-                  accessibilityRole="button"
-                >
-                  <Flashlight size={18} color="#FFFFFF" />
-                </TouchableOpacity>
+              {/* AI Bounding Target Box */}
+              <View
+                style={[
+                  styles.boundingTarget,
+                  {
+                    borderColor: isScanning ? '#F59E0B' : colors.primaryFixedDim,
+                    borderStyle: isScanning ? 'solid' : 'dashed',
+                  },
+                ]}
+              >
+                <View style={styles.targetHeader}>
+                  <View
+                    style={[
+                      styles.confidenceBadge,
+                      { backgroundColor: isScanning ? '#F59E0B' : colors.primary },
+                    ]}
+                  >
+                    <Sparkles size={11} color="#FFFFFF" />
+                    <Text style={styles.confidenceText}>
+                      {isScanning
+                        ? 'ANALYZING SCENE...'
+                        : activeResult
+                        ? `CONFIDENCE: ${activeResult.confidence}%`
+                        : currentMode === 'ocr'
+                        ? 'ALIGN TEXT IN FRAME'
+                        : currentMode === 'objects'
+                        ? 'OBJECT DETECTION READY'
+                        : 'SURROUNDINGS READY'}
+                    </Text>
+                  </View>
+                </View>
 
-                <TouchableOpacity
-                  style={styles.hudCircleBtn}
-                  onPress={toggleCameraFacing}
-                  accessibilityLabel="Switch camera facing"
-                  accessibilityRole="button"
-                >
-                  <SwitchCamera size={18} color="#FFFFFF" />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* AI Bounding Target Box */}
-            <View
-              style={[
-                styles.boundingTarget,
-                {
-                  borderColor: isScanning ? '#F59E0B' : colors.primaryFixedDim,
-                  borderStyle: isScanning ? 'solid' : 'dashed',
-                },
-              ]}
-            >
-              <View style={styles.targetHeader}>
-                <View
-                  style={[
-                    styles.confidenceBadge,
-                    { backgroundColor: isScanning ? '#F59E0B' : colors.primary },
-                  ]}
-                >
-                  <Sparkles size={11} color="#FFFFFF" />
-                  <Text style={styles.confidenceText}>
-                    {isScanning
-                      ? 'ANALYZING SCENE...'
-                      : activeResult
-                      ? `CONFIDENCE: ${activeResult.confidence}%`
-                      : currentMode === 'ocr'
-                      ? 'ALIGN TEXT IN FRAME'
+                <View style={styles.targetFooter}>
+                  <Text style={styles.targetTagText}>
+                    {currentMode === 'ocr'
+                      ? 'Optical Character Recognition'
                       : currentMode === 'objects'
-                      ? 'OBJECT DETECTION READY'
-                      : 'SURROUNDINGS READY'}
+                      ? 'Neural Spatial Object Grid'
+                      : 'Environmental Overview'}
                   </Text>
+                  <View
+                    style={[
+                      styles.activeLaserDot,
+                      { backgroundColor: isLive ? '#EF4444' : colors.primaryFixedDim },
+                    ]}
+                  />
                 </View>
               </View>
-
-              <View style={styles.targetFooter}>
-                <Text style={styles.targetTagText}>
-                  {currentMode === 'ocr'
-                    ? 'Optical Character Recognition'
-                    : currentMode === 'objects'
-                    ? 'Neural Spatial Object Grid'
-                    : 'Environmental Overview'}
-                </Text>
-                <View
-                  style={[
-                    styles.activeLaserDot,
-                    { backgroundColor: isLive ? '#EF4444' : colors.primaryFixedDim },
-                  ]}
-                />
-              </View>
             </View>
-          </CameraView>
+          </View>
         ) : (
           <View style={[styles.permissionFallback, { backgroundColor: colors.surfaceContainerLow }]}>
             <Camera size={38} color={colors.primary} />

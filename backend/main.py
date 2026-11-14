@@ -21,6 +21,8 @@ import scipy.io.wavfile as wavfile
 import speech_recognition as sr
 import imageio_ffmpeg
 
+from backend.app.echosign import isl_engine, motion_library, gesture_recognizer
+
 # Initialize FastAPI application
 app = FastAPI(
     title="AccessOne AI - Clinical Assistive Backend",
@@ -107,6 +109,46 @@ class HearingTranscribeResponse(BaseModel):
     processing_ms: int
     session_id: Optional[str] = None
     language: str
+
+# EchoSign Bridge Schemas
+class SpeechToSignRequest(BaseModel):
+    text: Optional[str] = Field(None, description="Recognized speech text (or omit if providing raw audio)")
+    audio: Optional[str] = Field(None, description="Base64 encoded audio payload")
+    audio_format: Optional[str] = Field("m4a", description="Audio format")
+    language: Optional[str] = Field("english", description="Input language: english, hindi, tamil, en-US")
+    session_id: Optional[str] = Field(None, description="Bridge session ID")
+
+class TextToSignRequest(BaseModel):
+    text: str = Field(..., description="Text input for sign language translation")
+    language: Optional[str] = Field("english", description="Input language: english, hindi, tamil, en-US")
+    session_id: Optional[str] = Field(None, description="Bridge session ID")
+
+class SpeechToSignResponse(BaseModel):
+    success: bool = True
+    gloss_sequence: List[str]
+    original_text: str
+    language: str
+    animation_data: List[Dict[str, Any]]
+    available_vocabulary: List[str]
+    missing_vocabulary: List[str]
+    session_id: Optional[str] = None
+    status: str
+
+class SignToTextRequest(BaseModel):
+    video_frame: Optional[str] = Field(None, description="Base64 encoded camera frame")
+    landmarks: Optional[List[List[float]]] = Field(None, description="Sequence of 198-keypoint landmark arrays")
+    language: Optional[str] = Field("english", description="Target translation language")
+    session_id: Optional[str] = Field(None, description="Bridge session ID")
+
+class SignToTextResponse(BaseModel):
+    success: bool
+    status: str
+    predicted_text: Optional[str] = None
+    confidence: Optional[float] = None
+    gesture_sequence: List[str] = []
+    landmarks: Optional[List[float]] = None
+    model_status: Dict[str, Any]
+    message: Optional[str] = None
 
 # Helper: Decode and validate image
 def decode_and_validate_image(b64_str: str) -> tuple[Image.Image, np.ndarray, int]:
@@ -322,6 +364,7 @@ def process_scene_mode(np_img: np.ndarray, lux: int) -> Dict[str, Any]:
 
 # Vision API Endpoint
 @app.post("/api/v1/vision", response_model=VisionResponse)
+@app.post("/vision", response_model=VisionResponse)
 async def analyze_vision(req: VisionRequest):
     start_time = time.time()
     
@@ -371,7 +414,12 @@ def convert_audio_payload_to_wav(b64_str: str, input_format: str = "m4a") -> tup
         raise HTTPException(status_code=400, detail=f"Invalid base64 audio payload: {e}")
 
     if len(raw_bytes) < 32:
-        raise HTTPException(status_code=400, detail="Audio payload too small or empty")
+        # Generate 0.5s silent 16kHz mono WAV for empty/ambient chunks
+        silent_samples = np.zeros(8000, dtype=np.int16)
+        temp_dir = tempfile.gettempdir()
+        out_file = os.path.join(temp_dir, f"accessone_audio_silent_{uuid.uuid4().hex[:8]}.wav")
+        wavfile.write(out_file, 16000, silent_samples)
+        return out_file, silent_samples, 16000
 
     temp_dir = tempfile.gettempdir()
     unique_id = uuid.uuid4().hex[:10]
@@ -552,9 +600,28 @@ def transcribe_speech_file(wav_path: str, language: str = "en-US") -> tuple[str,
 
 # Hearing Transcribe API Endpoint
 @app.post("/api/v1/hearing/transcribe", response_model=HearingTranscribeResponse)
+@app.post("/hearing/transcribe", response_model=HearingTranscribeResponse)
 async def transcribe_hearing_audio(req: HearingTranscribeRequest):
     start_time = time.time()
     wav_path = None
+
+    # Handle ambient silence or empty chunks gracefully
+    if not req.audio or len(req.audio.strip()) < 32:
+        now_str = time.strftime("%I:%M %p")
+        return HearingTranscribeResponse(
+            success=True,
+            transcript="",
+            is_final=req.is_final if req.is_final is not None else True,
+            confidence=None,
+            timestamp=now_str,
+            status="ambient_silence",
+            decibels=32,
+            is_speech=False,
+            sound_events=[],
+            processing_ms=0,
+            session_id=req.session_id,
+            language=req.language or "en-US"
+        )
 
     try:
         # 1. Convert base64 audio payload to standard 16kHz mono WAV
@@ -612,6 +679,151 @@ async def transcribe_hearing_audio(req: HearingTranscribeRequest):
             except Exception:
                 pass
 
+# EchoSign AI Bridge Endpoints & Handlers
+def process_text_to_sign_payload(text: str, language: str = "english", session_id: Optional[str] = None) -> SpeechToSignResponse:
+    gloss_sequence, metadata = isl_engine.text_to_gloss(text, language)
+
+    animation_data: List[Dict[str, Any]] = []
+    available_vocab: List[str] = []
+    missing_vocab: List[str] = []
+
+    for word in gloss_sequence:
+        sign_data = motion_library.get_sign(word)
+        if sign_data:
+            animation_data.append(sign_data)
+            available_vocab.append(word)
+        else:
+            missing_vocab.append(word)
+            # Add fingerspelling postures fallback
+            spelled_sequence = motion_library.get_fingerspelling(word)
+            if spelled_sequence:
+                animation_data.extend(spelled_sequence)
+
+    status = "completed"
+    if missing_vocab and not available_vocab:
+        status = "fingerspelling_only"
+    elif missing_vocab:
+        status = "partial_vocabulary"
+
+    return SpeechToSignResponse(
+        success=True,
+        gloss_sequence=gloss_sequence,
+        original_text=text,
+        language=language,
+        animation_data=animation_data,
+        available_vocabulary=available_vocab,
+        missing_vocabulary=missing_vocab,
+        session_id=session_id,
+        status=status
+    )
+
+@app.post("/api/v1/bridge/speech-to-sign", response_model=SpeechToSignResponse)
+@app.post("/bridge/speech-to-sign", response_model=SpeechToSignResponse)
+async def bridge_speech_to_sign(req: SpeechToSignRequest):
+    recognized_text = req.text
+    target_lang = req.language or "english"
+
+    if not recognized_text and req.audio:
+        lang_code = "en-US"
+        if target_lang.lower() in ["hindi", "hi-in", "hi"]:
+            lang_code = "hi-IN"
+        elif target_lang.lower() in ["tamil", "ta-in", "ta"]:
+            lang_code = "ta-IN"
+
+        wav_path = None
+        try:
+            wav_path, _, _ = convert_audio_payload_to_wav(req.audio, req.audio_format or "m4a")
+            recognized_text, _, _ = transcribe_speech_file(wav_path, lang_code)
+        finally:
+            if wav_path and os.path.exists(wav_path):
+                try:
+                    os.remove(wav_path)
+                except Exception:
+                    pass
+
+    if not recognized_text:
+        return SpeechToSignResponse(
+            success=False,
+            gloss_sequence=[],
+            original_text="",
+            language=target_lang,
+            animation_data=[],
+            available_vocabulary=[],
+            missing_vocabulary=[],
+            session_id=req.session_id,
+            status="no_speech_detected"
+        )
+
+    return process_text_to_sign_payload(recognized_text, target_lang, req.session_id)
+
+@app.post("/api/v1/bridge/text-to-sign", response_model=SpeechToSignResponse)
+@app.post("/bridge/text-to-sign", response_model=SpeechToSignResponse)
+def bridge_text_to_sign(req: TextToSignRequest):
+    return process_text_to_sign_payload(req.text, req.language or "english", req.session_id)
+
+@app.post("/api/v1/bridge/sign-to-text", response_model=SignToTextResponse)
+@app.post("/bridge/sign-to-text", response_model=SignToTextResponse)
+def bridge_sign_to_text(req: SignToTextRequest):
+    model_status = gesture_recognizer.get_model_status()
+    extracted_landmarks = None
+
+    if req.video_frame:
+        try:
+            pil_img, np_img, _ = decode_and_validate_image(req.video_frame)
+            extracted_landmarks = gesture_recognizer.extract_frame_landmarks(np_img).tolist()
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Invalid video frame: {e}")
+
+    # If user provided a full sequence of landmarks, run gesture recognition
+    if req.landmarks and len(req.landmarks) > 0:
+        seq_np = np.array(req.landmarks, dtype=np.float32)
+        res = gesture_recognizer.recognize_gesture(seq_np)
+        return SignToTextResponse(
+            success=res["success"],
+            status=res["status"],
+            predicted_text=res.get("predicted_text"),
+            confidence=res.get("confidence"),
+            gesture_sequence=res.get("gesture_sequence", []),
+            landmarks=extracted_landmarks,
+            model_status=model_status,
+            message=res.get("message")
+        )
+
+    return SignToTextResponse(
+        success=True,
+        status="landmarks_extracted",
+        predicted_text=None,
+        confidence=None,
+        gesture_sequence=[],
+        landmarks=extracted_landmarks,
+        model_status=model_status,
+        message=model_status["message"]
+    )
+
+@app.post("/api/v1/bridge/text-to-speech")
+@app.post("/bridge/text-to-speech")
+def bridge_text_to_speech(payload: Dict[str, Any]):
+    return {
+        "success": True,
+        "text": payload.get("text", ""),
+        "status": "ready_for_device_tts",
+        "timestamp": time.time()
+    }
+
+@app.get("/api/v1/bridge/sign-capabilities")
+@app.get("/bridge/sign-capabilities")
+def bridge_sign_capabilities():
+    return {
+        "success": True,
+        "version": "2.0.0",
+        "engine": "EchoSign AI - Indian Sign Language Bidirectional Neural Engine",
+        "motion_library": motion_library.get_stats(),
+        "gesture_model": gesture_recognizer.get_model_status(),
+        "supported_languages": ["english", "hindi", "tamil"],
+        "grammar_spec": "Indian Sign Language (SOV / Time-Topic-Comment structure)",
+        "features_per_frame": 198
+    }
+
 @app.get("/health")
 async def health_check():
     return {
@@ -619,6 +831,7 @@ async def health_check():
         "version": "4.2.0",
         "neuralEngine": "Local Neural YOLOv8 + Windows Native OCR",
         "speechRecognition": "Google Cloud Multilingual ASR Engine + Spectral Sound Event Classifier",
+        "signLanguageEngine": "EchoSign AI ISL Keypoint Motion Library & Text-to-Gloss Engine",
         "supportedLanguages": ["en-US", "es-ES", "hi-IN", "ta-IN", "fr-FR", "de-DE"],
         "timestamp": time.time()
     }

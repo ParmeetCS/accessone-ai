@@ -3,6 +3,15 @@ import * as Speech from 'expo-speech';
 import * as Haptics from 'expo-haptics';
 import { useUserStore } from './userStore';
 import { speechRecognitionService } from '../services/speechRecognitionService';
+import {
+  api,
+  EchoSignAnimationData,
+  SpeechToSignApiResponse,
+  SignToTextApiResponse,
+  SignCapabilitiesResponse,
+} from '../services/api';
+
+export type BridgeMode = 'two-way-chat' | 'voice-to-sign' | 'sign-to-voice' | 'text-to-sign';
 
 export interface BridgeMessage {
   id: string;
@@ -46,6 +55,10 @@ const QUICK_PHRASES = [
 ];
 
 interface BridgeState {
+  // Mode selection
+  bridgeMode: BridgeMode;
+  setBridgeMode: (mode: BridgeMode) => void;
+
   messages: BridgeMessage[];
   quickPhrases: string[];
   isPartnerListening: boolean;
@@ -61,7 +74,29 @@ interface BridgeState {
   pendingSender: 'doctor' | 'user';
   isReviewingTranscript: boolean;
 
+  // EchoSign 3D Avatar & Sign Animation state
+  signAnimations: EchoSignAnimationData[];
+  glossSequence: string[];
+  originalSentence: string;
+  missingVocabulary: string[];
+  isTranslatingSign: boolean;
+  signTranslationError: string | null;
+  signAvatarSpeed: number;
+
+  // EchoSign Sign to Text (Camera & Gesture Recognition) state
+  isSignCameraActive: boolean;
+  signCameraFacing: 'front' | 'back';
+  isSignRecognizing: boolean;
+  recognizedSignText: string | null;
+  signConfidence: number | null;
+  signModelStatus: any;
+  signErrorMessage: string | null;
+  signGestureSequence: string[];
+  lastLandmarkCount: number;
+
+  // Actions
   setBridgeSpeed: (speed: number) => void;
+  setSignAvatarSpeed: (speed: number) => void;
   togglePartnerListening: () => Promise<void>;
   startUserVoiceInput: () => Promise<void>;
   stopUserVoiceInput: () => Promise<void>;
@@ -75,9 +110,21 @@ interface BridgeState {
   quickSpeakPill: (phrase: string) => Promise<void>;
   replayMessageAudio: (msg: BridgeMessage) => Promise<void>;
   simulateDoctorResponse: (promptText?: string) => Promise<void>;
+
+  // EchoSign actions
+  translateTextToSign: (text: string, language?: string) => Promise<boolean>;
+  startVoiceToSignRecording: () => Promise<void>;
+  stopVoiceToSignRecording: () => Promise<void>;
+  recognizeSignFromFrame: (imageBase64: string) => Promise<void>;
+  speakRecognizedSign: (customText?: string) => Promise<void>;
+  toggleSignCameraFacing: () => void;
+  toggleSignCameraActive: (active?: boolean) => void;
+  clearSignAnimation: () => void;
+  fetchSignCapabilities: () => Promise<SignCapabilitiesResponse | null>;
 }
 
 export const useBridgeStore = create<BridgeState>((set, get) => ({
+  bridgeMode: 'two-way-chat',
   messages: INITIAL_MESSAGES,
   quickPhrases: QUICK_PHRASES,
   isPartnerListening: false,
@@ -92,6 +139,33 @@ export const useBridgeStore = create<BridgeState>((set, get) => ({
   pendingSender: 'doctor',
   isReviewingTranscript: false,
 
+  // EchoSign Animation State
+  signAnimations: [],
+  glossSequence: [],
+  originalSentence: '',
+  missingVocabulary: [],
+  isTranslatingSign: false,
+  signTranslationError: null,
+  signAvatarSpeed: 1.0,
+
+  // EchoSign Sign to Text State
+  isSignCameraActive: false,
+  signCameraFacing: 'front',
+  isSignRecognizing: false,
+  recognizedSignText: null,
+  signConfidence: null,
+  signModelStatus: null,
+  signErrorMessage: null,
+  signGestureSequence: [],
+  lastLandmarkCount: 0,
+
+  setBridgeMode: (mode) => {
+    try {
+      Haptics.selectionAsync();
+    } catch {}
+    set({ bridgeMode: mode });
+  },
+
   setBridgeSpeed: (speed) => {
     try {
       Haptics.selectionAsync();
@@ -99,11 +173,17 @@ export const useBridgeStore = create<BridgeState>((set, get) => ({
     set({ bridgeSpeed: speed });
   },
 
+  setSignAvatarSpeed: (speed) => {
+    try {
+      Haptics.selectionAsync();
+    } catch {}
+    set({ signAvatarSpeed: speed });
+  },
+
   togglePartnerListening: async () => {
     const isCurrentlyListening = get().isPartnerListening;
 
     if (!isCurrentlyListening) {
-      // Start capturing partner microphone audio
       try {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       } catch {}
@@ -118,7 +198,6 @@ export const useBridgeStore = create<BridgeState>((set, get) => ({
         set({ isPartnerListening: true, pendingSender: 'doctor' });
       }
     } else {
-      // Stop partner listening and extract genuine transcription for review
       try {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       } catch {}
@@ -134,7 +213,6 @@ export const useBridgeStore = create<BridgeState>((set, get) => ({
           isReviewingTranscript: true,
         });
       } else {
-        // Fallback to clinical simulation if microphone was silent
         get().simulateDoctorResponse();
       }
     }
@@ -206,7 +284,6 @@ export const useBridgeStore = create<BridgeState>((set, get) => ({
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch {}
 
-    // If user approved a message to speak to room, synthesize aloud
     if (isUser) {
       get().speakAloudText(newMsg.text, false);
     }
@@ -313,5 +390,170 @@ export const useBridgeStore = create<BridgeState>((set, get) => ({
     try {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch {}
+  },
+
+  // EchoSign Actions Implementation
+  translateTextToSign: async (text: string, language?: string) => {
+    if (!text || !text.trim()) return false;
+
+    set({ isTranslatingSign: true, signTranslationError: null });
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch {}
+
+    const lang = language || useUserStore.getState().language || 'english';
+    try {
+      const res = await api.bridge.textToSign({ text: text.trim(), language: lang });
+      if (res && res.success && res.animation_data && res.animation_data.length > 0) {
+        set({
+          signAnimations: res.animation_data,
+          glossSequence: res.gloss_sequence || [],
+          originalSentence: res.original_text || text,
+          missingVocabulary: res.missing_vocabulary || [],
+          isTranslatingSign: false,
+          signTranslationError: null,
+        });
+        try {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        } catch {}
+        return true;
+      } else {
+        set({
+          isTranslatingSign: false,
+          signTranslationError: 'No sign motion data found for sentence. Words were spelled or unavailable.',
+        });
+        return false;
+      }
+    } catch (err: any) {
+      set({
+        isTranslatingSign: false,
+        signTranslationError: err.message || 'Error communicating with sign translation engine.',
+      });
+      return false;
+    }
+  },
+
+  startVoiceToSignRecording: async () => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch {}
+
+    const userLang = useUserStore.getState().language || 'en-US';
+    const started = await speechRecognitionService.startListening({
+      language: userLang,
+      continuous: false,
+    });
+
+    if (started) {
+      set({ isUserVoiceRecording: true, signTranslationError: null });
+    }
+  },
+
+  stopVoiceToSignRecording: async () => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    } catch {}
+
+    set({ isUserVoiceRecording: false });
+    const res = await speechRecognitionService.stopListening();
+
+    if (res && res.transcript && res.transcript.trim()) {
+      const text = res.transcript.trim();
+      const userLang = useUserStore.getState().language || 'english';
+      await get().translateTextToSign(text, userLang);
+    } else {
+      set({
+        signTranslationError: 'No clear speech detected. Please speak clearly into the microphone.',
+      });
+    }
+  },
+
+  recognizeSignFromFrame: async (imageBase64: string) => {
+    if (!imageBase64) return;
+    set({ isSignRecognizing: true, signErrorMessage: null });
+
+    try {
+      const res = await api.bridge.signToText({ videoFrame: imageBase64 });
+      if (res) {
+        set({
+          signModelStatus: res.model_status,
+          recognizedSignText: res.predicted_text || null,
+          signConfidence: res.confidence || null,
+          signGestureSequence: res.gesture_sequence || [],
+          lastLandmarkCount: res.landmarks ? res.landmarks.length : 0,
+          isSignRecognizing: false,
+          signErrorMessage: res.message || null,
+        });
+      }
+    } catch (err: any) {
+      set({
+        isSignRecognizing: false,
+        signErrorMessage: `Recognition failed: ${err.message}`,
+      });
+    }
+  },
+
+  speakRecognizedSign: async (customText?: string) => {
+    const textToSpeak = customText || get().recognizedSignText;
+    if (!textToSpeak || !textToSpeak.trim()) return;
+
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      Speech.speak(textToSpeak.trim(), {
+        rate: get().bridgeSpeed,
+        pitch: 1.0,
+        language: 'en-US',
+      });
+
+      // Add to conversation dialogue
+      const newMsg: BridgeMessage = {
+        id: `b-${Date.now()}`,
+        sender: 'user',
+        senderName: 'ISL Signer (You)',
+        senderRole: 'EchoSign Sign-to-Voice',
+        text: textToSpeak.trim(),
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        isSpokenToRoom: true,
+      };
+
+      set((state) => ({
+        messages: [...state.messages, newMsg],
+      }));
+    } catch (err) {
+      console.warn('[BridgeStore] speakRecognizedSign error:', err);
+    }
+  },
+
+  toggleSignCameraFacing: () => {
+    try {
+      Haptics.selectionAsync();
+    } catch {}
+    set((state) => ({
+      signCameraFacing: state.signCameraFacing === 'front' ? 'back' : 'front',
+    }));
+  },
+
+  toggleSignCameraActive: (active?: boolean) => {
+    set((state) => ({
+      isSignCameraActive: active !== undefined ? active : !state.isSignCameraActive,
+    }));
+  },
+
+  clearSignAnimation: () => {
+    set({
+      signAnimations: [],
+      glossSequence: [],
+      originalSentence: '',
+      missingVocabulary: [],
+      signTranslationError: null,
+    });
+  },
+
+  fetchSignCapabilities: async () => {
+    const caps = await api.bridge.getSignCapabilities();
+    if (caps && caps.gesture_model) {
+      set({ signModelStatus: caps.gesture_model });
+    }
+    return caps;
   },
 }));
