@@ -156,6 +156,7 @@ export const api = {
     /**
      * POST /api/v1/vision
      * Sends captured or uploaded image to backend for OCR, Scene Description, or Object Identification.
+     * Routes internally: ocr→Windows WinRT, describe→Gemini 1.5 Flash, objects→YOLO.
      */
     analyze: async (payload: {
       image: string;
@@ -165,13 +166,13 @@ export const api = {
       const startTime = Date.now();
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
+        // OCR can be slow on complex documents; Gemini is fast (~2-5s)
+        const timeoutMs = payload.mode === 'ocr' || payload.mode === 'barcode' ? 60000 : 30000;
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
         const res = await fetch(`${API_BASE_URL}/vision`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             image: payload.image,
             mode: payload.mode,
@@ -190,20 +191,60 @@ export const api = {
         const data: VisionApiResponse = await res.json();
         return data;
       } catch (error: any) {
+        const isTimeout = error.name === 'AbortError';
         console.warn('[Vision API] Backend request failed:', error.message);
         const duration = Date.now() - startTime;
         return {
           success: false,
           mode: payload.mode,
-          result_text: `Vision service unreachable (${error.message}). Please ensure the AccessOne AI backend server is running at ${API_BASE_URL}.`,
+          result_text: isTimeout
+            ? `Analysis timed out. The image may be too complex or the backend is busy. Try again or use a clearer photo.`
+            : `Vision service unreachable (${error.message}). Ensure the backend is running at ${API_BASE_URL}.`,
           confidence: 0,
           processing_ms: duration,
-          title: 'Vision Service Unavailable',
+          title: isTimeout ? 'Analysis Timed Out' : 'Vision Service Unavailable',
           category: 'Network / Offline Mode',
-          warning_text: 'Unable to connect to the AI vision backend. Verify network connection and backend status.',
+          warning_text: isTimeout
+            ? 'OCR timed out. Try a photo with less text or better lighting.'
+            : 'Unable to connect to the AI vision backend. Verify network connection and backend status.',
           distance: 'Not Available',
           lux: 400,
         };
+      }
+    },
+
+    /**
+     * POST /api/v1/vision/describe
+     * Dedicated endpoint: AI-powered scene description for visually impaired users.
+     * Uses Gemini 1.5 Flash multimodal (if GEMINI_API_KEY set on backend), YOLO fallback.
+     */
+    describe: async (payload: {
+      image: string;
+      language?: string;
+    }): Promise<VisionApiResponse> => {
+      const startTime = Date.now();
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+        const res = await fetch(`${API_BASE_URL}/vision/describe`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: payload.image, language: payload.language || 'en-US' }),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!res.ok) {
+          // Fall back to main /vision endpoint with mode=describe
+          return api.vision.analyze({ image: payload.image, mode: 'describe', language: payload.language });
+        }
+
+        return await res.json() as VisionApiResponse;
+      } catch (error: any) {
+        // Fall back to main endpoint on any error
+        return api.vision.analyze({ image: payload.image, mode: 'describe', language: payload.language });
       }
     },
   },
@@ -224,7 +265,7 @@ export const api = {
       const startTime = Date.now();
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout for audio transcription
 
         const res = await fetch(`${API_BASE_URL}/hearing/transcribe`, {
           method: 'POST',

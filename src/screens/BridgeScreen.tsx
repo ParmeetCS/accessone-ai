@@ -481,7 +481,7 @@ export const BridgeScreen: React.FC = () => {
                     </Text>
                     {signConfidence && (
                       <Text style={[styles.resultConf, { color: colors.onPrimary, fontSize: scaleFont(10) }]}>
-                        {Math.round(signConfidence * 100)}% Confidence
+                        {Math.round(signConfidence)}% Confidence
                       </Text>
                     )}
                   </View>

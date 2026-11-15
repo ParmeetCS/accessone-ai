@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import * as Speech from 'expo-speech';
-import * as Haptics from 'expo-haptics';
+import * as Haptics from '../utils/haptics';
 import { useUserStore } from './userStore';
 import { speechRecognitionService } from '../services/speechRecognitionService';
 import {

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { FontScale } from '../theme/typography';
-import * as Haptics from 'expo-haptics';
+import * as Haptics from '../utils/haptics';
 import { User, Session } from '@supabase/supabase-js';
 import { authService } from '../services/supabase/auth';
 import { profilesService, Profile, ProfileUpdate, UserPreferences } from '../services/supabase/profiles';

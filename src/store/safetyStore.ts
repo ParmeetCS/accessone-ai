@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import * as Location from 'expo-location';
-import * as Haptics from 'expo-haptics';
+import * as Haptics from '../utils/haptics';
 
 export interface EmergencyContact {
   id: string;

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import * as Haptics from 'expo-haptics';
+import * as Haptics from '../utils/haptics';
 import * as Clipboard from 'expo-clipboard';
 import {
   speechRecognitionService,

@@ -1,14 +1,15 @@
 /**
- * AccessOne AI - EchoSign 3D Indian Sign Language (ISL) Avatar Viewer
- * Genuine Three.js WebGL 3D Avatar (Mixamo Y-Bot Rig from EchoSign)
- * Renders the authentic coral-red humanoid robot with dark metallic joints,
- * studio lighting, and smooth 60 FPS 3D sign language gestures.
+ * AccessOne AI - EchoSign 3D ISL Avatar
+ * Renders a Y-Bot style coral-red humanoid robot using pure HTML5 Canvas 2D.
+ * No CDN dependency — works 100% offline on Android/iOS.
+ * Matches the EchoSign reference: coral-red body, dark joints, articulated hands,
+ * studio lighting with shadow/highlight, smooth ISL animations.
  */
 
 import React, { useEffect, useState, useRef, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { Play, Pause, RotateCcw, Square, Sparkles, AlertTriangle, FastForward } from 'lucide-react-native';
+import { Play, Pause, RotateCcw, Square, Sparkles, AlertTriangle } from 'lucide-react-native';
 import { useAppTheme } from '../theme/ThemeContext';
 import { EchoSignAnimationData } from '../services/api';
 
@@ -39,49 +40,34 @@ export const EchoSignAvatar: React.FC<EchoSignAvatarProps> = ({
   const [speedMultiplier, setSpeedMultiplier] = useState<number>(1.0);
   const [isWebReady, setIsWebReady] = useState(false);
 
-  // Active clip
   const activeClip = useMemo(() => {
     if (!animationList || animationList.length === 0) return null;
     return animationList[Math.min(currentWordIdx, animationList.length - 1)];
   }, [animationList, currentWordIdx]);
 
-  // Robust cross-platform command sender (postMessage + injectJavaScript)
   const sendCommandTo3D = (payload: any) => {
     if (!webViewRef.current) return;
     const jsonStr = JSON.stringify(payload);
-
-    // 1. PostMessage
-    try {
-      webViewRef.current.postMessage(jsonStr);
-    } catch (e) {}
-
-    // 2. Direct JavaScript injection (100% reliable on Android)
+    try { webViewRef.current.postMessage(jsonStr); } catch (e) {}
     try {
       const escaped = JSON.stringify(jsonStr);
       webViewRef.current.injectJavaScript(`
-        if (window.handleNativeCommand) {
-          window.handleNativeCommand(${escaped});
-        }
+        if (window.handleCmd) window.handleCmd(${escaped});
         true;
       `);
     } catch (e) {}
   };
 
-  // Sync animation data to WebView when updated
   useEffect(() => {
     if (!isWebReady) return;
-
     if (animationList && animationList.length > 0) {
       setCurrentWordIdx(0);
       setIsPlaying(true);
       sendCommandTo3D({
-        type: 'LOAD_ANIMATION',
+        type: 'LOAD',
         words: animationList.map((a) => ({
-          word: a.word,
-          type: a.type,
-          character: a.character,
+          word: a.word, type: a.type, character: a.character,
           num_frames: a.num_frames,
-          keypoints: a.keypoints,
         })),
         speed: speedMultiplier,
       });
@@ -92,648 +78,748 @@ export const EchoSignAvatar: React.FC<EchoSignAvatarProps> = ({
     }
   }, [animationList, isWebReady]);
 
-  // Play / Pause toggle
   const handlePlayPause = () => {
     if (!animationList || animationList.length === 0) {
-      // Default to standard greeting sequence if tapped while idle
-      const defaultWords = [
-        { word: 'HELLO', type: 'motion_keypoints' as const, num_frames: 60, keypoints: [], duration: 2.0, source: 'default', available: true },
-        { word: 'HOW', type: 'motion_keypoints' as const, num_frames: 50, keypoints: [], duration: 1.6, source: 'default', available: true },
-        { word: 'YOU', type: 'motion_keypoints' as const, num_frames: 45, keypoints: [], duration: 1.5, source: 'default', available: true },
-      ];
       sendCommandTo3D({
-        type: 'LOAD_ANIMATION',
-        words: defaultWords,
+        type: 'LOAD',
+        words: [
+          { word: 'HELLO', type: 'motion_keypoints', num_frames: 60 },
+          { word: 'HOW', type: 'motion_keypoints', num_frames: 50 },
+          { word: 'YOU', type: 'motion_keypoints', num_frames: 45 },
+        ],
         speed: speedMultiplier,
       });
       setIsPlaying(true);
       return;
     }
-
-    const nextState = !isPlaying;
-    setIsPlaying(nextState);
-    sendCommandTo3D({
-      type: nextState ? 'PLAY' : 'PAUSE',
-    });
+    const next = !isPlaying;
+    setIsPlaying(next);
+    sendCommandTo3D({ type: next ? 'PLAY' : 'PAUSE' });
   };
 
   const handleReplay = () => {
-    setCurrentWordIdx(0);
-    setIsPlaying(true);
+    setCurrentWordIdx(0); setIsPlaying(true);
     sendCommandTo3D({ type: 'REPLAY' });
   };
 
   const handleStop = () => {
-    setIsPlaying(false);
-    setCurrentWordIdx(0);
+    setIsPlaying(false); setCurrentWordIdx(0);
     sendCommandTo3D({ type: 'STOP' });
   };
 
   const cycleSpeed = () => {
-    const nextSpeed = speedMultiplier === 1.0 ? 1.25 : speedMultiplier === 1.25 ? 0.75 : 1.0;
-    setSpeedMultiplier(nextSpeed);
-    sendCommandTo3D({
-      type: 'SET_SPEED',
-      speed: nextSpeed,
-    });
+    const next = speedMultiplier === 1.0 ? 1.5 : speedMultiplier === 1.5 ? 0.75 : 1.0;
+    setSpeedMultiplier(next);
+    sendCommandTo3D({ type: 'SPEED', speed: next });
   };
 
-  // Handle messages from Three.js WebView
   const handleWebViewMessage = (event: any) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
       if (data.type === 'READY') {
         setIsWebReady(true);
-        // Push animations immediately if available
         if (animationList && animationList.length > 0) {
           sendCommandTo3D({
-            type: 'LOAD_ANIMATION',
+            type: 'LOAD',
             words: animationList.map((a) => ({
-              word: a.word,
-              type: a.type,
-              character: a.character,
-              num_frames: a.num_frames,
-              keypoints: a.keypoints,
+              word: a.word, type: a.type, character: a.character, num_frames: a.num_frames,
             })),
             speed: speedMultiplier,
           });
         }
       } else if (data.type === 'WORD_CHANGE') {
-        setCurrentWordIdx(data.wordIndex);
-      } else if (data.type === 'ANIMATION_END') {
+        setCurrentWordIdx(data.idx);
+      } else if (data.type === 'DONE') {
         setIsPlaying(false);
         if (onAnimationEnd) onAnimationEnd();
       }
-    } catch (e) {
-      console.warn('[EchoSignAvatar] Error parsing message from 3D WebView:', e);
-    }
+    } catch (e) {}
   };
 
-  // Three.js HTML5 WebGL Studio Scene
-  const threeHtml = `
-<!DOCTYPE html>
+  // ═══════════════════════════════════════════════════════════
+  //  Pure HTML5 Canvas 2D — Y-Bot style 3D robot renderer
+  //  No external libraries. Works offline on any Android device.
+  // ═══════════════════════════════════════════════════════════
+  const avatarHtml = `<!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; overflow: hidden; background: #dce3eb; }
-    canvas { width: 100% !important; height: 100% !important; display: block; }
-    #loader {
-      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: #dce3eb; color: #1e293b; font-family: -apple-system, sans-serif; font-size: 13px; font-weight: 600;
-      transition: opacity 0.3s;
-    }
-  </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:100%;height:100%;overflow:hidden;background:#C8D4DC;}
+  canvas{display:block;width:100%;height:100%;}
+</style>
 </head>
 <body>
-  <div id="loader">
-    <div style="width:24px; height:24px; border:3px solid #cbd5e1; border-top-color:#fa5252; border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:8px;"></div>
-    Loading 3D Y-Bot Rig...
-  </div>
-  <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
-
+<canvas id="c"></canvas>
 <script>
-  let scene, camera, renderer;
-  let ybot = {};
-  let currentWords = [];
-  let currentWordIdx = 0;
-  let currentFrameIdx = 0;
-  let isPlaying = false;
-  let speed = 1.0;
-  let clock = new THREE.Clock();
+// ════════════════════════════════════════════════════════════
+//  EchoSign ISL Avatar — Pure Canvas 2D Y-Bot Renderer
+//  Coral-red robot body with dark joints, 3D perspective shading
+// ════════════════════════════════════════════════════════════
+var canvas = document.getElementById('c');
+var ctx = canvas.getContext('2d');
+var W, H, CX, CY, SCALE;
 
-  function hideLoader() {
-    const l = document.getElementById('loader');
-    if (l) l.style.display = 'none';
-  }
+// Animation state
+var words = [], wordIdx = 0, frame = 0, playing = false, speed = 1.0;
+var time = 0, lastTs = 0;
 
-  // Initialize Scene
-  function init() {
-    if (typeof THREE === 'undefined') {
-      setTimeout(init, 100);
-      return;
-    }
+// ── Responsive sizing ────────────────────────────────────────
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  CX = W / 2; CY = H / 2;
+  SCALE = Math.min(W, H) / 420;
+}
+window.addEventListener('resize', resize);
+resize();
 
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xdce3eb);
+// ── Notify React Native ──────────────────────────────────────
+function rn(msg) {
+  try {
+    if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(JSON.stringify(msg));
+  } catch(e) {}
+}
 
-    camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.1, 50);
-    camera.position.set(0, 1.42, 3.3);
-    camera.lookAt(0, 1.32, 0);
+// ════════════════════════════════════════════════════════════
+//  DRAWING HELPERS — simulated 3D shading on 2D canvas
+// ════════════════════════════════════════════════════════════
 
-    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
-    document.body.appendChild(renderer.domElement);
+// Draw an ellipse with radial gradient (simulates spherical 3D shading)
+function sphere(x, y, rx, ry, baseColor, hiColor) {
+  var grd = ctx.createRadialGradient(x - rx*0.3, y - ry*0.35, rx*0.05, x, y, Math.max(rx,ry));
+  grd.addColorStop(0, hiColor);
+  grd.addColorStop(0.55, baseColor);
+  grd.addColorStop(1, darken(baseColor, 0.45));
+  ctx.beginPath();
+  ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI*2);
+  ctx.fillStyle = grd;
+  ctx.fill();
+}
 
-    // Three-point Studio Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.95);
-    scene.add(ambientLight);
+// Draw a rounded rectangle capsule (torso/arm segments)
+function capsule(x, y, w, h, r, baseColor, hiColor, angle) {
+  ctx.save();
+  ctx.translate(x, y);
+  if (angle) ctx.rotate(angle);
+  var grd = ctx.createLinearGradient(-w/2, 0, w/2, 0);
+  grd.addColorStop(0, darken(baseColor, 0.35));
+  grd.addColorStop(0.28, hiColor);
+  grd.addColorStop(0.72, baseColor);
+  grd.addColorStop(1, darken(baseColor, 0.40));
+  ctx.beginPath();
+  roundRect(ctx, -w/2, -h/2, w, h, r);
+  ctx.fillStyle = grd;
+  ctx.fill();
+  ctx.restore();
+}
 
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
-    keyLight.position.set(2.5, 4.0, 3.2);
-    scene.add(keyLight);
+// Rounded rect path helper
+function roundRect(c, x, y, w, h, r) {
+  c.moveTo(x + r, y);
+  c.lineTo(x + w - r, y);
+  c.quadraticCurveTo(x + w, y, x + w, y + r);
+  c.lineTo(x + w, y + h - r);
+  c.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  c.lineTo(x + r, y + h);
+  c.quadraticCurveTo(x, y + h, x, y + h - r);
+  c.lineTo(x, y + r);
+  c.quadraticCurveTo(x, y, x + r, y);
+  c.closePath();
+}
 
-    const fillLight = new THREE.DirectionalLight(0xdbe6f7, 0.65);
-    fillLight.position.set(-3.0, 2.0, 2.0);
-    scene.add(fillLight);
+function darken(hex, amt) {
+  var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  r = Math.max(0, Math.round(r*(1-amt)));
+  g = Math.max(0, Math.round(g*(1-amt)));
+  b = Math.max(0, Math.round(b*(1-amt)));
+  return '#' + ('0'+r.toString(16)).slice(-2) + ('0'+g.toString(16)).slice(-2) + ('0'+b.toString(16)).slice(-2);
+}
 
-    const rimLight = new THREE.DirectionalLight(0xffdcd6, 0.55);
-    rimLight.position.set(0, 3.5, -2.5);
-    scene.add(rimLight);
+function lighten(hex, amt) {
+  var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  r = Math.min(255, Math.round(r + (255-r)*amt));
+  g = Math.min(255, Math.round(g + (255-g)*amt));
+  b = Math.min(255, Math.round(b + (255-b)*amt));
+  return '#' + ('0'+r.toString(16)).slice(-2) + ('0'+g.toString(16)).slice(-2) + ('0'+b.toString(16)).slice(-2);
+}
 
-    // Build Character
-    buildYBotCharacter();
+// Colors
+var CORAL    = '#E8453C';
+var CORAL_HI = '#FF7B72';
+var JOINT    = '#1A1E24';
+var JOINT_HI = '#3A4048';
+var VISOR    = '#0D1117';
+var SHADOW   = 'rgba(0,0,0,0.22)';
 
-    // Hide loader
-    hideLoader();
+// ════════════════════════════════════════════════════════════
+//  POSE SYSTEM — returns arm joint angles for each ISL sign
+// ════════════════════════════════════════════════════════════
+function getPose(word, t) {
+  var w = (word||'').toUpperCase().trim();
+  var cycle = Math.sin(t * Math.PI);          // 0→1→0 bell
+  var wave  = Math.sin(t * Math.PI * 4);      // fast oscillation
+  var osc2  = Math.sin(t * Math.PI * 2);      // medium oscillation
 
-    // Start loop
-    animate();
-
-    // Notify React Native that 3D engine is ready
-    notifyNative({ type: 'READY' });
-  }
-
-  // Send message to React Native safely
-  function notifyNative(msg) {
-    const str = JSON.stringify(msg);
-    if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-      window.ReactNativeWebView.postMessage(str);
-    }
-  }
-
-  // Builds the authentic 3D Mixamo Y-Bot Character (coral red armor + dark metallic joints)
-  function buildYBotCharacter() {
-    const coralMat = new THREE.MeshStandardMaterial({
-      color: 0xfa5252, // Signature EchoSign Y-Bot coral red
-      roughness: 0.28,
-      metalness: 0.35
-    });
-
-    const darkJointMat = new THREE.MeshStandardMaterial({
-      color: 0x2b303a, // Dark metallic joint core
-      roughness: 0.32,
-      metalness: 0.75
-    });
-
-    const visorMat = new THREE.MeshStandardMaterial({
-      color: 0x111317, // Recessed helmet visor groove
-      roughness: 0.15,
-      metalness: 0.95
-    });
-
-    const characterRoot = new THREE.Group();
-    characterRoot.position.set(0, 0, 0);
-    scene.add(characterRoot);
-    ybot.root = characterRoot;
-
-    // 1. Pelvis & Abdomen Core
-    const pelvisGeo = new THREE.CylinderGeometry(0.38, 0.30, 0.35, 24);
-    const pelvis = new THREE.Mesh(pelvisGeo, coralMat);
-    pelvis.position.set(0, 0.68, 0);
-    characterRoot.add(pelvis);
-
-    const waistBallGeo = new THREE.SphereGeometry(0.32, 28, 20);
-    const waistBall = new THREE.Mesh(waistBallGeo, darkJointMat);
-    waistBall.position.set(0, 0.95, 0);
-    characterRoot.add(waistBall);
-
-    // 2. Chiseled Chest Armor & Shoulder Pauldrons
-    const chestGroup = new THREE.Group();
-    chestGroup.position.set(0, 1.25, 0);
-    characterRoot.add(chestGroup);
-    ybot.chest = chestGroup;
-
-    // Tapered chest hull
-    const chestGeo = new THREE.CylinderGeometry(0.68, 0.36, 0.65, 8);
-    const chestMesh = new THREE.Mesh(chestGeo, coralMat);
-    chestMesh.scale.set(1.15, 1.0, 0.65);
-    chestGroup.add(chestMesh);
-
-    // Left & Right shoulder pauldrons
-    const pauldronGeo = new THREE.ConeGeometry(0.32, 0.55, 6);
-    const lPauldron = new THREE.Mesh(pauldronGeo, coralMat);
-    lPauldron.rotation.z = Math.PI * 0.45;
-    lPauldron.position.set(-0.72, 0.22, 0);
-    chestGroup.add(lPauldron);
-
-    const rPauldron = new THREE.Mesh(pauldronGeo, coralMat);
-    rPauldron.rotation.z = -Math.PI * 0.45;
-    rPauldron.position.set(0.72, 0.22, 0);
-    chestGroup.add(rPauldron);
-
-    // 3. Neck & Sculpted Y-Bot Helmet (Head)
-    const neckGeo = new THREE.CylinderGeometry(0.18, 0.22, 0.26, 20);
-    const neck = new THREE.Mesh(neckGeo, darkJointMat);
-    neck.position.set(0, 0.45, 0);
-    chestGroup.add(neck);
-
-    const headGroup = new THREE.Group();
-    headGroup.position.set(0, 0.72, 0);
-    chestGroup.add(headGroup);
-    ybot.head = headGroup;
-
-    // Sleek egg/helmet head
-    const headGeo = new THREE.SphereGeometry(0.28, 32, 24);
-    const headMesh = new THREE.Mesh(headGeo, coralMat);
-    headMesh.scale.set(0.85, 1.35, 1.0);
-    headGroup.add(headMesh);
-
-    // Iconic recessed central visor slot
-    const visorGeo = new THREE.CylinderGeometry(0.065, 0.065, 0.42, 16);
-    const visorMesh = new THREE.Mesh(visorGeo, visorMat);
-    visorMesh.position.set(0, -0.02, 0.24);
-    headGroup.add(visorMesh);
-
-    // 4. Arms & High-Fidelity 5-Finger Hands
-    ybot.leftArm = buildArm(chestGroup, -0.65, false, coralMat, darkJointMat);
-    ybot.rightArm = buildArm(chestGroup, 0.65, true, coralMat, darkJointMat);
-
-    // Floor Shadow disc
-    const shadowGeo = new THREE.CircleGeometry(1.2, 32);
-    const shadowMat = new THREE.MeshBasicMaterial({ color: 0x94a3b8, transparent: true, opacity: 0.35 });
-    const shadowMesh = new THREE.Mesh(shadowGeo, shadowMat);
-    shadowMesh.rotation.x = -Math.PI / 2;
-    shadowMesh.position.set(0, 0.05, 0);
-    scene.add(shadowMesh);
-  }
-
-  // Builds an articulated arm with shoulder, bicep, elbow, forearm, wrist, and 5 articulated fingers
-  function buildArm(parent, xOffset, isRight, coralMat, darkJointMat) {
-    const armObj = {};
-
-    // Shoulder joint ball
-    const shoulderBallGeo = new THREE.SphereGeometry(0.20, 24, 20);
-    const shoulderBall = new THREE.Mesh(shoulderBallGeo, darkJointMat);
-    shoulderBall.position.set(xOffset, 0.18, 0);
-    parent.add(shoulderBall);
-
-    // Shoulder bone pivot
-    const shoulderBone = new THREE.Group();
-    shoulderBall.add(shoulderBone);
-    armObj.shoulder = shoulderBone;
-
-    // Upper arm (bicep) armor sleeve
-    const bicepGeo = new THREE.CylinderGeometry(0.18, 0.15, 0.62, 20);
-    const bicepMesh = new THREE.Mesh(bicepGeo, coralMat);
-    bicepMesh.position.set(0, -0.32, 0);
-    shoulderBone.add(bicepMesh);
-
-    // Elbow joint ball
-    const elbowBallGeo = new THREE.SphereGeometry(0.16, 20, 16);
-    const elbowBall = new THREE.Mesh(elbowBallGeo, darkJointMat);
-    elbowBall.position.set(0, -0.65, 0);
-    shoulderBone.add(elbowBall);
-
-    // Elbow bone pivot
-    const elbowBone = new THREE.Group();
-    elbowBall.add(elbowBone);
-    armObj.elbow = elbowBone;
-
-    // Forearm armor sleeve
-    const forearmGeo = new THREE.CylinderGeometry(0.15, 0.12, 0.58, 20);
-    const forearmMesh = new THREE.Mesh(forearmGeo, coralMat);
-    forearmMesh.position.set(0, -0.30, 0);
-    elbowBone.add(forearmMesh);
-
-    // Wrist joint ball
-    const wristBallGeo = new THREE.SphereGeometry(0.13, 18, 14);
-    const wristBall = new THREE.Mesh(wristBallGeo, darkJointMat);
-    wristBall.position.set(0, -0.60, 0);
-    elbowBone.add(wristBall);
-
-    // Wrist bone pivot
-    const wristBone = new THREE.Group();
-    wristBall.add(wristBone);
-    armObj.wrist = wristBone;
-
-    // Palm plate
-    const palmGeo = new THREE.BoxGeometry(0.22, 0.20, 0.08);
-    const palmMesh = new THREE.Mesh(palmGeo, coralMat);
-    palmMesh.position.set(0, -0.11, 0);
-    wristBone.add(palmMesh);
-
-    // 5 Articulated Fingers per hand
-    armObj.fingers = [];
-    const fingerConfigs = [
-      { x: isRight ? -0.10 : 0.10, y: -0.06, z: 0.04, len: 0.18, rotZ: isRight ? 0.6 : -0.6 }, // Thumb
-      { x: -0.07, y: -0.21, z: 0, len: 0.24, rotZ: 0 }, // Index
-      { x: -0.02, y: -0.22, z: 0, len: 0.26, rotZ: 0 }, // Middle
-      { x: 0.03, y: -0.21, z: 0, len: 0.23, rotZ: 0 }, // Ring
-      { x: 0.08, y: -0.19, z: 0, len: 0.19, rotZ: 0 }  // Pinky
-    ];
-
-    fingerConfigs.forEach((cfg) => {
-      const fingerRoot = new THREE.Group();
-      fingerRoot.position.set(cfg.x, cfg.y, cfg.z);
-      fingerRoot.rotation.z = cfg.rotZ;
-      wristBone.add(fingerRoot);
-
-      // Phalanx 1
-      const p1Geo = new THREE.CylinderGeometry(0.035, 0.030, cfg.len * 0.5, 12);
-      const p1 = new THREE.Mesh(p1Geo, coralMat);
-      p1.position.set(0, -cfg.len * 0.25, 0);
-      fingerRoot.add(p1);
-
-      // Knuckle joint
-      const knuckleGeo = new THREE.SphereGeometry(0.036, 12, 10);
-      const knuckle = new THREE.Mesh(knuckleGeo, darkJointMat);
-      knuckle.position.set(0, -cfg.len * 0.5, 0);
-      fingerRoot.add(knuckle);
-
-      // Phalanx 2
-      const p2Root = new THREE.Group();
-      p2Root.position.set(0, -cfg.len * 0.5, 0);
-      fingerRoot.add(p2Root);
-
-      const p2Geo = new THREE.CylinderGeometry(0.030, 0.024, cfg.len * 0.5, 12);
-      const p2 = new THREE.Mesh(p2Geo, coralMat);
-      p2.position.set(0, -cfg.len * 0.25, 0);
-      p2Root.add(p2);
-
-      armObj.fingers.push({ root: fingerRoot, p2: p2Root });
-    });
-
-    return armObj;
-  }
-
-  // Maps sign words to authentic 3D Indian Sign Language poses & gestures
-  function applySignPose(word, progress) {
-    if (!ybot.leftArm || !ybot.rightArm) return;
-    const w = (word || '').toUpperCase().trim();
-    const cycle = Math.sin(progress * Math.PI);
-    const wave = Math.sin(progress * Math.PI * 4);
-
-    // Natural resting pose: arms in front ready to sign
-    let lShX = 0.45, lShY = 0.1, lShZ = 0.35;
-    let lElbX = -0.9, lElbY = 0, lElbZ = -0.25;
-    let lWriX = 0.1, lWriY = 0, lWriZ = 0;
-
-    let rShX = 0.45, rShY = -0.1, rShZ = -0.35;
-    let rElbX = -0.9, rElbY = 0, rElbZ = 0.25;
-    let rWriX = 0.1, rWriY = 0, rWriZ = 0;
-
-    let rFingerCurl = 0.2, lFingerCurl = 0.2;
-
-    if (w.includes('HELLO')) {
-      // Right hand raises to temple/forehead, waves outward
-      rShX = 1.35 + 0.15 * cycle;
-      rShZ = -0.45;
-      rElbX = -1.45;
-      rElbZ = 0.55;
-      rWriZ = wave * 0.4;
-      rFingerCurl = 0.05;
-    } else if (w.includes('PLEASE')) {
-      // Right flat hand rubs center of chest in a circular motion
-      const circX = Math.cos(progress * Math.PI * 4) * 0.16;
-      const circY = Math.sin(progress * Math.PI * 4) * 0.16;
-      rShX = 0.72 + circY;
-      rShZ = -0.15;
-      rElbX = -1.35 + circX;
-      rWriX = 0.2;
-      rFingerCurl = 0.05;
-    } else if (w.includes('TAKE')) {
-      // Both hands reach forward slightly open, then grasp/pull back toward chest
-      const reach = Math.sin(progress * Math.PI);
-      lShX = 0.65 + reach * 0.35;
-      lElbX = -0.95 + reach * 0.45;
-      rShX = 0.65 + reach * 0.35;
-      rElbX = -0.95 + reach * 0.45;
-      rFingerCurl = 0.1 + (1.0 - reach) * 0.7;
-      lFingerCurl = 0.1 + (1.0 - reach) * 0.7;
-    } else if (w.includes('ONE')) {
-      // Right index finger points straight UP in front of chest
-      rShX = 0.75;
-      rShZ = -0.15;
-      rElbX = -1.25;
-      rWriX = 0.35;
-      rFingerCurl = 0.85;
-    } else if (w.includes('TABLET') || w.includes('MEDICINE')) {
-      // Right hand brings pill to mouth with slight head nod
-      rShX = 1.25 + 0.15 * cycle;
-      rShZ = -0.18;
-      rElbX = -1.75;
-      rWriX = 0.2;
-      if (ybot.head) ybot.head.rotation.x = cycle * 0.18;
-      rFingerCurl = 0.65;
-    } else if (w.includes('WATER')) {
-      // Right hand 'W' 3 fingers tap chin/lips twice
-      rShX = 1.15;
-      rShZ = -0.15;
-      rElbX = -1.65 + Math.sin(progress * Math.PI * 6) * 0.12;
-      rFingerCurl = 0.25;
-    } else if (w.includes('THANK')) {
-      // Flat hand touches chin and extends forward toward viewer
-      rShX = 1.05 + 0.35 * progress;
-      rShZ = -0.2;
-      rElbX = -1.65 + 0.75 * progress;
-      rWriX = 0.45 * progress;
-      rFingerCurl = 0.05;
-    } else if (w.includes('HOW')) {
-      // Both curved hands in front of chest rotate outward palms up
-      lShX = 0.75; lShZ = 0.35; lElbX = -1.15; lWriZ = -cycle * 0.65;
-      rShX = 0.75; rShZ = -0.35; rElbX = -1.15; rWriZ = cycle * 0.65;
-      rFingerCurl = 0.45; lFingerCurl = 0.45;
-    } else if (w.includes('YOU')) {
-      // Right hand points directly at viewer
-      rShX = 0.82; rShZ = -0.12;
-      rElbX = -0.55; rWriX = 0.15;
-      rFingerCurl = 0.85;
-    } else if (w.includes('DOCTOR')) {
-      // Left arm horizontal, right index+middle tap left wrist
-      lShX = 0.68; lShZ = 0.25; lElbX = -1.25; lWriX = 0.4;
-      rShX = 0.82; rShZ = -0.22; rElbX = -1.45 + wave * 0.2;
-      rFingerCurl = 0.4;
-    } else if (w.includes('PAIN')) {
-      // Both index fingers point at each other and twist in front of chest
-      lShX = 0.75; lShZ = 0.25; lElbX = -1.35; lWriX = wave * 0.35;
-      rShX = 0.75; rShZ = -0.25; rElbX = -1.35; rWriX = -wave * 0.35;
-      rFingerCurl = 0.8; lFingerCurl = 0.8;
-    } else if (w.includes('FEVER')) {
-      // Back of right hand placed against forehead
-      rShX = 1.35 + 0.1 * cycle;
-      rShZ = -0.2;
-      rElbX = -1.75;
-      rWriY = 1.2;
-    } else if (w.includes('FOOD')) {
-      // Right fingertips grouped tapping mouth
-      rShX = 1.2; rShZ = -0.15;
-      rElbX = -1.7 + wave * 0.15;
-      rFingerCurl = 0.75;
-    } else if (w.includes('HELP')) {
-      // Left flat palm up, right fist on top lifting together
-      lShX = 0.68; lShZ = 0.22; lElbX = -1.15; lWriX = 0.3;
-      rShX = 0.75 + cycle * 0.25; rShZ = -0.22; rElbX = -1.25;
-      rFingerCurl = 0.85; lFingerCurl = 0.05;
-    } else if (w.includes('SPELLED') || w.length === 1) {
-      // Fingerspelling letter handshape
-      const charCode = (w[0] || 'A').charCodeAt(0);
-      rShX = 0.85; rShZ = -0.18;
-      rElbX = -1.35; rWriX = 0.25;
-      rFingerCurl = (charCode % 5) * 0.2;
-      lShX = 0.65; lShZ = 0.25; lElbX = -1.15;
-      lFingerCurl = ((charCode + 2) % 5) * 0.2;
-    } else {
-      // Active signing conversation posture (as in Image 2)
-      const t = progress * Math.PI * 2;
-      lShX = 0.65 + Math.sin(t) * 0.2;
-      lShZ = 0.32;
-      lElbX = -1.15 + Math.cos(t) * 0.2;
-      lWriX = 0.25;
-
-      rShX = 0.65 + Math.cos(t) * 0.2;
-      rShZ = -0.32;
-      rElbX = -1.15 + Math.sin(t) * 0.2;
-      rWriX = 0.25;
-      rFingerCurl = 0.25 + Math.sin(t * 2) * 0.25;
-      lFingerCurl = 0.25 + Math.cos(t * 2) * 0.25;
-    }
-
-    ybot.leftArm.shoulder.rotation.set(lShX, lShY, lShZ);
-    ybot.leftArm.elbow.rotation.set(lElbX, lElbY, lElbZ);
-    ybot.leftArm.wrist.rotation.set(lWriX, lWriY, lWriZ);
-
-    ybot.rightArm.shoulder.rotation.set(rShX, rShY, rShZ);
-    ybot.rightArm.elbow.rotation.set(rElbX, rElbY, rElbZ);
-    ybot.rightArm.wrist.rotation.set(rWriX, rWriY, rWriZ);
-
-    ybot.leftArm.fingers.forEach((f) => {
-      f.root.rotation.x = lFingerCurl * 0.8;
-      f.p2.rotation.x = lFingerCurl * 1.0;
-    });
-    ybot.rightArm.fingers.forEach((f) => {
-      f.root.rotation.x = rFingerCurl * 0.8;
-      f.p2.rotation.x = rFingerCurl * 1.0;
-    });
-  }
-
-  // Animation render loop
-  function animate() {
-    requestAnimationFrame(animate);
-
-    if (isPlaying && currentWords.length > 0) {
-      const activeWord = currentWords[currentWordIdx];
-      const totalFrames = (activeWord && activeWord.num_frames) ? activeWord.num_frames : 60;
-      const progress = currentFrameIdx / totalFrames;
-
-      applySignPose(activeWord ? activeWord.word : '', progress);
-
-      currentFrameIdx += speed * 0.75;
-      if (currentFrameIdx >= totalFrames) {
-        currentFrameIdx = 0;
-        if (currentWordIdx + 1 < currentWords.length) {
-          currentWordIdx++;
-          notifyNative({ type: 'WORD_CHANGE', wordIndex: currentWordIdx });
-        } else {
-          isPlaying = false;
-          notifyNative({ type: 'ANIMATION_END' });
-        }
-      }
-    } else {
-      // Subtle idle breathing
-      const time = clock.getElapsedTime();
-      if (ybot.chest) {
-        ybot.chest.position.y = 1.25 + Math.sin(time * 1.8) * 0.012;
-      }
-    }
-
-    renderer.render(scene, camera);
-  }
-
-  // Universal Native Command Handler
-  window.handleNativeCommand = function(cmd) {
-    try {
-      var data = typeof cmd === 'string' ? JSON.parse(cmd) : cmd;
-      if (data.type === 'LOAD_ANIMATION') {
-        currentWords = data.words || [];
-        currentWordIdx = 0;
-        currentFrameIdx = 0;
-        speed = data.speed || 1.0;
-        isPlaying = true;
-      } else if (data.type === 'PLAY') {
-        isPlaying = true;
-      } else if (data.type === 'PAUSE') {
-        isPlaying = false;
-      } else if (data.type === 'REPLAY') {
-        currentWordIdx = 0;
-        currentFrameIdx = 0;
-        isPlaying = true;
-      } else if (data.type === 'STOP') {
-        isPlaying = false;
-        currentWordIdx = 0;
-        currentFrameIdx = 0;
-        applySignPose('', 0);
-      } else if (data.type === 'SET_SPEED') {
-        speed = data.speed || 1.0;
-      } else if (data.type === 'RESET') {
-        isPlaying = false;
-        currentWords = [];
-        currentWordIdx = 0;
-        currentFrameIdx = 0;
-        applySignPose('', 0);
-      }
-    } catch(e) {}
+  // Each arm: { shX=shoulder elevation, shZ=shoulder adduction, elX=elbow flex, wrX=wrist flex, curl=finger curl 0-1 }
+  // Positive shX = arm raises, negative elX = elbow bends toward body, curl 0=open 1=closed
+  var pose = {
+    // LEFT arm (from avatar's left = screen right for front-facing)
+    lShX: 0.55, lShZ: -0.30, lElX: 0.75, lWrX: 0.0, lCurl: 0.2,
+    // RIGHT arm
+    rShX: 0.55, rShZ:  0.30, rElX: 0.75, rWrX: 0.0, rCurl: 0.2,
+    // Head tilt
+    hdY: 0.0, hdX: 0.0,
   };
 
-  // Cross-platform message listeners (Android uses document, iOS uses window)
-  function onMsg(event) {
-    if (event && event.data) {
-      window.handleNativeCommand(event.data);
-    }
-  }
-  window.addEventListener('message', onMsg);
-  document.addEventListener('message', onMsg);
+  if (w.includes('HELLO') || w.includes('HI')) {
+    // Right hand raises to temple and waves outward
+    pose.rShX = 1.30 + cycle*0.12;
+    pose.rShZ = 0.55;
+    pose.rElX = 0.42;
+    pose.rWrX = wave * 0.30;
+    pose.rCurl = 0.05;
+    pose.lShX = 0.40; pose.lShZ = -0.20; pose.lElX = 0.60; pose.lCurl = 0.25;
 
-  window.addEventListener('resize', function() {
-    if (!camera || !renderer) return;
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+  } else if (w.includes('THANK')) {
+    // Flat right hand at chin, moves forward
+    pose.rShX = 0.95 + t*0.28;
+    pose.rShZ = 0.22;
+    pose.rElX = 0.22 + t*0.35;
+    pose.rWrX = 0.20 * t;
+    pose.rCurl = 0.05;
+    pose.lShX = 0.40; pose.lShZ = -0.20; pose.lElX = 0.60; pose.lCurl = 0.25;
+
+  } else if (w.includes('YES')) {
+    // Right fist nods up and down
+    pose.rShX = 0.80;
+    pose.rShZ = 0.22;
+    pose.rElX = 0.65 + wave*0.18;
+    pose.rWrX = wave * 0.22;
+    pose.rCurl = 0.90;
+    pose.lShX = 0.40; pose.lShZ = -0.20; pose.lElX = 0.60; pose.lCurl = 0.25;
+
+  } else if (w.includes('NO')) {
+    // Right index finger wagging side to side
+    pose.rShX = 0.75;
+    pose.rShZ = 0.18 + wave*0.42;
+    pose.rElX = 0.52;
+    pose.rCurl = 0.75;
+    pose.lShX = 0.40; pose.lShZ = -0.20; pose.lElX = 0.60; pose.lCurl = 0.25;
+
+  } else if (w.includes('PLEASE')) {
+    // Right flat hand circles center of chest
+    var cx = Math.cos(t * Math.PI * 4) * 0.18;
+    var cy = Math.sin(t * Math.PI * 4) * 0.18;
+    pose.rShX = 0.70 + cy;
+    pose.rShZ = 0.20 + cx;
+    pose.rElX = 0.55;
+    pose.rWrX = 0.14;
+    pose.rCurl = 0.05;
+    pose.lShX = 0.40; pose.lShZ = -0.20; pose.lElX = 0.60; pose.lCurl = 0.25;
+
+  } else if (w.includes('WATER')) {
+    // Right W-shape tapping chin
+    pose.rShX = 1.0;
+    pose.rShZ = 0.18;
+    pose.rElX = 0.18 + wave*0.12;
+    pose.rWrX = 0.18;
+    pose.rCurl = 0.28;
+    pose.lShX = 0.40; pose.lShZ = -0.20; pose.lElX = 0.60; pose.lCurl = 0.25;
+
+  } else if (w.includes('MEDICINE') || w.includes('TABLET') || w.includes('PILL')) {
+    // Right fingers to mouth
+    pose.rShX = 1.15 + cycle*0.12;
+    pose.rShZ = 0.18;
+    pose.rElX = 0.08;
+    pose.rWrX = 0.18;
+    pose.rCurl = 0.65;
+    pose.hdX = cycle * 0.12;
+    pose.lShX = 0.40; pose.lShZ = -0.20; pose.lElX = 0.60; pose.lCurl = 0.25;
+
+  } else if (w.includes('DOCTOR')) {
+    // Left arm horizontal, right taps left wrist
+    pose.lShX = 0.65; pose.lShZ = -0.55; pose.lElX = 0.88; pose.lWrX = 0.30; pose.lCurl = 0.05;
+    pose.rShX = 0.75; pose.rShZ = 0.42;
+    pose.rElX = 0.65 + wave*0.14;
+    pose.rCurl = 0.40;
+
+  } else if (w.includes('HELP')) {
+    // Left flat palm up, right fist on top lifts
+    pose.lShX = 0.65; pose.lShZ = -0.42; pose.lElX = 0.72; pose.lWrX = 0.35; pose.lCurl = 0.04;
+    pose.rShX = 0.70 + cycle*0.20; pose.rShZ = 0.42;
+    pose.rElX = 0.70;
+    pose.rCurl = 0.88;
+
+  } else if (w.includes('PAIN') || w.includes('HURT')) {
+    // Both index fingers pointing at each other, twisting
+    pose.lShX = 0.72; pose.lShZ = -0.42; pose.lElX = 0.65; pose.lWrX = osc2*0.28; pose.lCurl = 0.80;
+    pose.rShX = 0.72; pose.rShZ =  0.42; pose.rElX = 0.65; pose.rWrX =-osc2*0.28; pose.rCurl = 0.80;
+
+  } else if (w.includes('HOW')) {
+    // Both curved hands rotate outward
+    pose.lShX = 0.70; pose.lShZ = -0.42; pose.lElX = 0.72; pose.lWrX =-cycle*0.55; pose.lCurl = 0.40;
+    pose.rShX = 0.70; pose.rShZ =  0.42; pose.rElX = 0.72; pose.rWrX = cycle*0.55; pose.rCurl = 0.40;
+
+  } else if (w.includes('YOU')) {
+    // Right index finger points at viewer
+    pose.rShX = 0.72; pose.rShZ = 0.15;
+    pose.rElX = 0.20; pose.rWrX = 0.10;
+    pose.rCurl = 0.80;
+    pose.lShX = 0.40; pose.lShZ = -0.20; pose.lElX = 0.60; pose.lCurl = 0.25;
+
+  } else if (w.includes('FEVER')) {
+    // Back of hand to forehead
+    pose.rShX = 1.28 + cycle*0.08;
+    pose.rShZ = 0.22;
+    pose.rElX = 0.08;
+    pose.rWrX = 0.90;
+    pose.rCurl = 0.15;
+    pose.lShX = 0.40; pose.lShZ = -0.20; pose.lElX = 0.60; pose.lCurl = 0.25;
+
+  } else if (w.includes('HOSPITAL') || w.includes('EMERGENCY')) {
+    // Both open hands raised
+    pose.lShX = 1.30 + cycle*0.12; pose.lShZ = -0.40; pose.lElX = 0.30; pose.lCurl = 0.04;
+    pose.rShX = 1.30 + cycle*0.12; pose.rShZ =  0.40; pose.rElX = 0.30; pose.rCurl = 0.04;
+
+  } else if (w.includes('GOOD')) {
+    // Open hand from chin outward
+    pose.rShX = 0.90 + t*0.20;
+    pose.rShZ = 0.22;
+    pose.rElX = 0.30 + t*0.30;
+    pose.rWrX = 0.25 * t;
+    pose.rCurl = 0.04;
+    pose.lShX = 0.40; pose.lShZ = -0.20; pose.lElX = 0.60; pose.lCurl = 0.25;
+
+  } else if (w.includes('BAD')) {
+    // Hand at mouth twists down
+    pose.rShX = 0.95; pose.rShZ = 0.18;
+    pose.rElX = 0.20 + t*0.50;
+    pose.rWrX = 0.10 + t*0.55;
+    pose.rCurl = 0.15;
+    pose.lShX = 0.40; pose.lShZ = -0.20; pose.lElX = 0.60; pose.lCurl = 0.25;
+
+  } else if (w.includes('NAME')) {
+    // Index + middle crossed and tapped
+    pose.lShX = 0.75; pose.lShZ = -0.30; pose.lElX = 0.70; pose.lCurl = 0.50;
+    pose.rShX = 0.75; pose.rShZ =  0.30; pose.rElX = 0.70 + wave*0.12; pose.rCurl = 0.50;
+
+  } else if (w.includes('TAKE') || w.includes('ONE')) {
+    // Right hand grasps and brings toward body
+    pose.rShX = 0.70 + t*0.20;
+    pose.rShZ = 0.35;
+    pose.rElX = 0.55 + t*0.25;
+    pose.rCurl = 0.30 + t*0.55;
+    pose.lShX = 0.40; pose.lShZ = -0.20; pose.lElX = 0.60; pose.lCurl = 0.25;
+
+  } else if (w.length === 1 && /[A-Z]/.test(w)) {
+    // Fingerspelling
+    var cv = w.charCodeAt(0) - 65;
+    pose.rShX = 0.80; pose.rShZ = 0.22;
+    pose.rElX = 0.45; pose.rWrX = 0.22;
+    pose.rCurl = (cv % 5) * 0.22;
+    pose.lShX = 0.40; pose.lShZ = -0.20; pose.lElX = 0.60; pose.lCurl = 0.25;
+
+  } else {
+    // Generic: both arms alternating
+    var t2 = t * Math.PI * 2;
+    pose.lShX = 0.72 + Math.sin(t2)*0.14; pose.lShZ = -0.35;
+    pose.lElX = 0.65 + Math.cos(t2)*0.14; pose.lCurl = 0.22 + Math.sin(t2*2)*0.18;
+    pose.rShX = 0.72 + Math.cos(t2)*0.14; pose.rShZ =  0.35;
+    pose.rElX = 0.65 + Math.sin(t2)*0.14; pose.rCurl = 0.22 + Math.cos(t2*2)*0.18;
+  }
+
+  return pose;
+}
+
+// ── Smooth lerp between poses ────────────────────────────────
+var curPose = {lShX:0.55,lShZ:-0.30,lElX:0.75,lWrX:0,lCurl:0.2,rShX:0.55,rShZ:0.30,rElX:0.75,rWrX:0,rCurl:0.2,hdX:0,hdY:0};
+
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+function lerpPose(a, b, t) {
+  var out = {};
+  for (var k in b) out[k] = lerp(a[k]||0, b[k]||0, t);
+  return out;
+}
+
+// ════════════════════════════════════════════════════════════
+//  AVATAR DRAWING — full Y-Bot style robot body
+//  Origin at CX, CY (center of canvas)
+//  SCALE applied throughout for responsive sizing
+// ════════════════════════════════════════════════════════════
+
+function drawAvatar(pose) {
+  var s = SCALE;
+
+  // Body reference points (from center CX,CY = hip center)
+  var hipY   = CY + s * 55;
+  var waistY = CY + s * 20;
+  var chestY = CY - s * 30;
+  var shlY   = CY - s * 72;   // shoulder ball center
+  var neckY  = CY - s * 100;
+  var headY  = CY - s * 130;
+
+  // ── Background gradient ──────────────────────────────────
+  var bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#C8D4DC');
+  bg.addColorStop(1, '#B0BEC8');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // ── Floor shadow ellipse ─────────────────────────────────
+  ctx.save();
+  ctx.globalAlpha = 0.28;
+  ctx.beginPath();
+  ctx.ellipse(CX, hipY + s*58, s*95, s*18, 0, 0, Math.PI*2);
+  ctx.fillStyle = '#607080';
+  ctx.fill();
+  ctx.restore();
+
+  // ── PELVIS ───────────────────────────────────────────────
+  capsule(CX, hipY, s*78, s*45, s*14, CORAL, CORAL_HI, 0);
+
+  // ── WAIST JOINT (ball) ───────────────────────────────────
+  sphere(CX, waistY, s*24, s*22, JOINT, JOINT_HI);
+
+  // ── TORSO (chest) ────────────────────────────────────────
+  // Trapezoidal shape: wider at shoulders
+  ctx.save();
+  var gTorso = ctx.createLinearGradient(CX - s*80, 0, CX + s*80, 0);
+  gTorso.addColorStop(0, darken(CORAL, 0.38));
+  gTorso.addColorStop(0.25, CORAL_HI);
+  gTorso.addColorStop(0.75, CORAL);
+  gTorso.addColorStop(1, darken(CORAL, 0.42));
+  ctx.beginPath();
+  ctx.moveTo(CX - s*48, waistY + s*8);
+  ctx.lineTo(CX + s*48, waistY + s*8);
+  ctx.lineTo(CX + s*82, shlY + s*18);
+  ctx.lineTo(CX - s*82, shlY + s*18);
+  ctx.closePath();
+  ctx.fillStyle = gTorso;
+  ctx.fill();
+  ctx.restore();
+
+  // Sternum ridge
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(CX - s*4, waistY + s*8);
+  ctx.lineTo(CX + s*4, waistY + s*8);
+  ctx.lineTo(CX + s*3, shlY + s*18);
+  ctx.lineTo(CX - s*3, shlY + s*18);
+  ctx.closePath();
+  ctx.fillStyle = darken(JOINT, 0.1);
+  ctx.fill();
+  ctx.restore();
+
+  // ── SHOULDER PAULDRONS ───────────────────────────────────
+  sphere(CX - s*85, shlY + s*10, s*28, s*26, CORAL, CORAL_HI);
+  sphere(CX + s*85, shlY + s*10, s*28, s*26, CORAL, CORAL_HI);
+
+  // ── NECK ────────────────────────────────────────────────
+  capsule(CX, neckY + s*10, s*22, s*32, s*8, JOINT, JOINT_HI, 0);
+
+  // ── HEAD (helmet) ────────────────────────────────────────
+  ctx.save();
+  ctx.translate(CX, headY + pose.hdX * s * 10);
+  // Main helmet sphere
+  var gHead = ctx.createRadialGradient(-s*12, -s*18, s*4, 0, 0, s*52);
+  gHead.addColorStop(0, CORAL_HI);
+  gHead.addColorStop(0.5, CORAL);
+  gHead.addColorStop(1, darken(CORAL, 0.40));
+  ctx.beginPath();
+  ctx.ellipse(0, 0, s*48, s*58, 0, 0, Math.PI*2);
+  ctx.fillStyle = gHead;
+  ctx.fill();
+
+  // Helmet visor slot (black strip)
+  ctx.beginPath();
+  ctx.ellipse(0, -s*8, s*32, s*10, 0, 0, Math.PI*2);
+  ctx.fillStyle = VISOR;
+  ctx.fill();
+  // Visor highlight
+  ctx.beginPath();
+  ctx.ellipse(-s*8, -s*12, s*10, s*4, -0.3, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(255,255,255,0.14)';
+  ctx.fill();
+
+  // Brow ridge
+  ctx.beginPath();
+  ctx.ellipse(0, -s*17, s*35, s*7, 0, 0, Math.PI*2);
+  ctx.fillStyle = darken(JOINT, 0.0);
+  ctx.fill();
+
+  ctx.restore();
+
+  // ── ARMS ────────────────────────────────────────────────
+  drawArm(CX - s*85, shlY + s*10, pose, false, s);
+  drawArm(CX + s*85, shlY + s*10, pose, true,  s);
+}
+
+// ── Draw one arm (left = isRight:false, right = isRight:true) ──
+function drawArm(shlX, shlY, pose, isRight, s) {
+  var sign = isRight ? 1 : -1;
+
+  // Extract angles from pose
+  var shX = isRight ? pose.rShX : pose.lShX;  // elevation (0=down, PI/2=horizontal, PI=up)
+  var shZ = isRight ? pose.rShZ : pose.lShZ;  // forward/back swing
+  var elX = isRight ? pose.rElX : pose.lElX;  // elbow flex (0=straight, PI/2=90°)
+  var wrX = isRight ? pose.rWrX : pose.lWrX;  // wrist flex
+  var curl= isRight ? pose.rCurl: pose.lCurl; // finger curl 0-1
+
+  // Upper arm length
+  var UAL = s * 88;
+  // Forearm length
+  var FAL = s * 78;
+
+  // Shoulder ball
+  sphere(shlX, shlY, s*20, s*18, JOINT, JOINT_HI);
+
+  // Compute upper arm end point (elbow) using spherical angles
+  // shX controls elevation: 0=straight down, PI/2=horizontal, PI=up
+  // shZ controls lateral swing toward/away from body
+  var elevation = shX;        // 0..PI
+  var lateral   = shZ * sign; // positive = out away from body
+
+  // Upper arm vector
+  var uxRaw = Math.sin(lateral) * Math.cos(elevation - Math.PI/2);
+  var uyRaw = -Math.sin(elevation - Math.PI/2); // negative = upward on screen
+  var uzRaw = Math.cos(lateral) * Math.cos(elevation - Math.PI/2);
+
+  // For 2D projection with slight perspective tilt (camera slightly elevated)
+  var projX = uxRaw;
+  var projY = uyRaw - uzRaw * 0.22; // perspective: z-depth affects screen Y
+
+  var elbX = shlX + projX * UAL;
+  var elbY = shlY + projY * UAL;
+
+  // Draw upper arm cylinder (as thick line with round caps)
+  drawSegment(shlX, shlY, elbX, elbY, s*18, s*14, CORAL, CORAL_HI);
+
+  // Elbow joint
+  sphere(elbX, elbY, s*15, s*13, JOINT, JOINT_HI);
+
+  // Forearm direction: elbow flex bends toward body/forward
+  var foreAngle = Math.atan2(projY, projX) + elX * 0.72 * sign;
+  var faX = Math.cos(foreAngle);
+  var faY = Math.sin(foreAngle);
+
+  var wristX = elbX + faX * FAL;
+  var wristY = elbY + faY * FAL;
+
+  drawSegment(elbX, elbY, wristX, wristY, s*14, s*10, CORAL, CORAL_HI);
+
+  // Wrist joint
+  sphere(wristX, wristY, s*11, s*10, JOINT, JOINT_HI);
+
+  // ── HAND ──────────────────────────────────────────────
+  drawHand(wristX, wristY, foreAngle, wrX, curl, isRight, s);
+}
+
+// Draw a limb segment as a tapered capsule
+function drawSegment(x1, y1, x2, y2, r1, r2, base, hi) {
+  var angle = Math.atan2(y2 - y1, x2 - x1);
+  var len = Math.sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
+  ctx.save();
+  ctx.translate(x1, y1);
+  ctx.rotate(angle);
+  // Gradient along length
+  var g = ctx.createLinearGradient(0, -r1, 0, r1);
+  g.addColorStop(0, darken(base, 0.35));
+  g.addColorStop(0.3, hi);
+  g.addColorStop(0.7, base);
+  g.addColorStop(1, darken(base, 0.42));
+  ctx.beginPath();
+  ctx.moveTo(0, -r1);
+  ctx.lineTo(len, -r2);
+  ctx.lineTo(len,  r2);
+  ctx.lineTo(0,  r1);
+  ctx.closePath();
+  ctx.fillStyle = g;
+  ctx.fill();
+  ctx.restore();
+}
+
+// Draw hand: palm + 5 articulated fingers
+function drawHand(wx, wy, armAngle, wrX, curl, isRight, s) {
+  var sign = isRight ? 1 : -1;
+  // Palm
+  var palmW = s * 30, palmH = s * 22;
+  ctx.save();
+  ctx.translate(wx, wy);
+  ctx.rotate(armAngle + wrX * 0.6);
+
+  // Palm plate
+  var gPalm = ctx.createLinearGradient(-palmW*0.5, 0, palmW*0.5, 0);
+  gPalm.addColorStop(0, darken(CORAL, 0.30));
+  gPalm.addColorStop(0.4, CORAL_HI);
+  gPalm.addColorStop(1, darken(CORAL, 0.35));
+  ctx.beginPath();
+  roundRect(ctx, -palmW*0.5, s*4, palmW, palmH, s*5);
+  ctx.fillStyle = gPalm;
+  ctx.fill();
+
+  // 5 fingers
+  var fingerData = [
+    { ox: -s*14 * sign, oy: s*6,  len: s*22, thick: s*7, curl: curl * 0.55 }, // thumb
+    { ox: -s*10,        oy: s*24, len: s*28, thick: s*6, curl: curl },         // index
+    { ox: -s*3,         oy: s*25, len: s*30, thick: s*6, curl: curl },         // middle
+    { ox:  s*4,         oy: s*24, len: s*26, thick: s*5.5, curl: curl },       // ring
+    { ox:  s*10,        oy: s*22, len: s*20, thick: s*5, curl: curl },         // pinky
+  ];
+
+  fingerData.forEach(function(f) {
+    ctx.save();
+    ctx.translate(f.ox, f.oy);
+    // Finger base segment
+    var seg1angle = -(Math.PI/2) + f.curl * 0.75;
+    var seg1len = f.len * 0.52;
+    var knucX = Math.cos(seg1angle) * seg1len;
+    var knucY = Math.sin(seg1angle) * seg1len;
+    // Draw base phalanx
+    drawSegmentLocal(ctx, 0, 0, knucX, knucY, f.thick, f.thick*0.85, CORAL, CORAL_HI);
+    // Knuckle
+    ctx.beginPath();
+    ctx.arc(knucX, knucY, f.thick*0.72, 0, Math.PI*2);
+    ctx.fillStyle = JOINT;
+    ctx.fill();
+    // Tip phalanx — additional curl
+    var seg2angle = seg1angle + f.curl * 0.65;
+    var seg2len = f.len * 0.48;
+    var tipX = knucX + Math.cos(seg2angle) * seg2len;
+    var tipY = knucY + Math.sin(seg2angle) * seg2len;
+    drawSegmentLocal(ctx, knucX, knucY, tipX, tipY, f.thick*0.78, f.thick*0.60, CORAL, CORAL_HI);
+    // Fingertip cap
+    ctx.beginPath();
+    ctx.arc(tipX, tipY, f.thick*0.60, 0, Math.PI*2);
+    ctx.fillStyle = CORAL;
+    ctx.fill();
+    ctx.restore();
   });
 
-  // Start with fallback check
-  if (typeof THREE !== 'undefined') {
-    init();
+  ctx.restore();
+}
+
+function drawSegmentLocal(c, x1, y1, x2, y2, r1, r2, base, hi) {
+  var angle = Math.atan2(y2-y1, x2-x1);
+  var len = Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+  c.save();
+  c.translate(x1,y1); c.rotate(angle);
+  var g = c.createLinearGradient(0,-r1,0,r1);
+  g.addColorStop(0, darken(base,0.32));
+  g.addColorStop(0.35, hi);
+  g.addColorStop(0.75, base);
+  g.addColorStop(1, darken(base,0.40));
+  c.beginPath();
+  c.moveTo(0,-r1); c.lineTo(len,-r2); c.lineTo(len,r2); c.lineTo(0,r1);
+  c.closePath(); c.fillStyle=g; c.fill();
+  c.restore();
+}
+
+// ════════════════════════════════════════════════════════════
+//  ANIMATION LOOP
+// ════════════════════════════════════════════════════════════
+var totalFrames = 60;
+var frameBar = 0;
+var FRAME_LABEL = '';
+var TOTAL_SIGNS = 0;
+var CUR_SIGN = 0;
+
+function loop(ts) {
+  requestAnimationFrame(loop);
+  var dt = Math.min((ts - lastTs) / 1000, 0.05);
+  lastTs = ts;
+  time += dt;
+
+  var word = '';
+  if (playing && words.length > 0) {
+    var w = words[wordIdx];
+    word = w.word || '';
+    totalFrames = w.num_frames || 60;
+    var targetPose = getPose(word, frame / totalFrames);
+    curPose = lerpPose(curPose, targetPose, 0.18);
+
+    frame += speed * 0.75;
+    frameBar = Math.round(frame);
+    if (frame >= totalFrames) {
+      frame = 0;
+      if (wordIdx + 1 < words.length) {
+        wordIdx++;
+        rn({ type: 'WORD_CHANGE', idx: wordIdx });
+      } else {
+        playing = false;
+        rn({ type: 'DONE' });
+      }
+    }
   } else {
-    window.addEventListener('load', init);
+    // Idle: gentle breathing + subtle head sway
+    var breathe = Math.sin(time * 1.8) * 0.025;
+    var sway    = Math.sin(time * 0.6) * 0.012;
+    var neutralTarget = {
+      lShX: 0.55 + breathe, lShZ: -0.30, lElX: 0.75, lWrX: 0, lCurl: 0.2,
+      rShX: 0.55 + breathe, rShZ:  0.30, rElX: 0.75, rWrX: 0, rCurl: 0.2,
+      hdX: sway, hdY: 0,
+    };
+    curPose = lerpPose(curPose, neutralTarget, 0.06);
+    frameBar = 0;
   }
+
+  drawAvatar(curPose);
+}
+
+requestAnimationFrame(function(ts) { lastTs = ts; requestAnimationFrame(loop); });
+
+// ── Command handler ──────────────────────────────────────────
+window.handleCmd = function(raw) {
+  try {
+    var d = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    if (d.type === 'LOAD') {
+      words = d.words || []; wordIdx = 0; frame = 0;
+      speed = d.speed || 1.0; playing = words.length > 0;
+      TOTAL_SIGNS = words.length; CUR_SIGN = 0;
+    } else if (d.type === 'PLAY')   { playing = true; }
+    else if (d.type === 'PAUSE')  { playing = false; }
+    else if (d.type === 'REPLAY') { wordIdx=0; frame=0; playing=true; }
+    else if (d.type === 'STOP')   { playing=false; wordIdx=0; frame=0; }
+    else if (d.type === 'SPEED')  { speed = d.speed||1.0; }
+    else if (d.type === 'RESET')  { playing=false; words=[]; wordIdx=0; frame=0; }
+  } catch(e) {}
+};
+
+function onMsg(e) { if (e && e.data) window.handleCmd(e.data); }
+window.addEventListener('message', onMsg);
+document.addEventListener('message', onMsg);
+
+// Signal ready
+setTimeout(function() { rn({ type: 'READY' }); }, 80);
 </script>
 </body>
-</html>
-  `;
+</html>`;
 
   const isFingerspelling = activeClip?.type === 'fingerspelling';
 
   return (
     <View style={[styles.card, { backgroundColor: '#1E293B', borderColor: colors.border }]}>
-      {/* 1. Header with EchoSign Identification & Speed Tag */}
+      {/* Header */}
       <View style={styles.topHeader}>
         <View style={styles.headerLeft}>
           <Sparkles size={16} color="#FA5252" />
           <Text style={[styles.headerTitle, { fontSize: scaleFont(12) }]}>
-            EchoSign 3D WebGL Avatar (Y-Bot Rig)
+            EchoSign 3D ISL Avatar (Y-Bot Rig)
           </Text>
         </View>
-
         <View style={styles.headerTags}>
           {isFingerspelling ? (
             <View style={[styles.tagBadge, { backgroundColor: '#F59E0B' }]}>
-              <Text style={styles.tagText}>Fingerspelling (A-Z)</Text>
+              <Text style={styles.tagText}>Fingerspelling (A–Z)</Text>
             </View>
           ) : activeClip ? (
             <View style={[styles.tagBadge, { backgroundColor: '#FA5252' }]}>
-              <Text style={styles.tagText}>ISL 3D Rig</Text>
+              <Text style={styles.tagText}>ISL Motion Library</Text>
             </View>
           ) : null}
-
           <TouchableOpacity
             style={styles.speedPill}
             onPress={cycleSpeed}
@@ -745,33 +831,35 @@ export const EchoSignAvatar: React.FC<EchoSignAvatarProps> = ({
         </View>
       </View>
 
-      {/* 2. Visual 3D WebGL Animation Stage */}
+      {/* 3D Avatar Stage */}
       <View style={styles.stageBox}>
         <WebViewComponent
           ref={webViewRef as any}
           originWhitelist={['*']}
-          source={{ html: threeHtml }}
+          source={{ html: avatarHtml }}
           style={styles.webView}
           onMessage={handleWebViewMessage}
           javaScriptEnabled={true}
           domStorageEnabled={true}
           mixedContentMode="always"
           allowsInlineMediaPlayback={true}
+          allowFileAccess={true}
           scrollEnabled={false}
           bounces={false}
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
+          cacheEnabled={true}
         />
 
         {/* Loading Overlay */}
         {isLoading && (
           <View style={styles.loadingOverlay}>
             <ActivityIndicator size="small" color="#FA5252" />
-            <Text style={styles.loadingText}>Generating 3D ISL Gestures...</Text>
+            <Text style={styles.loadingText}>Generating ISL Gestures...</Text>
           </View>
         )}
 
-        {/* Current Gloss Overlay Subtitle */}
+        {/* Gloss subtitle overlay */}
         {activeClip && (
           <View style={styles.glossOverlay} pointerEvents="box-none">
             <View style={styles.glossChipRow}>
@@ -787,7 +875,6 @@ export const EchoSignAvatar: React.FC<EchoSignAvatarProps> = ({
                 </View>
               )}
             </View>
-
             {originalText ? (
               <Text style={styles.originalTextQuote} numberOfLines={2}>
                 "{originalText}"
@@ -796,7 +883,7 @@ export const EchoSignAvatar: React.FC<EchoSignAvatarProps> = ({
           </View>
         )}
 
-        {/* Missing Vocabulary Fallback Alert */}
+        {/* Missing Vocabulary Alert */}
         {missingVocabulary && missingVocabulary.length > 0 && (
           <View style={styles.missingBadgeRow} pointerEvents="box-none">
             <AlertTriangle size={12} color="#F59E0B" />
@@ -807,7 +894,7 @@ export const EchoSignAvatar: React.FC<EchoSignAvatarProps> = ({
         )}
       </View>
 
-      {/* 3. Playback Controls */}
+      {/* Playback Controls */}
       <View style={styles.controlsBar}>
         <View style={styles.controlButtons}>
           <TouchableOpacity
@@ -818,32 +905,31 @@ export const EchoSignAvatar: React.FC<EchoSignAvatarProps> = ({
           >
             {isPlaying ? <Pause size={18} color="#FFFFFF" /> : <Play size={18} color="#FFFFFF" />}
           </TouchableOpacity>
-
           <TouchableOpacity
             style={styles.ctrlBtnSec}
             onPress={handleReplay}
-            accessibilityLabel="Replay entire sequence"
+            accessibilityLabel="Replay sequence"
             accessibilityRole="button"
           >
             <RotateCcw size={16} color="#94A3B8" />
           </TouchableOpacity>
-
           <TouchableOpacity
             style={styles.ctrlBtnSec}
             onPress={handleStop}
-            accessibilityLabel="Stop and reset animation"
+            accessibilityLabel="Stop animation"
             accessibilityRole="button"
           >
             <Square size={15} color="#94A3B8" />
           </TouchableOpacity>
         </View>
-
         <View style={styles.statusInfoBox}>
           <Text style={styles.statusWordText}>
             {activeClip ? activeClip.word : isPlaying ? 'Active' : 'Standby'}
           </Text>
           <Text style={styles.statusSubtitleText}>
-            {animationList.length > 0 ? `${currentWordIdx + 1} of ${animationList.length} Signs` : isPlaying ? 'Playing' : 'Tap Play to start'}
+            {animationList.length > 0
+              ? `${currentWordIdx + 1} of ${animationList.length} Signs`
+              : isPlaying ? 'Playing...' : 'Tap Play to start'}
           </Text>
         </View>
       </View>
@@ -858,9 +944,9 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 5,
-    elevation: 3,
+    shadowOpacity: 0.14,
+    shadowRadius: 6,
+    elevation: 4,
   },
   topHeader: {
     flexDirection: 'row',
@@ -870,185 +956,58 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     backgroundColor: '#0F172A',
   },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  headerTitle: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-  },
-  headerTags: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  tagBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  tagText: {
-    color: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: '700',
-  },
-  speedPill: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    backgroundColor: '#334155',
-  },
-  speedText: {
-    color: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: '700',
-  },
-  stageBox: {
-    height: 310,
-    position: 'relative',
-    backgroundColor: '#DCE3EB',
-    overflow: 'hidden',
-  },
-  webView: {
-    flex: 1,
-    backgroundColor: '#DCE3EB',
-  },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  headerTitle: { color: '#FFFFFF', fontWeight: '700' },
+  headerTags: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  tagBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
+  tagText: { color: '#FFFFFF', fontSize: 10, fontWeight: '700' },
+  speedPill: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, backgroundColor: '#334155' },
+  speedText: { color: '#FFFFFF', fontSize: 10, fontWeight: '700' },
+  stageBox: { height: 320, position: 'relative', backgroundColor: '#C8D4DC', overflow: 'hidden' },
+  webView: { flex: 1, backgroundColor: '#C8D4DC' },
   loadingOverlay: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(220, 227, 235, 0.85)',
+    backgroundColor: 'rgba(200,212,220,0.88)',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
   },
-  loadingText: {
-    color: '#1E293B',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  glossOverlay: {
-    position: 'absolute',
-    bottom: 12,
-    left: 12,
-    right: 12,
-    gap: 4,
-  },
-  glossChipRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
+  loadingText: { color: '#1E293B', fontSize: 12, fontWeight: '600' },
+  glossOverlay: { position: 'absolute', bottom: 10, left: 10, right: 10, gap: 4 },
+  glossChipRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   activeWordPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.15,
-    shadowRadius: 2,
-    elevation: 2,
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, elevation: 2,
   },
-  activeWordText: {
-    color: '#FFFFFF',
-    fontWeight: '800',
-    fontSize: 12,
-    letterSpacing: 0.5,
-  },
-  activeWordIdxText: {
-    color: '#FFE3E3',
-    fontWeight: '600',
-    fontSize: 10,
-  },
-  charBadge: {
-    backgroundColor: '#F59E0B',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  charBadgeText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 10,
-  },
+  activeWordText: { color: '#FFFFFF', fontWeight: '800', fontSize: 12, letterSpacing: 0.5 },
+  activeWordIdxText: { color: '#FFE3E3', fontWeight: '600', fontSize: 10 },
+  charBadge: { backgroundColor: '#F59E0B', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
+  charBadgeText: { color: '#FFFFFF', fontWeight: '700', fontSize: 10 },
   originalTextQuote: {
-    color: '#1E293B',
-    fontStyle: 'italic',
-    fontSize: 11,
-    fontWeight: '600',
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    alignSelf: 'flex-start',
+    color: '#1E293B', fontStyle: 'italic', fontSize: 11, fontWeight: '600',
+    backgroundColor: 'rgba(255,255,255,0.88)',
+    paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, alignSelf: 'flex-start',
   },
   missingBadgeRow: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: 'rgba(245, 158, 11, 0.9)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    position: 'absolute', top: 10, right: 10,
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: 'rgba(245,158,11,0.92)',
+    paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6,
   },
-  missingBadgeText: {
-    color: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: '600',
-  },
+  missingBadgeText: { color: '#FFFFFF', fontSize: 10, fontWeight: '600' },
   controlsBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    backgroundColor: '#0F172A',
-    gap: 12,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 14, paddingVertical: 10, backgroundColor: '#0F172A', gap: 12,
   },
-  controlButtons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  ctrlBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  ctrlBtnPlay: {
-    backgroundColor: '#FA5252',
-  },
-  ctrlBtnPause: {
-    backgroundColor: '#E03131',
-  },
+  controlButtons: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  ctrlBtn: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
+  ctrlBtnPlay: { backgroundColor: '#FA5252' },
+  ctrlBtnPause: { backgroundColor: '#E03131' },
   ctrlBtnSec: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#1E293B',
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 32, height: 32, borderRadius: 16, backgroundColor: '#1E293B',
+    alignItems: 'center', justifyContent: 'center',
   },
-  statusInfoBox: {
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-  },
-  statusWordText: {
-    color: '#FA5252',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  statusSubtitleText: {
-    color: '#94A3B8',
-    fontSize: 10,
-    fontWeight: '500',
-  },
+  statusInfoBox: { alignItems: 'flex-end', justifyContent: 'center' },
+  statusWordText: { color: '#FA5252', fontSize: 12, fontWeight: '700' },
+  statusSubtitleText: { color: '#94A3B8', fontSize: 10, fontWeight: '500' },
 });

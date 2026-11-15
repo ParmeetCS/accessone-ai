@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import * as Speech from 'expo-speech';
-import * as Haptics from 'expo-haptics';
+import * as Haptics from '../utils/haptics';
 import { useUserStore } from './userStore';
 import { api, VisionApiResponse } from '../services/api';
 import { visionService } from '../services/supabase/vision';
@@ -104,11 +104,20 @@ export const useVisionStore = create<VisionState>((set, get) => ({
     set({ isScanning: true, scanError: null });
 
     try {
-      const res = await api.vision.analyze({
-        image: base64,
-        mode: currentMode,
-        language: useUserStore.getState().language || 'en-US',
-      });
+      const language = useUserStore.getState().language || 'en-US';
+
+      // Route describe mode through the dedicated /vision/describe endpoint (Gemini AI)
+      // All other modes use the unified /vision endpoint
+      let res;
+      if (currentMode === 'describe') {
+        res = await api.vision.describe({ image: base64, language });
+      } else {
+        res = await api.vision.analyze({
+          image: base64,
+          mode: currentMode,
+          language,
+        });
+      }
 
       const newResult: DetectionResult = {
         title: res.title || (currentMode === 'ocr' ? 'Document / Prescription OCR' : currentMode === 'objects' ? 'Objects Detected' : 'Surroundings Overview'),
@@ -136,8 +145,14 @@ export const useVisionStore = create<VisionState>((set, get) => ({
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       } catch {}
 
-      // Prompt Requirement 7: Store only useful metadata in vision_scans.
-      // Do not automatically store raw images, medical prescriptions or sensitive OCR content permanently.
+      // Auto-read aloud for describe/scene modes (most useful for visually impaired)
+      if (currentMode === 'describe' || currentMode === 'objects') {
+        setTimeout(() => {
+          get().readAloud();
+        }, 400);
+      }
+
+      // Store only useful metadata in vision_scans — never raw images
       const user = useUserStore.getState().user;
       if (user?.id) {
         let safeExtractedText = res.result_text;
