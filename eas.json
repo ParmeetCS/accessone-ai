@@ -9,7 +9,8 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "http://10.139.50.11:8000/api/v1",
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+        "EXPO_PUBLIC_API_URL": "http://192.168.1.4:8000/api/v1",
         "EXPO_PUBLIC_SUPABASE_URL": "https://ncximtlqhuijkwyjsslh.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_hO48kuobCy_NAH1AFwXSlQ_7C6n0S2o",
         "NEXT_PUBLIC_SUPABASE_URL": "https://ncximtlqhuijkwyjsslh.supabase.co",
