@@ -80,29 +80,42 @@ export const VisionScreen: React.FC = () => {
     }
   }, []);
 
-  // Live Auto-Capture Loop when Live Mode is active
+  // Live Auto-Capture Loop when Live Mode is active.
+  // Sequential: waits for the previous analysis to finish completely before
+  // taking the next photo (no fixed-cadence skips, no overlapping requests).
   useEffect(() => {
     if (!isLive || !isFocused || !permission?.granted) return;
 
-    const interval = setInterval(async () => {
-      if (cameraRef.current && !isScanning) {
-        try {
-          const photo = await cameraRef.current.takePictureAsync({
-            base64: true,
-            quality: 0.6,
-            skipProcessing: true,
-          });
-          if (photo?.base64) {
-            analyzeImageBase64(photo.base64, photo.uri);
-          }
-        } catch (e) {
-          console.warn('[Live Auto-Capture] Frame capture skipped:', e);
-        }
-      }
-    }, 4500); // 4.5s cadence to avoid overwhelming device or backend
+    let cancelled = false;
 
-    return () => clearInterval(interval);
-  }, [isLive, isFocused, permission?.granted, isScanning]);
+    const captureLoop = async () => {
+      while (!cancelled) {
+        if (cameraRef.current && !useVisionStore.getState().isScanning) {
+          try {
+            const mode = useVisionStore.getState().currentMode;
+            const photo = await cameraRef.current.takePictureAsync({
+              base64: true,
+              quality: mode === 'ocr' ? 0.9 : 0.6,
+              skipProcessing: mode !== 'ocr',
+            });
+            if (photo?.base64) {
+              await analyzeImageBase64(photo.base64, photo.uri);
+            }
+          } catch (e) {
+            console.warn('[Live Auto-Capture] Frame capture skipped:', e);
+          }
+        }
+        // Brief pause, then capture again — analyzeImageBase64 guards against overlap
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    };
+
+    captureLoop();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isLive, isFocused, permission?.granted]);
 
   // Capture from live camera
   const handleCaptureAndAnalyze = async () => {
@@ -113,10 +126,11 @@ export const VisionScreen: React.FC = () => {
     }
 
     try {
+      const mode = useVisionStore.getState().currentMode;
       const photo = await cameraRef.current.takePictureAsync({
         base64: true,
-        quality: 0.7,
-        skipProcessing: false,
+        quality: mode === 'ocr' ? 0.9 : 0.7,
+        skipProcessing: mode !== 'ocr',
       });
 
       if (photo?.base64) {

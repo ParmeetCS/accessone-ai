@@ -108,11 +108,13 @@ export const useVisionStore = create<VisionState>((set, get) => ({
 
       // OCR mode: run Google ML Kit Text Recognition v2 fully on-device
       // first (realtime, works offline). If the native module is unavailable
-      // (Expo Go) or recognition fails, fall back to the backend OCR engine —
-      // also a real OCR service, never mock data.
+      // (Expo Go), recognition fails, or the result looks too sparse to be
+      // trustworthy, fall back to the backend — which now uses Gemini Vision
+      // AI text extraction (also a real OCR engine, never mock data).
+      const MIN_TRUSTED_OCR_CHARS = 24;
       if (currentMode === 'ocr' && isOnDeviceOcrAvailable() && imageUri) {
         const onDevice = await recognizeTextOnDevice(imageUri);
-        if (onDevice) {
+        if (onDevice && onDevice.text.length >= MIN_TRUSTED_OCR_CHARS) {
           const ocrResult: DetectionResult = {
             title: 'Document / Prescription OCR',
             category: 'ML Kit OCR (On-Device)',

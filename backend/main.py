@@ -294,7 +294,16 @@ def parse_prescription_entities(text: str) -> Dict[str, Any]:
 
 # Mode Handlers
 def process_ocr_mode(pil_img: Image.Image, np_img: np.ndarray, lux: int) -> Dict[str, Any]:
-    text, words_count, lines_count = run_windows_ocr(pil_img)
+    # Prefer Gemini Vision AI text extraction (much more accurate on
+    # prescriptions, curved labels and handwriting); fall back to the
+    # local Windows OCR engine when Gemini is unavailable.
+    gemini_text = _ocr_with_gemini(pil_img)
+    if gemini_text is not None:
+        text = gemini_text
+        words_count = len(text.split())
+        lines_count = len([l for l in text.splitlines() if l.strip()])
+    else:
+        text, words_count, lines_count = run_windows_ocr(pil_img)
 
     if not text:
         return {
@@ -514,14 +523,14 @@ def _describe_with_gemini(pil_img: Image.Image, lux: int) -> Dict[str, Any]:
     prompt = (
         "You are an AI assistant helping a visually impaired person understand their surroundings.\n\n"
         f"Lighting condition: {lighting} ({lux} lux estimated).\n\n"
-        "Describe this image concisely and accessibly. Include:\n"
-        "1. Main objects and their approximate positions (left, center, right, foreground, background)\n"
-        "2. Any visible text, signs, or labels\n"
-        "3. Colors and shapes of important items\n"
-        "4. Any potential hazards or obstacles\n"
-        "5. Overall setting or environment type\n\n"
-        "Be direct and factual. Use plain language. Do not speculate beyond what is clearly visible. "
-        "If something is unclear, say so. Keep response under 120 words."
+        "Describe this scene in 2-3 short sentences. Cover only:\n"
+        "- The most important objects and roughly where they are\n"
+        "- Any visible text/signs worth knowing\n"
+        "- Any immediate hazards or obstacles\n"
+        "- The setting (e.g. kitchen, street, office)\n\n"
+        "Be direct and factual. Use plain language. No markdown, no headings, no bullet points — "
+        "plain flowing sentences only. Do not speculate beyond what is clearly visible. "
+        "Keep the whole response under 50 words."
     )
 
     payload = {
@@ -533,7 +542,7 @@ def _describe_with_gemini(pil_img: Image.Image, lux: int) -> Dict[str, Any]:
                 ]
             }
         ],
-        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 800},
+        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 400},
     }
 
     last_error = "unknown"
@@ -590,6 +599,76 @@ def _describe_with_gemini(pil_img: Image.Image, lux: int) -> Dict[str, Any]:
 
     print(f"[Gemini] All model candidates failed. Last error: {last_error}")
     return {"gemini_error": last_error}
+
+
+def _ocr_with_gemini(pil_img: Image.Image) -> Optional[str]:
+    """
+    Extract all visible text from the image using Gemini Vision AI.
+    Far more accurate than traditional OCR on prescriptions, handwriting,
+    low-light photos and curved labels. Returns None if unavailable/failed.
+    """
+    config = _get_gemini_candidates()
+    if config is None:
+        return None
+    api_key, model_candidates = config
+
+    img = pil_img.copy()
+    if max(img.size) > 1024:
+        img.thumbnail((1024, 1024), Image.LANCZOS)
+
+    buf = io.BytesIO()
+    img.save(buf, format="JPEG", quality=90)
+    img_b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+
+    prompt = (
+        "Extract ALL text visible in this image exactly as written.\n"
+        "- Preserve the reading order and line breaks\n"
+        "- Include dosages, numbers, units, dates and labels exactly\n"
+        "- Output ONLY the extracted text, nothing else\n"
+        "- If there is no legible text, output exactly: NO_TEXT"
+    )
+
+    payload = {
+        "contents": [
+            {
+                "parts": [
+                    {"text": prompt},
+                    {"inline_data": {"mime_type": "image/jpeg", "data": img_b64}},
+                ]
+            }
+        ],
+        "generationConfig": {"temperature": 0.0, "maxOutputTokens": 800},
+    }
+
+    for model_name in model_candidates[:4]:
+        try:
+            response = _gemini_rest_request(
+                f"{_GEMINI_API_BASE}/models/{model_name}:generateContent?key={api_key}",
+                payload=payload,
+                timeout=25,
+            )
+            response_candidates = response.get("candidates", [])
+            parts = (
+                response_candidates[0].get("content", {}).get("parts", [])
+                if response_candidates else []
+            )
+            text = "".join(p.get("text", "") for p in parts if "text" in p).strip()
+            if not text:
+                continue
+            if text.upper().strip(".\"' ") == "NO_TEXT":
+                return ""
+            _gemini_cache["model"] = model_name
+            print(f"[Gemini] OCR extracted {len(text)} chars using {model_name}")
+            return text
+        except urllib.error.HTTPError as e:
+            print(f"[Gemini] {model_name} OCR unavailable ({e.code}) — trying next model")
+            if e.code not in (404, 403, 429):
+                break
+        except Exception as e:
+            print(f"[Gemini] OCR error: {e}")
+            break
+
+    return None
 
 
 def process_describe_mode(pil_img: Image.Image, np_img: np.ndarray, lux: int) -> Dict[str, Any]:
