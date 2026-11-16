@@ -8,6 +8,8 @@ import time
 import tempfile
 import uuid
 import socket
+import urllib.request
+import urllib.error
 from typing import Optional, List, Dict, Any, Literal
 from pathlib import Path
 
@@ -419,60 +421,93 @@ def process_scene_mode(np_img: np.ndarray, lux: int) -> Dict[str, Any]:
     }
 
 # ── Gemini Vision AI — Describe Surroundings ─────────────────────────────────
-# Lazy-loads the Gemini SDK only if GEMINI_API_KEY is present in environment.
-# Falls back to enhanced YOLO-based spatial description if no key / SDK missing.
+# Uses the official Gemini REST API directly (no SDK dependency needed).
+# Auto-discovers an available flash vision model so model-name changes on
+# Google's side never break scene understanding.
+# Falls back to enhanced YOLO-based spatial description if no key / API error.
 
-_gemini_model = None
+_GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta"
+_gemini_cache: Dict[str, Any] = {"key": None, "model": None}
 
-def _get_gemini():
-    """Return a cached Gemini GenerativeModel, or None if unavailable."""
-    global _gemini_model
-    if _gemini_model is not None:
-        return _gemini_model if _gemini_model is not False else None
+# Preferred models, in order — fastest reliable flash models first.
+# gemini-3.8-flash / gemini-flash-latest hang on generateContent for this
+# endpoint, and gemini-2.5-flash is 404 for new users, so they rank last /
+# are omitted. Newer "thinking" models need maxOutputTokens >= 300 because
+# hidden reasoning tokens count against the output budget.
+_GEMINI_MODEL_PREFERENCES = [
+    "gemini-3.5-flash-lite",
+    "gemini-3.1-flash-lite",
+    "gemini-3.6-flash",
+    "gemini-3.5-flash",
+    "gemini-3.7-flash",
+]
+
+
+def _gemini_rest_request(url: str, payload: Optional[dict] = None, timeout: int = 25) -> dict:
+    """Perform a GET (payload None) or POST against the Gemini REST API."""
+    data = json.dumps(payload).encode("utf-8") if payload is not None else None
+    headers = {"Content-Type": "application/json"} if data else {}
+    req = urllib.request.Request(url, data=data, headers=headers)
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return json.loads(resp.read().decode("utf-8"))
+
+
+def _get_gemini_candidates() -> Optional[tuple]:
+    """Return (api_key, [candidate model names in preference order]) or None."""
+    cached_key, cached_model = _gemini_cache["key"], _gemini_cache["model"]
+    if cached_key and cached_model:
+        return cached_key, [cached_model]
 
     api_key = os.environ.get("GEMINI_API_KEY", "").strip()
     if not api_key:
         print("[Gemini] GEMINI_API_KEY not set — using YOLO fallback for describe mode")
-        _gemini_model = False
         return None
 
     try:
-        import google.generativeai as genai
-        genai.configure(api_key=api_key, transport="rest")
-        # gemini-3.8-flash is the latest fast multimodal model for real-time vision description
-        model_name = "gemini-3.8-flash"
-        _gemini_model = genai.GenerativeModel(model_name)
-        print(f"[Gemini] {model_name} model loaded successfully")
-        return _gemini_model
-    except ImportError:
-        print("[Gemini] google-generativeai not installed. Run: .venv\\Scripts\\pip install google-generativeai")
-        _gemini_model = False
-        return None
+        # Discover an available vision-capable model for this API key
+        listing = _gemini_rest_request(
+            f"{_GEMINI_API_BASE}/models?key={api_key}", timeout=15
+        )
+        available = [
+            m["name"].split("models/", 1)[-1]
+            for m in listing.get("models", [])
+            if "generateContent" in m.get("supportedGenerationMethods", [])
+        ]
+        # Prefer listed models first, then any other flash model, then anything
+        candidates = [m for pref in _GEMINI_MODEL_PREFERENCES for m in available if m == pref]
+        candidates += [m for m in available if "flash" in m and m not in candidates]
+        candidates += [m for m in available if m not in candidates]
+        if not candidates:
+            print("[Gemini] No generateContent-capable model available for this key")
+            return None
+        _gemini_cache["key"] = api_key
+        print(f"[Gemini] Model candidates: {candidates[:4]}")
+        return api_key, candidates
     except Exception as e:
-        print(f"[Gemini] Failed to initialize: {e}")
-        _gemini_model = False
+        print(f"[Gemini] Model discovery failed: {e}")
         return None
 
 
 def _describe_with_gemini(pil_img: Image.Image, lux: int) -> Dict[str, Any]:
     """
-    Use Gemini 1.5 Flash multimodal to generate an accessibility-focused
-    scene description — objects, positions, colors, text, relative distances,
+    Use Gemini multimodal to generate an accessibility-focused scene
+    description — objects, positions, colors, text, relative distances,
     lighting conditions. Suitable for visually impaired users.
     """
-    model = _get_gemini()
-    if model is None:
+    config = _get_gemini_candidates()
+    if config is None:
         return {}  # signal caller to use fallback
+    api_key, model_candidates = config
 
     # Keep image small for Gemini (reduces token cost and latency)
     img = pil_img.copy()
     if max(img.size) > 1024:
         img.thumbnail((1024, 1024), Image.LANCZOS)
 
-    # Convert to bytes for Gemini inline_data
+    # Convert to base64 for Gemini inline_data
     buf = io.BytesIO()
     img.save(buf, format="JPEG", quality=82)
-    img_bytes = buf.getvalue()
+    img_b64 = base64.b64encode(buf.getvalue()).decode("ascii")
 
     lighting = "bright" if lux > 400 else ("moderate" if lux > 150 else "dim")
 
@@ -489,31 +524,71 @@ def _describe_with_gemini(pil_img: Image.Image, lux: int) -> Dict[str, Any]:
         "If something is unclear, say so. Keep response under 120 words."
     )
 
-    try:
-        import google.generativeai as genai
-        response = model.generate_content(
-            [
-                prompt,
-                {"mime_type": "image/jpeg", "data": img_bytes}
-            ],
-            generation_config=genai.GenerationConfig(
-                max_output_tokens=200,
-                temperature=0.2,
+    payload = {
+        "contents": [
+            {
+                "parts": [
+                    {"text": prompt},
+                    {"inline_data": {"mime_type": "image/jpeg", "data": img_b64}},
+                ]
+            }
+        ],
+        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 800},
+    }
+
+    last_error = "unknown"
+    for model_name in model_candidates[:4]:
+        try:
+            response = _gemini_rest_request(
+                f"{_GEMINI_API_BASE}/models/{model_name}:generateContent?key={api_key}",
+                payload=payload,
+                timeout=25,
             )
-        )
-        description = response.text.strip() if response.text else ""
-        if description:
+            response_candidates = response.get("candidates", [])
+            parts = (
+                response_candidates[0].get("content", {}).get("parts", [])
+                if response_candidates else []
+            )
+            description = "".join(
+                p.get("text", "") for p in parts if "text" in p
+            ).strip()
+            if not description:
+                reason = (
+                    response_candidates[0].get("finishReason", "unknown")
+                    if response_candidates else "no candidates"
+                )
+                block = response.get("promptFeedback", {}).get("blockReason")
+                print(f"[Gemini] Empty response (finishReason={reason}, blocked={block})")
+                return {}  # fallback — model works, image itself was the problem
+
+            # Remember the working model so future calls skip discovery
+            _gemini_cache["model"] = model_name
+            print(f"[Gemini] Scene described using {model_name}")
+
             return {
                 "result_text": description,
                 "confidence": 94.0,
                 "title": "AI Scene Description",
                 "category": "Gemini Vision AI",
                 "distance": "Environmental overview",
-                "limitations": "Description generated by Gemini 1.5 Flash. May not capture all details."
+                "limitations": f"Description generated by {model_name}. May not capture all details."
             }
-    except Exception as e:
-        print(f"[Gemini] describe_content error: {e}")
+        except urllib.error.HTTPError as e:
+            body = ""
+            try:
+                body = e.read().decode("utf-8", errors="replace")[:300]
+            except Exception:
+                pass
+            last_error = f"{e.code}: {body}"
+            print(f"[Gemini] {model_name} unavailable ({e.code}) — trying next model")
+            if e.code not in (404, 403, 429):
+                break  # non-model error (auth, quota, server) — don't retry others
+        except Exception as e:
+            last_error = str(e)
+            print(f"[Gemini] describe_content error: {e}")
+            break
 
+    print(f"[Gemini] All model candidates failed. Last error: {last_error}")
     return {}  # signal caller to use fallback
 
 
