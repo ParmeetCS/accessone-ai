@@ -167,7 +167,7 @@ export const api = {
       try {
         const controller = new AbortController();
         // OCR can be slow on complex documents; Gemini is fast (~2-5s)
-        const timeoutMs = payload.mode === 'ocr' || payload.mode === 'barcode' ? 60000 : 30000;
+        const timeoutMs = payload.mode === 'ocr' || payload.mode === 'barcode' ? 60000 : 45000;
         const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
         const res = await fetch(`${API_BASE_URL}/vision`, {
@@ -225,7 +225,8 @@ export const api = {
       const startTime = Date.now();
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000);
+        // Gemini flash models can take up to ~40s under load; give headroom
+        const timeoutId = setTimeout(() => controller.abort(), 45000);
 
         const res = await fetch(`${API_BASE_URL}/vision/describe`, {
           method: 'POST',

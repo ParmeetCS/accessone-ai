@@ -589,56 +589,25 @@ def _describe_with_gemini(pil_img: Image.Image, lux: int) -> Dict[str, Any]:
             break
 
     print(f"[Gemini] All model candidates failed. Last error: {last_error}")
-    return {}  # signal caller to use fallback
+    return {"gemini_error": last_error}
 
 
 def process_describe_mode(pil_img: Image.Image, np_img: np.ndarray, lux: int) -> Dict[str, Any]:
     """
-    Describe Surroundings — tries Gemini Vision AI first, falls back to
-    enhanced YOLO-based spatial description.
+    Describe Surroundings — Gemini Vision AI only. No YOLO fallback:
+    scene understanding must be realtime AI, never heuristic mock data.
+    Returns {"gemini_error": ...} when Gemini is unavailable so the caller
+    can surface an honest error to the user.
     """
     # Attempt Gemini multimodal description
     gemini_result = _describe_with_gemini(pil_img, lux)
     if gemini_result:
         return gemini_result
 
-    # Fallback: enriched YOLO + heuristic spatial description
-    obj_data = process_objects_mode(np_img, lux)
-    objects = obj_data.get("objects_detected", [])
-
-    hazards = []
-    if lux < 120:
-        hazards.append("Low ambient lighting — potential obstacle visibility risk.")
-
-    if objects:
-        positions_str = "; ".join(
-            f"{o['label']} on the {o['position']} ({o['confidence']}% confidence)"
-            for o in objects[:5]
-        )
-        desc = (
-            f"Scene contains {len(objects)} identified object(s). "
-            f"{positions_str}. "
-        )
-        if lux < 120:
-            desc += "Warning: Low lighting detected — proceed with caution."
-        elif lux > 600:
-            desc += "Scene is brightly lit."
-    else:
-        desc = (
-            "No distinct objects detected in the foreground. "
-            "The area appears clear or the scene may be too dark, blurry, or featureless "
-            "for automatic recognition."
-        )
-
     return {
-        "result_text": desc,
-        "confidence": obj_data.get("confidence", 82.0) if objects else 72.0,
-        "title": "Surroundings Description",
-        "category": "Spatial Environmental Overview",
-        "objects_detected": objects,
-        "hazards": hazards if hazards else None,
-        "distance": "0.5 m - 5.0 m",
-        "limitations": "Description based on object detection only. Add GEMINI_API_KEY for full AI scene understanding."
+        "gemini_error": "Scene understanding is unavailable right now. "
+        "The Gemini AI service could not be reached. Check the backend console "
+        "for the [Gemini] error details and try again."
     }
 
 # Vision API Endpoint — unified handler for OCR, describe, objects, scene, barcode
@@ -662,8 +631,21 @@ async def analyze_vision(req: VisionRequest):
     elif mode == "objects":
         res_dict = await asyncio.to_thread(process_objects_mode, np_img, lux)
     elif mode == "describe":
-        # Gemini multimodal first, YOLO fallback
+        # Gemini multimodal only — no YOLO fallback
         res_dict = await asyncio.to_thread(process_describe_mode, pil_img, np_img, lux)
+        if "gemini_error" in res_dict:
+            return VisionResponse(
+                success=False,
+                mode="describe",
+                result_text=res_dict["gemini_error"],
+                confidence=0.0,
+                processing_ms=int((time.time() - start_time) * 1000),
+                title="Scene Understanding Unavailable",
+                category="Gemini Vision AI",
+                warning_text="Gemini AI could not describe this scene. Check backend logs and try again.",
+                distance="Not Available",
+                lux=lux,
+            )
     else:  # "scene"
         res_dict = await asyncio.to_thread(process_scene_mode, np_img, lux)
 
@@ -709,6 +691,18 @@ async def describe_surroundings_json(req: DescribeRequest):
     lux, _ = calculate_image_metrics(np_img)
     res_dict = await asyncio.to_thread(process_describe_mode, pil_img, np_img, lux)
     processing_ms = int((time.time() - start_time) * 1000)
+    if "gemini_error" in res_dict:
+        return VisionResponse(
+            success=False, mode="describe",
+            result_text=res_dict["gemini_error"],
+            confidence=0.0,
+            processing_ms=processing_ms,
+            title="Scene Understanding Unavailable",
+            category="Gemini Vision AI",
+            warning_text="Gemini AI could not describe this scene. Check backend logs and try again.",
+            distance="Not Available",
+            lux=lux,
+        )
     return VisionResponse(
         success=True, mode="describe",
         result_text=res_dict.get("result_text", ""),
@@ -747,6 +741,18 @@ async def describe_surroundings_upload(file: UploadFile = File(...)):
     lux, _ = calculate_image_metrics(np_img)
     res_dict = await asyncio.to_thread(process_describe_mode, pil_img, np_img, lux)
     processing_ms = int((time.time() - start_time) * 1000)
+    if "gemini_error" in res_dict:
+        return VisionResponse(
+            success=False, mode="describe",
+            result_text=res_dict["gemini_error"],
+            confidence=0.0,
+            processing_ms=processing_ms,
+            title="Scene Understanding Unavailable",
+            category="Gemini Vision AI",
+            warning_text="Gemini AI could not describe this scene. Check backend logs and try again.",
+            distance="Not Available",
+            lux=lux,
+        )
     return VisionResponse(
         success=True, mode="describe",
         result_text=res_dict.get("result_text", ""),
@@ -759,23 +765,6 @@ async def describe_surroundings_upload(file: UploadFile = File(...)):
         limitations=res_dict.get("limitations"),
         objects_detected=res_dict.get("objects_detected"),
         hazards=res_dict.get("hazards"),
-    )
-
-    return VisionResponse(
-        success=True,
-        mode=mode,
-        result_text=res_dict.get("result_text", ""),
-        confidence=res_dict.get("confidence", 0.0),
-        processing_ms=processing_ms,
-        title=res_dict.get("title", "Analysis Complete"),
-        category=res_dict.get("category", "Vision Assist"),
-        warning_text=res_dict.get("warning_text"),
-        distance=res_dict.get("distance", "Approx. 30 cm"),
-        lux=lux,
-        entities=res_dict.get("entities"),
-        objects_detected=res_dict.get("objects_detected"),
-        hazards=res_dict.get("hazards"),
-        limitations=res_dict.get("limitations")
     )
 
 # Helper: Convert audio payload to 16kHz mono WAV using bundled FFmpeg

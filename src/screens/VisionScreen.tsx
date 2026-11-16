@@ -93,7 +93,7 @@ export const VisionScreen: React.FC = () => {
             skipProcessing: true,
           });
           if (photo?.base64) {
-            analyzeImageBase64(photo.base64);
+            analyzeImageBase64(photo.base64, photo.uri);
           }
         } catch (e) {
           console.warn('[Live Auto-Capture] Frame capture skipped:', e);
@@ -120,7 +120,7 @@ export const VisionScreen: React.FC = () => {
       });
 
       if (photo?.base64) {
-        await analyzeImageBase64(photo.base64);
+        await analyzeImageBase64(photo.base64, photo.uri);
       }
     } catch (e: any) {
       console.warn('[Camera Capture Error]', e);
@@ -142,7 +142,7 @@ export const VisionScreen: React.FC = () => {
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const asset = result.assets[0];
         if (asset.base64) {
-          await analyzeImageBase64(asset.base64);
+          await analyzeImageBase64(asset.base64, asset.uri);
         }
       }
     } catch (e: any) {
